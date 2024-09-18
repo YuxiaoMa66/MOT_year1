@@ -1,0 +1,8 @@
+"0","# choose lambda as the one that maximizes the log-likelihood"
+"0","bcFD <- boxcox(dta$Flight.Distance ~ 1, plotit = FALSE)"
+"0","lambda <- bcFD$x[which.max(bcFD$y)]"
+"0","lambda"
+"1","[1]"
+"1"," 0.1"
+"1","
+"

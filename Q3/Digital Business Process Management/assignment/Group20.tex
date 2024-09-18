@@ -1,0 +1,108 @@
+\documentclass[a4paper]{article}
+
+%%%%%%%% CREATE DOCUMENT STRUCTURE %%%%%%%%
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage{subfig}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{sectsty}
+\usepackage{apacite}
+\usepackage{float}
+\usepackage{titling} 
+\usepackage{blindtext}
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{xcolor}
+\definecolor{darkgreen}{rgb}{0.0, 0.4, 0.0}
+\usepackage{listings}
+\usepackage{pythonhighlight}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage{hyperref}
+
+% hide links frame of contents
+% \hypersetup{hidelinks}
+
+%%%%%%%% DOCUMENT %%%%%%%%
+\begin{document}
+
+%%%% Title Page
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 							% horizontal line and its thickness
+\center 
+
+% University
+\textsc{\LARGE Delft University of Technology}\\[1cm]
+
+\includegraphics[width=0.6\textwidth]{images/TU_delft_logo.jpg}\\[1cm] 	% University logo
+
+% Document info
+\textsc{\Large Digital Business Process Management}\\[0.2cm]
+\textsc{\large MOT1531}\\[1cm] 										% Course Code
+\HRule \\[0.8cm]
+{ \huge \bfseries Assignment: Proposal (Pecha kucha) - midterm}\\[0.7cm]								% Assignment
+\HRule \\[2cm]
+\large
+\emph{Authors:}\\
+
+\begin{align*}
+    &\text{Isa Ouz (6042937)}\\
+    &\text{Ma Quoc Khanh (6006507)}\\
+    &\text{Yohanes Bayu Suryo Nugroho (5904196)}\\
+    &\text{Yuxiao Ma (5916305)}
+\end{align*}
+% Isa Ouz (6042937)\\
+% Ma Quoc Khanh (6006507)\\
+% Yohanes Bayu Suryo Nugroho (5904196)\\
+% Yuxiao Ma (5916305)\\
+\\[1.5cm]													% Author info
+
+{\large \today}\\[5cm]
+% \includegraphics[width=0.6\textwidth]{images/TU_delft_logo.jpg}\\[1cm] 	% University logo
+\vfill 
+\end{titlepage}
+
+%%\begin{abstract}
+%%Your abstract.
+%%\end{abstract}
+
+% Table of Contents
+\tableofcontents
+% add the references to the table of contents
+\addcontentsline{toc}{section}{References}
+
+%%%% SECTIONS
+%% Section 1
+\section{Question 1}
+\subsection{Problem Statement}
+\subsubsection{Current Situation}
+
+%%%%%%%% EXTRA TIPS %%%%%%%%
+%% hou deze structuur aan voor afbeeldingen
+%%\begin{figure}[H]
+%%\includegraphics[]{Pendulum.jpg}
+%%\caption{Sketch of the pendulum}
+%%\label{fig:pendulum}
+%%\end{figure}
+
+
+%\newpage
+\bibliographystyle{apacite}
+\addcontentsline{toc}{section}{References}
+\bibliography{sample}
+
+\end{document}
+

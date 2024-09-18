@@ -1,0 +1,67 @@
+---
+author: "Stefan Bras"
+Date: "10-03-2024"
+---
+
+
+# 2 different ways to explore data:
+# 1. Distinguish between numeric and non-numeric data
+# 2. Distinguish between univariate and multivariate data exploration
+  
+```{r start with an empty work space}
+remove(list = ls())
+```
+
+```{r load data file}
+df <- read.csv("airline_passenger_satisfaction.csv")
+```
+
+```{r explore the data file}
+str(df)
+```
+
+# 1. Distinguish between numeric and non-numeric data
+
+``` {r numerical columns}
+numerical_columns <- sapply(df,is.numeric)
+table(numerical_columns)
+```
+
+``` {r calculate the standard deviation, mean, median, and min-max range for each variable (column)}
+for(column in names(df)[numerical_columns]) {
+  sd_value <- sd(df[[column]]) 
+  cat("standard deviation for", column, ":", sd_value, "\n")
+  mean_value <- mean(df[[column]])
+  cat("mean value for", column, ":", mean_value, "\n")
+  median_value <- median(df[[column]])
+  cat("median value for", column, ":", median_value, "\n")
+  min_range <- min(df[[column]])
+  cat("minimum value for", column, ":", min_range, "\n")
+  max_range <- max(df[[column]])
+  cat("maximum value for", column, ":", max_range, "\n")
+}  # Arrival.Delay has NA values, therefore it gives NA as result -> how do we deal with these?
+```
+```{r check missing values}
+summary(is.na(df)) # yes, 393 observations in the column Arrival.Delay
+missing_values <- df[which(df$Arrival.Delay %in% NA), ]  
+print(missing_values)
+```
+
+
+```{r non-numerical columns}
+non_numerical_columns <- sapply(df, function(x) !is.numeric(x))
+
+for(column in names(df)[non_numerical_columns]) {
+  print(column)
+}
+```
+
+
+
+
+
+# 2. Distinguish between univariate and multivariate data exploration
+
+
+
+

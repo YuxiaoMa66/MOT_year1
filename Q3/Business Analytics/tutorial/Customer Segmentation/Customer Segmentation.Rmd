@@ -1,0 +1,362 @@
+---
+title: 'Workshop: Unsupervised Learning: Clustering'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+## Working with this document
+
+### Before you begin
+
+Before you start working through this tutorial, please ensure you have followed the tutorial 'An introduction to working with R', as it contains crucial information about how to work with an R Markdown document. In addition, this tutorial builds upon some of the basics explained in that introductory tutorial.
+
+### Proceeding through the tutorial
+
+This tutorial consists of three main parts: (1) An introduction to the tutorial's objectives and the data that will be used, (2) an introduction to the problem we'll address in this tutorial and how we'll address it, and (3) a walk-through. Work your way through these different parts, and note that sometimes, we will ask you to add small elements to the code yourself. Doing so is pivotal for all code to run! Once you made it until the tutorial's end, you can click the **Knit** button. This generates an HTML document that includes content and the output of the code chunks.
+
+## Tutorial introduction: Objectives and data
+
+### Objectives
+
+After having followed this tutorial, you will be able to:
+
+-   Explain the rationale of and steps in clustering techniques in machine learning
+-   Interpret the results of cluster analysis
+-   Perform a cluster analysis in RStudio using the k-means algorithm and optimize its performance
+
+## The data
+
+customer.csv (in the .zip file downloaded from Brightspace) customer - set2.csv (in the .zip-file downloaded from Brightspace)
+
+### Data dictionary
+
+| Field name    | Data type | Description                                                                                           |
+|------------|------------|-------------------------------------------------|
+| customerid    | Integer   | ID of the customer                                                                                    |
+| age           | Integer   | Age in years                                                                                          |
+| education     | Ordinal   | Level of education: "doctrate", "post doctoral research", "post graduate", "school", "under graduate" |
+| yearsemployed | Integer   | Years employed                                                                                        |
+| income        | Integer   | Annual income in 1,000 USD                                                                            |
+| carddebt      | Ratio     | Debt, accessed through credit cards in 1,000 USD                                                      |
+| otherdebt     | Ratio     | Customers' debt other than credit cards in 1,000 USD                                                  |
+| defaulted     | Integer   | Did customers fail to make a payment? 0 = no, 1 = yes, NA = missing                                   |
+| address       | Nominal   | Address code                                                                                          |
+
+## Customer segmentation: Introduction
+
+Imagine you are asked to assemble three soccer teams from a group of primary school kids. The goal is to gather the teams so that each team consists of members with more or less the same soccer skills. Although you don't have information about each kid's skills, you get time to observe them playing soccer. This observation aims to look for details that reveal clues about each kid's skill level.
+
+As you perform your observation, you may start to see recurring patterns. Perhaps a specific type of kid, identified by high ball control levels, assertiveness, a certain length and age, will come to typify the more talented soccer player. Other kids who are less fluent with the ball and have a more wait-and-see attitude during the game could be labelled less talented. Of course, these stereotypes are dangerous to apply to individual kids: no two people are exactly alike! Used in aggregate, however, the labels may reflect some underlying pattern of similarity among the kids falling within a group.
+
+In this tutorial, we'll cover methods to address the machine-learning task of clustering. This task involves finding the natural groupings of data. As you will see, clustering works in a process very similar to the observational research described above.
+
+### Understanding clustering
+
+Clustering is an unsupervised machine-learning task that automatically divides the data into *clusters* or groupings of similar items. It does this without being told upfront what these groups should look like. As we may not know what we are looking for, clustering is used for knowledge generation rather than prediction. It provides an insight into the natural groupings found in data. Besides, contrary to, e.g. classification, clustering creates new data: unlabeled observations are given a cluster label and inferred fully from the data's relationships. As such, cluster methods are an example of *unsupervised learning*. The catch is that the generated cluster labels have no intrinsic meaning. For example, a cluster task might return groups 1, 2 and 3. Still, it is up to you to establish the logic (if any) behind the clusters and apply a meaningful and actionable label. Some possible uses of clustering include:
+
+-   *Segmenting customers* into groups with similar demographics or buying patterns. The resulting segments can be used for targeted marketing campaigns and detailed analysis of purchasing behaviour by subgroup
+-   *Detection of anomalous behaviour*, such as intrusion into computer networks. This is based on identifying patterns of use that fall outside known clusters
+-   *Simplifying large data sets* by grouping many features with similar values into a much smaller number of homogeneous categories. Note that this was discussed in the lecture on Principal Component Analysis and involves grouping variables rather than observations
+
+Clustering is applicable whenever a much smaller number of groups can exemplify diverse and varied data. It results in meaningful and actionable structured data that reduce complexity and provide insights into relationship patterns.
+
+### Intra-cluster homogeneity versus inter-cluster heterogeneity
+
+Without knowing what comprises a cluster upfront, how does a computer know where one group ends and another begins? The answer is simple: clustering is guided by the principle that records inside a cluster should be very similar but very different from those outside that cluster. Although the definition of similarity might vary across algorithms (see the lecture on clustering), the basic idea is always the same: group the data so related elements are placed together. Below, we'll look at one of the possible approaches for determining similarity when we delve deeper into one of the most often-used clustering methods: k-means clustering.
+
+### k-means clustering
+
+The k-means algorithm has been studied for decades and is the foundation for many more sophisticated clustering techniques. Understanding the k-means algorithm k-means (sorry, call us nerds, but we couldn't pass up this pun) that you have the knowledge needed to understand nearly any non-hierarchical clustering algorithm used! Despite its age and the availability of more advanced clustering methods, it has several strengths that make it still used widely. For example, it uses simple principles for identifying clusters, which can be explained in non-statistical terms. It's also a flexible algorithm (meaning it can be easily adapted to address most of its shortcomings), which is pretty efficient and high-performing. One of its drawbacks is that it uses an element of chance, so it is not guaranteed to find the optimal set of clusters.
+
+The k-means algorithm involves two phases (see also the lecture on unsupervised learning). First, it randomly assigns k data points as cluster centroids, after which the other data points are assigned to the closest centroid. This results in the initial cluster solution. Second, it updates these assignments by adjusting cluster centroids to the mean of the variables assigned to each cluster. This updating and reassigning process repeats several times until making changes no longer improves the cluster fit. At this point, the process stops, and the clusters are finalized. Different distance measures can determine cluster fit (e.g. Manhattan or Minkowski distance). Traditionally, k-means uses Euclidean distance (which is occasionally called the Pythagorean distance because it draws on the Pythagorean theorem to calculate distance). For example, let's say we compare two kids, one aged 12 who has scored three times, and one aged eight who has scored one time. The Euclidian distance is calculated by first calculating the differences between each attribute pair and adding their square terms: (12 - 8)\^2 + (3-1)\^2 = 20. Second, we take the square root of that outcome to get the Euclidian distance: sqrt(20) = 4.472136.
+
+A tricky issue with k-means clustering is that the number of clusters (k) that naturally *might* exist in the data requires an upfront reasonable guess. Ideally, we already know about possible groups in advance and base k on that. For example, setting k equal to the number of movie genres is a helpful starting point when clustering movies. It also might be that the number of clusters is dictated by a business requirement (as in the soccer example where the number of groups needed to be 3). Without any advance knowledge, one can resort to rules of thumb (not discussed here) or to a technique known as the elbow method. This technique allows one to find k such that higher values of k yield diminishing returns on intra-cluster homogeneity. Setting the exact or actual value of k is not a strict requirement in many situations, as this value cannot be defined. Moreover, as we will see later, setting k can sometimes lead to inferring where the data has naturally defined boundaries. For example, tightly clustered groups won't change much when varying k, whereas less homogeneous groups will form or disband over time.
+
+### The case
+
+A retail bank has recruited you to build and run a customer segmentation analysis on their customer data. The bank wants to use these customer segments for diverse marketing and sales initiatives. You have been given a data set (in two files) containing anonymized information on 850 current bank customers, including some personal and financial information. The data dictionary above shows that this data set includes descriptive information about each customer, including income and debts and whether or not a customer defaulted on their loan(s). You have decided to use k-means clustering to identify the customer segments.
+
+## Tutorial walkthrough
+
+### 1. Setting up the R workspace and loading the data
+
+We use several packages in this tutorial. As explained in the previous tutorial, a package is a bundle of code, data, documentation and tests that extend the basic functionality of R. You could compare it with a plugin for, e.g., MS Word. We use the following packages in this tutorial:
+
+-   `apaTables`
+    -   This package allows you to generate tables according to the American Psychological Association's (APA) style. We use this package to create a correlation matrix that is more informative (and nicer to the eye) compared to the standard correlation matrix that is generated by the base package in R.
+-   `C50`
+    -   This is the core package we will use in the workbook on classification in which we generate decision trees using the C5.0 algorithm. In this tutorial, we'll generate such a decision tree when we predict the generated clusters with the attributes used for finding these clusters (this is called 'semi-supervised learning'). We will delve further into decision trees in the next tutorial. In this tutorial, we use them to assess the importance of the different predictors.
+-   `cluster`
+    -   The `cluster`-package contains a toolbox for performing various cluster analyses. Although the clusters in this tutorial are determined using the base functionality available in R, we use the `silhouette`-function from this package to assess the quality of the found clusters.
+-   `factoextra`
+    -   This package makes it easy to extract and visualize the output of exploratory multivariate data analysis, of which cluster analysis is one of the options. We'll use the `fviz_cluster`-function from this package to get a projection of the found clusters in a 2-dimensional plane.
+-   `ggplot2`
+    -   This package was already described in the data exploration and dimension reduction tutorial. With this package, we'll generate plots that look nicer than the basic plotting functionality in R. Also, it gives you more flexibility in generating plots. The package is called in several code chunks that we'll ask you to run. If you're interested, you can see what the code does, but understanding it is *not* the aim of this tutorial, and we won't ask questions about it later on in the quiz based on this tutorial.
+-   `gmodels`
+    -   This package allows us to create a table that cross-tabulates the found clusters with the 'defaulted'-variable. As we will explain later, this table aims to create targeted communication campaigns.
+-   `reshape2`
+    -   This package contains functions designed to make it easier to reshape your data. It offers a streamlined approach to pivoting data frames between wide format (where different variables are stored in separate columns) and long format (where variables are stacked in a single column but distinguished by another identifier column). This capability is instrumental in data analysis and visualization tasks where the data structure needs to be modified to suit specific analysis or plotting functions.
+
+To install these packages, we first tell R where they can be downloaded by setting the CRAN mirror (CRAN stands for the "Comprehensive R Archive Network"). Next, we ask R to install the package using the `install.packages()`-command. Run the code chunk below by clicking the 'play'-button on its upper right (you don't have to change the code). You can always remove packages once you finish the course with the `remove.packages()` command, e.g. `remove.packages(c("lattice", "gmodels")`.
+
+```{r setup, echo = FALSE}
+# Set the CRAN mirror:
+local({r <- getOption("repos")
+r["CRAN"] <- "https://cran.rstudio.com/"
+options(repos = r)})
+
+# Install the packages used in this tutorial:
+packages <- c("apaTables", "C50", "cluster", "factoextra", "ggplot2", "gmodels", "lattice", "reshape2")
+
+# for (i in packages) {
+#     if(!require(i, character.only = TRUE)) {
+#         install.packages(i, dependencies = TRUE)
+#     }
+# }
+```
+
+Like the previous tutorial, we will use the `::` operator to call functions from a package, except for the `ggplot2` package. We load this package with the `library()`-command. In addition, R loads the data from the same folder where you stored this .Rmd-file. It could, however, be the case that you want to load your data from another location on your machine. This can be done using the `setwd()`-command. Although working with this command is not mandatory, we show how to do this (and repeat a description of how it works from the first tutorial) should you want to explore this function further. Lastly, we want to load our data into R (using the `read.csv`-command. We'll explain each step in more detail below:
+
+-   `library()`
+    -   This command loads packages into the current environment. In the code chunk below, this is done for the `ggplot2`-package by running the `library(ggplot2)` command.
+-   `setwd()`
+    -   This command tells R which folder to use for reading and writing data. The abbreviation `wd` stands for 'working directory'. It's comparable to, e.g. selecting the folder where a .docx-document is stored that you want to open when working in Word. Whereas in an R Workbook, this working directory is the directory from which it loads the workbook, it needs to be specified explicitly when not working from a workbook. If, for example, you have set 'Users' as a top-level folder, then the command would read `setwd("C:/Users")`. Regardless of the operating system you are working with, you **must always use forward slashes** ('/') when specifying the path name. Using a forward slash is the default on Mac systems but **not** Windows systems (which use '\\'). Also note that if you work on a Mac, we don't specify the hard drive in the working directory (so the `setwd()` command on a Mac would read as `setwd("/Users")`). Selecting which folder to use as your working directory depends on your preferences for organising your hard drive, so we won't dictate which folder to use.
+-   `read.csv()`
+    -   R can open various data file formats (e.g. .txt, .xls, .xlsx, .sav, etc.). For some of these formats, you need to install additional packages (e.g. the `rio`-package). This tutorial will only work with simple CSV files using the `read.csv`-command. Remember that you have been given the data set in two files, so these files must be merged later in the process. For now, the loaded data is assigned to two objects. The first object is labelled `customer_01`, and the second is labelled `customer_02`.
+
+Once you are done setting your working directory in the code chunk below, run it by pressing the 'play'-button.
+
+```{r data}
+# Loading the `ggplot2` package
+library(ggplot2)
+
+# Set the working directory (optional)
+# setwd("TYPE YOUR WORKING DIRECTORY HERE. USE / instead of \") # specify the working directory (make sure the data is stored in that directory)
+
+# Read the data
+customer_01 <- read.csv("customer.csv")
+customer_02 <- read.csv("customer - set2.csv")
+```
+
+Before we can explore the data, we need to append the data from the two data sets together (initially, they used to be in one file). We can do this by 'binding' the rows of both data sets together, using the `rbind`-command. Note that the command below works because both data sets have the same number of columns and variables. Typically, one wants to check this upfront (see the tutorial on Data exploration and preparation), but here, we have already done that for you.
+
+```{r merge data frames}
+customer_dta <- rbind(customer_01, customer_02)
+```
+
+### 2. Data exploration and preparation
+
+As explained in the lecture on data preparation, about 80% of a data analyst's time is spent on getting to know and preparing the data that is worked with. Once this preparation is done, the actual analysis is a breeze. Let's start with exploring the `customer_dta`-frame using the `str()`-command (this command provides a compact overview of the variables in the data frame, including the first ten observations per variable) and the `summary()`-command (this command results in an overview of some basic descriptives per variable, such as the mean). Both commands help us understand the data set we will work with.
+
+```{r explore data frame}
+str(customer_dta)
+summary(customer_dta)
+```
+
+Let's first perform a sanity check: in the case description, we read that our data set would contain information on 850 bank customers. Indeed, the data frame we created in the previous step contains 850 rows.
+
+As a second step, let's determine which variables are potentially helpful for our cluster analysis. It is essential to know that the k-means algorithm only takes numeric data. Also, the data should be meaningful to be used in a clustering step. In this light, the variable CUSTOMERID is *not* meaningful, as it is just a sequential number used to identify unique customers. The variable DEFAULTED (whether or not a customer missed a payment) could be helpful, but unfortunately, it contains many missing values, making imputing these missing values an unfeasible step. We'll exclude this variable from the cluster analysis, but we'll use it later to classify the customer segments found broadly into 'high-' and 'low-risk' segments. We'll also exclude the ADDRESS variable from our analysis: although this is a potentially helpful clustering variable, it contains 32 unique text values. Recoding these values to a suitable format for a cluster analysis would require us to create 31 dummy variables, which -given the total number of cases- might mean we'll run into the "Curse of dimensionality" and ask too much from our data.
+
+Other than CUSTOMERID, DEFAULTED and ADDRESS, the variables will be used to determine our clusters. As you can see, the EDUCATION-variable type currently is plain text (`chr`). We must recode these text values to an ordinal variable (degrees of education have an order) to make this variable suitable for the k-means algorithm. The code chunk below performs this recoding step using a nested `ifelse`-statement. The first values after each `==` in this statement show the original value in the EDUCATION variable (e.g. "SCHOOL"), and the value after the commas shows the new value that represents that first value (e.g. 1). The recoded values are stored in a new column in the data frame labelled `education_reclassified`. We also decapitalize the column names in the data frame using the `tolower`-function (we think this is nicer to the eye than all these shouting caps).
+
+```{r recoding_and_decapitalizing}
+customer_dta$education_reclassified <- ifelse(customer_dta$EDUCATION == "SCHOOL", 1,
+                                              ifelse(customer_dta$EDUCATION == "UNDER GRADUATE", 2,
+                                                     ifelse(customer_dta$EDUCATION == "POST GRADUATE", 3,
+                                                            ifelse(customer_dta$EDUCATION == "DOCTRATE", 4,
+                                                                   ifelse(customer_dta$EDUCATION == "POST DOCTORAL RESEARCH", 5, NA)))))
+colnames(customer_dta) <- tolower(colnames(customer_dta))
+```
+
+As a second data exploration step, we check the correlations between the variables of interest. This step helps detect highly correlated variables that we can cluster upfront to ease interpreting the clusters generated by the subsequent cluster analysis. This is done using the `apa.cor.table`-command from the `apaTables` package. Note that in the below chunk, we subset `customer_dta` using a vector with the column names of the variables we are interested in.
+
+```{r correlations}
+apaTables::apa.cor.table(customer_dta[ c("age", "education_reclassified", "yearsemployed", "income", "carddebt", "otherdebt") ])
+```
+
+We deduce that the variables 'income', 'carddebt' and 'otherdebt' all are highly correlated from the above correlation table. This makes sense when we consider that the higher an individual's income, the higher the debt burden this person can carry. We create a single indebtedness ratio to eliminate the redundancy between these variables. We label this ratio `debtincomeratio`, calculate it by summing carddebt and otherdebt, and divide that sum by income. This result, in turn, is multiplied by 100, so the new variable is a percentage. Note that this is a somewhat quick and dirty approach. A more sophisticated approach would have been to conduct a PCA, although given the number of columns in this data set, it might come too much at the cost of interpretability of the results.
+
+```{r debtincomeratio}
+customer_dta$debtincomeratio <- (customer_dta$carddebt + customer_dta$otherdebt) / customer_dta$income * 100
+```
+
+Now, it's time to create a vector containing the variables we initially want to use for our cluster analysis. You'll be asked to change this vector later, so understand what happens below. In the below chunk, we'll specify this vector, which we label the `cls_sel` vector. It contains our initial selection of clustering variables: 'age', 'yearsemployed', 'education_reclassified' and 'debtincomeratio'. Note that including *more* variables does not make sense, considering the previous data exploration and preparation steps. So, when exploring alternative clusters later, you should only remove variables from this vector. This can be done by removing its corresponding label from the below vector.
+
+```{r column_names}
+cls_sel <- c("age", "yearsemployed", "education_reclassified", "debtincomeratio")
+```
+
+This selection vector, in turn, can be used to prepare the data for analysis. The next chunk below contains two additional preparation steps and one interesting function that warrants further explanation.
+
+-   Creation of the `dta_cls` data frame
+    -   Using the `cls_sel`-vector, we filter those columns from the customer_dta data frame we want to use and assign its result to the `dta_cls`-object. Directly modifying the customer_dta data frame risks losing variables, so it is good practice to derive a new data frame from the original one if you want to retain the flexibility to change the selection of variables later.
+-   Creation of the `dta_cls_z` data frame
+    -   It is common practice before any analysis that involves distance calculations to standardize the variables for clustering so each has the same scale (hence the use of the `scale`-function). Doing so avoids the problem that some variables dominate solely because they are measured on a scale with a larger magnitude compared to other variable's scales. As you might remember from the data preparation and exploration lecture, Z-score standardization yields variables with a mean of 0 and a standard deviation of 1. These values are less intuitive to interpret, so we only use the resulting `dta_cls_z` data frame for determining clusters. The found clusters, in turn, are assigned to the `dta_cls` data frame, which in turn is used for further exploration and interpretation. For our purpose, using the normalized or original data does not make any difference for this follow-up exploration step. But let's first create the `dta_cls` data frame and standardize its variables. Once you have executed the code chunk below, the data is ready for analysis.
+-   Using the `lapply` function.
+    -   In the 'An introduction to working with R' tutorial, we explained how vectorization avoids the use of for-loops in R when performing an operation on individual variables, for example, `log(dta_cls$debtincomeratio)` The `lapply` function, and related functions like `sapply` and `mapply`, extend this idea to performing operations to multiple variables at once. So, in the example below, instead of writing a for-loop that operates on each variable individually, the `lapply` function applies a function to all variables at once in the `dta_cls_z` data frame below. The function is a powerful and commonly used one and part of a family of apply functions which are designed to avoid explicit use of loop constructs in R. This makes the code more readable and often more efficient. For illustrative purposes, we also have included a for loop (commented out) that accomplishes the same as the `lapply` function so you can see the difference the function makes.
+
+```{r variable_standardization}
+dta_cls <- customer_dta[, cls_sel ]
+
+## Applying the scale function using a for-loop
+# dta_cls_z <- data.frame(matrix(ncol = ncol(dta_cls), nrow = nrow(dta_cls))) # create the empty dta_cls_z to store the scaled columns
+# names(dta_cls_z) <- names(dta_cls) # set the names of the new data frame to match the original
+# for (i in 1:ncol(dta_cls)) { # loop through each column by its index
+#   dta_cls_z[[i]] <- scale(dta_cls[[i]])
+# }
+# rownames(dta_cls_z) <- rownames(dta_cls) # optionally, convert row names to match original (if necessary)
+
+## Applying the lapply function instead
+dta_cls_z <- as.data.frame(lapply(dta_cls, scale))
+```
+
+### 3. Performing a cluster analysis on the data
+
+We use an implementation of k-means in the `stats`-package. This package is included in your R installation by default. Many alternatives are available, but this package's `kmeans()` function is widely used and provides a vanilla algorithm implementation.
+
+In the description of the clustering process (see the section in k-means clustering), we explained that as a first step, it randomly assigns k data points as cluster centroids, after which the other data points are assigned to the closest centroid. This means that each time we would run the clustering algorithms, different data points could be assigned to be the starting clusters. As a result, you may come to different cluster solutions after executing the algorithms several times. Although this is a feature we could use to our advantage (see, for example, the lecture in which we explain different ensembling methods), this is not ideal for our didactic purposes with this tutorial. So, we want everyone to get the same cluster solution, and freezing R's random allocation can be done by setting the "seed", which is the first step in the below code chunk. We use the `set.seed()` function to set the starting point for generating a sequence of random numbers. By providing a specific seed value, you ensure that any code involving random operations produces the same results every time you execute it.
+
+We must also specify the number of clusters (denoted as `k` in the code chunk below). The ultimate decision regarding the number of clusters to choose is always the result of several trials in which different cluster sizes and variable specifications are tried. This can be a bit of an art, and sometimes, much trial and error is involved. The decision is based on a trade-off: if we use too many clusters, we may find them too specific to be helpful. If we choose too few clusters, however, we might end up with too heterogeneous groupings. The key message is to feel comfortable experimenting with the values of `k` and to explore cluster meaning and fit using various candidates of `k`. We then select the value of `k` that yields results that make the most sense and best fit. We start with a `k` of 5: make sure to assign the number 5 to `k` in the code chunk below.
+
+Notice that in the last line of the code chunk below, we'll assign the found clusters to the `dta_cls` data frame. This is done so we can explore variable distributions per cluster later. As stated earlier, clustering is one technique that enriches data sets (compared to predicting an existing variable with a set of other variables already in the data).
+
+```{r cluster}
+set.seed(57498351) 
+k <-  5# set the number of clusters here
+clusters <- kmeans(dta_cls_z, k)
+dta_cls <- cbind(dta_cls, cluster = clusters$cluster)
+```
+
+### 4. Cluster exploration and evaluation
+
+In this part, we look at several aspects of the clusters found by the k-means algorithm. We start by visualizing the clusters using the \`fviz_cluster' function.
+
+```{r cluster_visualization, , echo = FALSE, message = FALSE}
+factoextra::fviz_cluster(clusters, dta_cls[, -which(colnames(dta_cls) %in% "cluster") ],
+                         geom = "point",
+                         ellipse.type = "convex",
+                         ggtheme = theme_bw()) 
+```
+
+Using all variables eligible for clustering and a `k` of 5, the picture above shows the 5 clusters found. Although it might look as if some of the clusters strongly overlap (especially clusters 3 and 4 vis-á-vis cluster 1), remember that this picture maps a 4-dimensional data set in a 2-dimensional plane (a PCA is performed on the data, and the first two PCs are used as dimensions. These PCs explain (39.3 + 25.4) 64.7% of the total variance in the data). So, even though the picture gives a helpful first suggestion of the different clusters, we need to delve deeper into them. This is done below, where we'll look at (1) data distributions within clusters, (2) cluster size, (3) predictor importance and (4) cluster quality.
+
+Regarding the first point, let us generate a visualization of the data distributions per cluster (the for-loop) and a data frame that gives the mean of each clustering variable per cluster (the aggregate-command).
+
+```{r cluster_distributions, echo = FALSE}
+plot_data_long <- reshape2::melt(dta_cls, id.vars = "cluster") # converting the data frame to a 'long' format (see earlier explanation of the reshape2 package)
+normalized_densities <- data.frame() # create empty data frame to store results
+
+# Calculate normalized densities for each combination of variable and cluster
+for (variable_name in unique(plot_data_long$variable)) {
+    for (cluster_name in unique(plot_data_long$cluster)) {
+        subset_data <- subset(plot_data_long, variable == variable_name & cluster == cluster_name)
+        dens <- density(subset_data$value, na.rm = TRUE) # Ensure to handle NAs if present
+        normalized_density <- dens$y / sum(dens$y)
+        temp_df <- data.frame(value = dens$x, density = normalized_density, variable = variable_name, cluster = cluster_name)
+        normalized_densities <- rbind(normalized_densities, temp_df)
+    }
+}
+
+# Create the ggplot object with relative density plots for each variable, faceted by variable
+plt <- ggplot(normalized_densities, aes(x = value, y = density, colour = as.factor(cluster))) + 
+    geom_line() +
+    facet_wrap(~ variable, scales = "free") + # Adjust 'nrow' and 'ncol' based on the number of variables
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.background = element_rect(fill = "lightgrey"),
+          legend.position = "bottom") +
+    labs(colour = "Cluster")
+
+# Print the plot
+print(plt)
+
+# Clean up the working space a bit
+remove(plot_data_long, normalized_densities, variable_name, cluster_name, subset_data, dens, normalized_density, temp_df, plt)
+
+# Calculate mean scores per cluster
+aggregate(. ~ cluster, 
+          data = dta_cls, 
+          FUN = mean)
+```
+
+Note that each of the numbers above the plots refer to a cluster. Based on these distributions, we can infer some characteristics per cluster. Clusters 1 and 2 are similar in that they consist of customers in their mid-thirties with a relatively low education level and a few years of employment. Both clusters differ markedly when we look at the debt-income ratio: customers in cluster 1 have a relatively high debt-income ratio, whereas this ratio for cluster 2 is relatively low. Customers in Cluster 3 differ from those in Cluster 2 in that the members of Cluster 3 are older and generally have received higher levels of education. Customers in cluster 4 are the youngest, have a relatively sizeable debt-income ratio and have typically received higher levels of education. Lastly, customers in cluster 5 are the oldest, have a relatively low level of education, have the largest number of employment years, and have a reasonably low debt-income ratio.
+
+Although informative, you might have experienced that the descriptions above are not very engaging. See if you can come up with catchy labels for these clusters! This dramatically helps to communicate about these clusters. For example, with these descriptions, a marketing executive would clearly understand the different customer types. Based on these profiles, the executive could then develop targeted marketing activities relevant to one or more of these clusters.
+
+Describing the clusters as we did in the above might be a helpful exercise, though, as you'll almost automatically get a feeling for the extent to which the clusters are different from one another and which variables are most important (we'll use a classification model later to quantify variable importance). Both help select a suitable value for `k` and the set of cluster variables, respectively.
+
+Now, let's have a look at cluster sizes. Ideally, none of the clusters found should be extremely large or small. The code below generates a pie chart that depicts the different sizes (in the lecture that discusses the module on data visualization, we reflected on the pros and cons of using pie charts in general: the fact that in ggplot, there is *no* function dedicated to generating pie charts (we modify a bar plot instead) implies that in general, such charts are frowned upon in the visualization community).
+
+```{r cluster_size, echo = FALSE}
+siz <- data.frame(cls = sort(unique(as.character(paste("Cluster", clusters$cluster)))),
+                  frq = as.vector(table(clusters$cluster)))
+siz$prp <- siz$frq / sum(siz$frq) * 100
+
+ggplot(siz, aes(x = "", y = frq, fill = cls)) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar("y", start = 0) +
+    theme_void() +
+    scale_fill_discrete(name = "Clusters",
+                        breaks = siz$cls,
+                        labels = paste(siz$cls, "-", paste(round(siz$prp, 1), "%", sep = "")))
+```
+
+To understand the importance of the different variables used in determining the clusters, we can estimate a decision tree that predicts the clusters we found with the used cluster variables (as said earlier, this approach is an example of 'semi-supervised learning'. The code below estimates such a tree. As indicated earlier, you can ignore most of the output for this tutorial, except the latter section on 'Attribute usage'. Unfortunately, the `C5.0`-function generates an object that is not straightforward to subset).
+
+```{r predictor_importance}
+model <- C50::C5.0(as.factor(cluster) ~., 
+                   data = dta_cls)
+summary(model)
+```
+
+The section on 'Attribute usage' shows us the importance of the different predictors in predicting the cluster. We learn from this information that 'education' and the 'debtincome' ratio are strong predictors, especially. Being still in the \>90% range, 'age' and 'yearsemployed' can also be considered strong predictors. Validating these variables' predictive ability may make the clusters easier to sell when pitched to the marketing team.
+
+As the last step, we evaluate cluster quality using the 'silhouette' measure. Let's first run the code that calculates and visualizes this measure for each observation, cluster, and clustering solution. Note that here, we use the normalized variables.
+
+```{r cluster_quality, echo = FALSE}
+dis = dist(dta_cls_z)
+sil = cluster::silhouette(clusters$cluster, dis)
+plot(sil, border = NA) 
+cbind(dta_cls[ which(sil[, 3] < 0), ], sil[,2:3][which( sil[,3] < 0), ])
+```
+
+Silhouette analysis is used to determine the separation distance between the clusters found. The plot above shows how close each point in one cluster is to points in the neighbouring clusters. As such, it provides a way to assess parameters like `k` visually. The silhouette coefficient has a range of [-1, 1]. Coefficients near 1 indicate that the observation is far away from the neighbouring cluster. A value of 0 suggests that the observation is close to the decision boundary between two neighbouring clusters. Negative values indicate those observations might have been assigned to the wrong cluster. The code in the above outlines such cases in a separate data frame that includes the cluster an observation is assigned to and its closest neighbour.
+
+Using the initially specified settings (including all variables eligible for clustering and a `k` of 5), the silhouette analysis above suggests that a `k` of five might be a bad pick for the given data because of the presence of clusters with below-average silhouette scores (caused by some individual observations that have a silhouette score \< 0), and also due to wide fluctuations in the size of the silhouette plots. Let's see if we can improve our cluster model's performance by varying (1) the set of cluster variables and (2) `k`.
+
+### 5. Improving model performance
+
+We now invite you to dive deeper into the art and science of cluster analysis by experimenting with different numbers of clusters and varying the variables included in the analysis. This hands-on approach will solidify your understanding of k-means clustering and enhance your analytical skills in evaluating cluster solutions.
+
+First of all, experiment with the number of clusters. Modify the `k` parameter in the *r cluster* code chunk to explore solutions with 3, 4, and 5 clusters. To do this, locate the line where k is set and change its value accordingly. Once you have adjusted `k` to a new value, re-execute all relevant code chunks, including the *cluster_quality* chunk. This will generate new cluster solutions based on your adjustments. As you explore different values of k, make notes on the cluster distributions, sizes, and silhouette scores. Pay close attention to how these metrics change with varying values of k.
+
+Second, experiment by removing the `education_reclassified` variable from the clustering process (see the *column_names* code chunk). Further, try removing other variables one at a time and observe the impact on the cluster solution. With each variable adjustment, re-run the cluster analysis and note changes in the distribution within clusters, variations in cluster sizes, shifts in the importance of predictors and alterations in cluster quality (as indicated by the silhouette measure).
+
+For each configuration tested, describe the characteristics defining each cluster. Reflect on how the removal of variables and changes in k affect these descriptions. Also, attempt to assign descriptive labels to each cluster based on their defining characteristics. This exercise will help you think about the clusters regarding potential real-world applications or segments. Lastly, consider the silhouette scores and other metrics to evaluate the quality of each cluster solution. Which configuration yields the most meaningful and distinct clusters?
+
+As a last step, reflect on the process and outcomes of your experiments. Which configuration of `k` and variables do you prefer, and why? Consider both the quantitative metrics and how interpretable and actionable the clusters are from a practical perspective. These exercises aim not just to find the 'best' cluster solution but to deepen your understanding of how different choices in the clustering process can lead to significantly different outcomes. By engaging critically with the data and the clustering results, you'll develop a more nuanced understanding of cluster analysis beyond simply following instructions. As a final note, remember that the quiz for this tutorial will strongly focus on comparing cluster solutions and drawing conclusions about the most suitable `k`. This is your opportunity to apply what you've learned in a practical context, so thoroughly explore and think critically about your findings.
+
+### 6. Using clusters for differentiating a marketing campaign
+
+The bank wants to create communication campaigns destined for different customer segments. For that, it needs to distinguish the high-risk customer segments from the low-risk ones. For this purpose, we can cross-tabulate the clusters we have generated with the binary variable `defaulted` in our data set to find out if the risk of default is homogeneously distributed across customer segments. This latter variable indicates whether the individual has ever defaulted on debt or not, and as such, it is a reasonable risk indicator. We will use a `k` of 4 and exclude the 'education_reclassified'-variable from the model specification.
+
+This cross-tabulation is made in the code chunk below after adding the `defaulted'- column to the`dta_cls`data frame and recoding`NA\`-values. According to this table, are specific clusters of customers more prone to default than others?
+
+```{r cluster_marketing}
+dta_def <- cbind(dta_cls, defaulted = customer_dta$defaulted)
+dta_def[ is.na(dta_def$defaulted), ]$defaulted <- 99
+
+gmodels::CrossTable(dta_def$defaulted, dta_def$cluster,
+                    prop.chisq = FALSE,
+                    prop.c = TRUE,
+                    prop.r = FALSE,
+                    prop.t = FALSE,
+                    dnn = c("Defaulted (0 = no, 1 = yes, 99 = missing)", "Clusters"))
+```
+
+### Concluding remarks
+
+In this workbook, we have seen the adage "birds of a feather flock together" in action. Using machine learning methods to cluster bank customers with similar traits, we were able to develop a typology of clusters predictive of variables such as age and years of employment. These same methods can be applied to other contexts with similar results. In this workbook, we covered only the fundamentals of clustering. As a very mature machine learning method, there is a myriad of variants to the k-means algorithm, and many alternatives that bring unique touches and heuristics to the task. Based on what you have learned in this workbook, you will understand and apply other clustering methods to new problems. For reading more about alternative clustering techniques, we refer to the chapter on Cluster Analysis of the mandatory text book for this course. Once again, if you would like to convert this file to a .html-file, click on the 'Knit'-button in the above.

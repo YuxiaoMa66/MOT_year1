@@ -1,0 +1,4 @@
+"0","# implement the function"
+"0","accuracy2 <- train_and_predict_logistic_regression(train_data_new2, test_data_new2, ""Satisfaction_dummy"")"
+"2","Error in train_data[[predictor_col]] : subscript out of bounds
+"

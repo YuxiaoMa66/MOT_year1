@@ -1,0 +1,174 @@
+# Set the CRAN mirror:
+local({r <- getOption("repos")
+r["CRAN"] <- "https://cran.rstudio.com/"
+options(repos = r)})
+# Install the packages used in this tutorial:
+packages <- c("C50", "ggplot2", "gmodels", "Hmisc", "randomForest", "rsample")
+for (i in packages) {
+if(!require(i, character.only = TRUE)) {
+install.packages(i, dependencies = TRUE)
+}
+}
+# Load ggplot2
+library(ggplot2)
+# Read the data
+tree_credit <- read.csv("tree_credit.csv")
+str(tree_credit)
+vrs <- c("Credit.rating", "Income.level", "Number.of.credit.cards", "Education", "Car.loans")
+tree_credit[ vrs ] <- lapply(tree_credit[ vrs ], factor)
+remove(vrs)
+for (i in 1:dim(tree_credit)[2]) {
+if (is.numeric(tree_credit[, i])) {
+plt <- ggplot(data = tree_credit, aes(x = tree_credit[, i])) +
+geom_histogram(aes(color = Credit.rating, fill = Credit.rating), alpha = .4) +
+scale_color_manual(values = c("#0098C8", "#960634")) +
+scale_fill_manual(values = c("#0098C8", "#960634")) +
+xlab(colnames(tree_credit[i]))
+print(plt)
+} else {
+plt <- ggplot(data = tree_credit, aes(x = tree_credit[, i])) +
+geom_bar(position = position_dodge(), aes(color = Credit.rating, fill = Credit.rating), alpha = .4) +
+scale_color_manual(values = c("#0098C8", "#960634")) +
+scale_fill_manual(values = c("#0098C8", "#960634")) +
+xlab(colnames(tree_credit[i]))
+print(plt)
+}
+}
+Hmisc::describe(tree_credit)
+set.seed(46748717)
+proportion <- 0.7 # <type the desired proportion here>
+split <- rsample::initial_split(tree_credit, prop = proportion)
+training <- training(split)
+testing <- testing(split)
+model <- C50::C5.0(Credit.rating ~.,
+data = training)
+summary(model)
+knitr::include_graphics("images/confusion_matrix.png")
+knitr::include_graphics("images/tree.png")
+print("Confusion matrix based on testing data")
+pred.test <- predict(model, testing)
+gmodels::CrossTable(testing$Credit.rating, pred.test,
+prop.chisq = FALSE,
+prop.c = FALSE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+# Add boosting
+model_boost <- C5.0(Credit.rating ~.,
+data = training,
+trials = 10)
+# Predicting on the testing data
+print("Confusion matrix based on testing data (boosting)")
+pred.test <- predict(model_boost, testing)
+CrossTable(testing$Credit.rating, pred.test,
+prop.chisq = FALSE,
+prop.c = FALSE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+# Specifying the cost matrix
+cost.matrix <- matrix(c(NA, 2,  # FN costs of predicting "Good" whereas actual value is "Bad"
+1, NA), # FP costs of predicting "Bad" whereas actual value is "Good"
+nrow = 2,
+ncol = 2,
+byrow = FALSE)
+rownames(cost.matrix) <- colnames(cost.matrix) <- c("Bad", "Good")
+# Estimating the model with the cost matrix
+model.cost <- C5.0(Credit.rating ~.,
+data = training,
+costs = cost.matrix)
+print("Confusion matrix based on testing data (costs")
+pred.test <- predict(model.cost, testing)
+CrossTable(testing$Credit.rating, pred.test,
+prop.chisq = FALSE,
+prop.c = FALSE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+# Set parameters
+iterations <- 10 # how many trees do you want to estimate?
+randomize <- FALSE # use a randomly selected set of predictor variables?
+min_randomize <- 2 # if randomize is set to TRUE, how many predictor variables do you want to sample (min = 2, max = 5)
+# Split tree_credit in training and testing set
+split <- rsample::initial_split(tree_credit, prop = proportion)
+training <- training(split)
+testing <- testing(split)
+# Make predictions for multiple trees
+for (i in seq(iterations)) {
+if (isFALSE(randomize)) {
+tmp <- training(rsample::initial_split(training, prop = proportion))
+model <- C50::C5.0(Credit.rating ~.,
+data = tmp)
+testing <- cbind(testing, data.frame(predict(model, testing)))
+} else {
+tmp <- training(rsample::initial_split(training, prop = proportion))
+names <- names(tmp)[ -which(names(tmp) %in% "Credit.rating") ]
+names <- sample(names, sample(min_randomize:length(names), 1))
+tmp <- cbind(Credit.rating = tmp$Credit.rating, tmp[ names ])
+model <- C50::C5.0(Credit.rating ~.,
+data = tmp)
+testing <- cbind(testing, data.frame(predict(model, testing)))
+}
+}
+str(testing)
+counts <- testing[, 7:ncol(testing) ]
+counts <- data.frame(lapply(counts, as.numeric)) - 1
+counts$Sum <- rowSums(counts)
+counts$Credit.rating.predicted <- ifelse(counts$Sum / (ncol(counts) - 1) > 0.5, "Good",
+ifelse(counts$Sum / (ncol(counts) - 1) == 0.5, sample(c("Good", "Bad"), 1),
+"Bad"))
+testing <- cbind(testing[, c(1:6)], Credit.rating.predicted = counts$Credit.rating.predicted)
+remove(counts)
+CrossTable(testing$Credit.rating, testing$Credit.rating.predicted,
+prop.chisq = FALSE,
+prop.c = FALSE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+model.forest <- randomForest::randomForest(Credit.rating ~.,
+data = training,
+ntree = 500, # how many trees should be grown?
+mtry = 2, # how many variables to sample at each split?
+replace = TRUE) # sampling of cases with or without replacement?
+print("Confusion matrix based on testing data (costs")
+pred.test <- predict(model.forest, testing)
+CrossTable(testing$Credit.rating, pred.test,
+prop.chisq = FALSE,
+prop.c = FALSE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+pred.test <- predict(model, testing)
+gmodels::CrossTable(testing$Credit.rating, pred.test,
+prop.chisq = TRUE,
+prop.c = FALSE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+gmodels::CrossTable(testing$Credit.rating, pred.test,
+prop.chisq = TRUE,
+prop.c = TRUE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+gmodels::CrossTable(testing$Credit.rating, pred.test,
+prop.chisq = TRUE,
+prop.c = TRUE,
+prop.r = TRUE,
+prop.t = TRUE,
+dnn = c("Actual credit rating", "Predicted credit rating"))
+# Set the CRAN mirror:
+local({r <- getOption("repos")
+r["CRAN"] <- "https://cran.rstudio.com/"
+options(repos = r)})
+# Install the packages used in this tutorial:
+packages <- c("h2o", "ggplot2", "gmodels", "magick", "reshape")
+for (i in packages) {
+if(!require(i, character.only = TRUE)) {
+install.packages(i, dependencies = TRUE)
+}
+}
+library(ggplot2)
+#remove(packages)
+h2o::h2o.init()
+h2o::h2o.init()

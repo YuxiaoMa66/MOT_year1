@@ -1,0 +1,4 @@
+"0","dta <- dta[, !names(dta) %in% c(""Gender"", ""Customer.Type"", ""Type.of.Travel"", ""Class"", ""Satisfaction"")]"
+"0","#Removing non-numerical collums"
+"0","#dta <- dta[ ,-which(colnames(dta) == c(""Gender"", ""Customer.Type"", ""Type.of.Travel"", ""Class"", ""Satisfaction""))]"
+"0",""

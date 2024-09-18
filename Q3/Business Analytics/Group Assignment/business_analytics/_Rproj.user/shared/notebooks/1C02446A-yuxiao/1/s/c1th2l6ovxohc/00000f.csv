@@ -1,0 +1,6 @@
+"0","# print the number of leaf nodes"
+"0","print(paste(""Number of Leaf Nodes:"", length(leaves_data)))"
+"1","[1]"
+"1"," ""Number of Leaf Nodes: 20"""
+"1","
+"

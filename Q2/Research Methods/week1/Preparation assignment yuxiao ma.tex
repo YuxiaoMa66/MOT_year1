@@ -1,0 +1,196 @@
+% \special{dvipdfmx:config z 0}
+\documentclass[UTF8,a4paper,AutoFakeBold,AutoFakeSlant]{article}
+\usepackage[a4paper,left=2.8cm,right=2.6cm,top=3.7cm,bottom=3.5cm]{geometry}
+\usepackage{ctex}
+% \usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\usepackage[mathscr]{eucal}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{capt-of} 
+\usepackage{hyperref} 
+\usepackage{abstract}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{amsfonts} 
+\usepackage{CJK,CJKnumb}
+\usepackage{float}
+% \usepackage{gbt7714}
+\usepackage{framed}
+\usepackage{multirow}
+\usepackage{animate}
+
+
+\newcommand{\song}{\CJKfamily{song}}    % 宋体   (Windows自带simsun.ttf)
+\newcommand{\fs}{\CJKfamily{fs}}        % 仿宋体 (Windows自带simfs.ttf)
+\newcommand{\kai}{\CJKfamily{kai}}      % 楷体   (Windows自带simkai.ttf)
+\newcommand{\hei}{\CJKfamily{hei}}      % 黑体   (Windows自带simhei.ttf)
+\newcommand{\li}{\CJKfamily{li}}        % 隶书   (Windows自带simli.ttf) 
+\newcommand{\ssong}{\CJKfamily{STSong}}
+
+\xeCJKsetup{SlantFactor = 0.3}
+% \xeCJKsetup{SlantFactor = -0.7}
+\setCJKmainfont[BoldFont=SimHei, SlantedFont=KaiTi]{SimSun}
+
+
+
+% -- 中文字体 --
+%\setCJKmainfont{Microsoft YaHei}  % 微软雅黑
+%\setCJKmainfont{YouYuan}  % 幼圆
+%\setCJKmainfont{NSimSun}  % 新宋体
+%\setCJKmainfont{KaiTi}    % 楷体
+% \setCJKmainfont{SimSun}   % 宋体
+%\setCJKmainfont{SimHei}   % 黑体
+% \setCJKfamilyfont{hwsong}{STSong}
+ 
+% -- 英文字体 --
+% \setmainfont{Times New Roman}
+% \setmainfont{DejaVu Sans}
+% \setmainfont{Latin Modern Mono}
+% \setmainfont{Consolas}
+% \setmainfont{Courier New}
+
+
+\usepackage{xcolor}  	%高亮使用的颜色
+\definecolor{commentcolor}{RGB}{85,139,78}
+\definecolor{stringcolor}{RGB}{206,145,108}
+\definecolor{keywordcolor}{RGB}{34,34,250}
+\definecolor{backcolor}{RGB}{220,220,220}
+
+\usepackage{accsupp}	
+\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+\usepackage{listings}
+\lstset{						%高亮代码设置
+	language=python, 					%Python语法高亮
+	linewidth=0.95\linewidth,      		%列表list宽度
+	%basicstyle=\ttfamily,				%tt无法显示空格
+	commentstyle=\color{commentcolor},	%注释颜色
+	keywordstyle=\color{keywordcolor},	%关键词颜色
+	stringstyle=\color{stringcolor},	%字符串颜色
+	%showspaces=true,					%显示空格
+	numbers=left,						%行数显示在左侧
+	numberstyle=\tiny\emptyaccsupp,		%行数数字格式
+	numbersep=5pt,						%数字间隔
+	frame=single,						%加框
+	framerule=0.1pt,						%划线
+	escapeinside=@@,					%逃逸标志
+	emptylines=1,						%
+	xleftmargin=3em,					%list左边距
+	backgroundcolor=\color{backcolor},	%列表背景色
+	tabsize=4,							%制表符长度为4个字符
+	% gobble=4							%忽略每行代码前4个字符
+}
+
+
+
+
+\renewcommand{\abstractname}{}    % clear the title
+\renewcommand{\absnamepos}{empty}
+%去除摘要两边缩进
+\makeatletter
+\renewenvironment{abstract}{%
+    \if@twocolumn
+    \subsection*{\abstractname}%
+    \else
+    \small
+    \begin{center}%
+        {\bfseries \abstractname\vspace{-.5em}\vspace{\z@}}%
+    \end{center}%
+    \fi}
+    {}
+\makeatother
+\lstset{
+language=Matlab,
+keywords={break,case,catch,continue,else,elseif,end,for,function,
+    global,if,otherwise,persistent,return,switch,try,while},
+basicstyle=\ttfamily,
+keywordstyle=\color{blue}\bfseries,
+commentstyle=\color{dkgreen},
+stringstyle=\color{dkpurple},
+backgroundcolor=\color{white},
+tabsize=4,
+showspaces=false,
+showstringspaces=false
+}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+language=C++,                     % the language of code
+% backgroundcolor=\color{backcolor},	%列表背景色
+linewidth=0.95\linewidth,      		%列表list宽度
+basicstyle = \small\ttfamily,           % 基本样式 + 小号字体
+% basicstyle = \footnotesize,    
+xleftmargin=3em,					%list左边距   
+breakatwhitespace = false,        
+breaklines = true,                 
+captionpos = b,                    
+commentstyle = \color{mygreen}\bfseries,
+extendedchars = false,             
+frame =shadowbox, 
+framerule=0.1pt,
+keepspaces=true,
+keywordstyle=\color{blue}\bfseries, % keyword style
+otherkeywords={string}, 
+numbers=left, 
+numbersep=5pt,
+numberstyle=\tiny\color{mygray},
+rulecolor=\color{black},         
+showspaces=false,  
+showstringspaces=false, 
+showtabs=false,    
+stepnumber=1,         
+stringstyle=\color{mymauve},        % string literal style
+tabsize=4,   
+% gobble=4,							%忽略每行代码前4个字符       
+% title=\lstname                      
+}
+
+\title{\textbf{\textsf{{\textsf{Preparation assignment}}}} 
+\author{\tnewroman 5916305~~~~~~Yuxiao Ma}
+\date{}
+
+% 去掉红框
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+
+\begin{document}
+
+
+
+\maketitle
+
+
+
+
+
+
+% --------------------------section------------------------------------------------
+\section{Problem 1}
+
+
+
+
+
+
+
+
+
+
+
+
+% \bibliographystyle{gbt7714-numerical}
+% % \bibliographystyle{7714-author-year}
+% \bibliographystyle{ieeetr}
+% \bibliography{bibl}
+
+\end{document}

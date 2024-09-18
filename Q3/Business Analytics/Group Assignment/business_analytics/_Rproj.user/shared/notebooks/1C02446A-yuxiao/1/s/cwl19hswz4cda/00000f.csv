@@ -1,0 +1,6 @@
+"0","names_num <- c('Age', 'Flight.Distance', 'Departure.Delay', 'Arrival.Delay')"
+"0",""
+"0","for (i in names_num) {"
+"0","  print(plothist(dta, i))"
+"0","  print(pbox(dta, i))"
+"0","}"

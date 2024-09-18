@@ -1,0 +1,565 @@
+---
+title: "Analysis"
+author: "Group7"
+date: '2024-03-05'
+output: html_document
+---
+#Abstract
+
+######################################################
+#Report
+## 1. Introduction
+
+### 1.1 Business Problem Identification
+
+
+### 1.2 Translation to Machine Learning Task
+Explaining that we are making a Prediction
+
+######################################################
+## 2. Data Preparation
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(corrplot)
+library(reshape2)
+```
+
+```{r}
+dta <- read.csv("airline_passenger_satisfaction.csv")
+dta_csv <- dta # Saveing the origional dataframe
+dta <- dta[ ,-which(colnames(dta) == "ID")]
+head(dta)
+```
+
+```{r library upload}
+library(ggplot2)
+```
+
+
+### 2.1 Exploratory Data Analysis
+
+```{r}
+str(dta)
+```
+
+```{r}
+summary(dta)
+```
+
+```{r}
+# get the number of missing values in each column
+colSums(is.na(dta))
+```
+
+```{r}
+# see quick info of category values (not including the numeric ones)
+sapply(dta[,sapply(dta, is.character)], table)
+```
+
+Define the function to visualize the distribution of the variabels.
+```{r distribution visulization function}
+# using ggplot to visualize the distribution of the non-numeric variables as barplot
+pplotbar <- function(df, col) {
+  ggplot(df, aes_string(col)) +
+    geom_bar(stat="count") +
+    geom_text(stat="count", aes(label=after_stat(count)), vjust=1.6, color="white") +
+    labs(title = paste("Distribution of", col
+                          ), x = col, y = "Frequency")
+}
+
+# using ggplot to visualize the distribution of the non-numeric variables as pie chart
+pplotpie <- function(df, col) {
+    p <- ggplot(df, aes_string(x = factor(1), fill = col)) +
+        geom_bar(width = 1, stat = "count") +
+        geom_text(aes(label = scales::percent(..count../sum(..count..))),
+                            stat = "count", 
+                            position = position_stack(vjust = 0.5),
+                            format = "percent") + 
+
+        coord_polar(theta = "y") +
+
+        labs(x = NULL, y = NULL, fill = col, title = paste("Distribution of", col)) +
+
+        theme_void() +
+
+        theme(legend.position = "right")
+
+    return(p)
+}
+
+# using ggplot to visualize the distribution of the numeric variables as histogram, showing the density and median and mean value
+plothist <- function(df, col) {
+  mean_val <- mean(df[[col]], na.rm = TRUE)
+  median_val <- median(df[[col]], na.rm = TRUE)
+  
+  ggplot(df, aes_string(x = col)) + 
+    geom_histogram(aes(y = ..density..), bins = 15, fill = "#656568", color = "black", alpha = 0.7) +
+    geom_density(color = "red", size = 1) +
+    geom_vline(xintercept = median_val, color = "red", linetype = "dashed", size = 1) +
+    geom_vline(xintercept = mean_val, color = "blue", linetype = "dashed", size = 1) + 
+    labs(title = paste("Distribution of", col), x = col, y = "Density") +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    annotate("text", x = median_val, y = Inf, label = paste("Median =", round(median_val, 2)), vjust = 2, color = "red") +
+    annotate("text", x = mean_val, y = Inf, label = paste("Mean =", round(mean_val, 2)), vjust = 3, color = "blue") 
+}
+
+# using ggplot to visualize the distribution of the numeric variables as boxplot, showing the median and quartiles
+pbox <- function(df, col) {
+  boxplot(df[,col], main = paste("Boxplot of", col), ylab = col)
+  invisible()  
+}
+```
+
+
+Show the numeric variables' distribution:
+```{r}
+names_num <- c('Age', 'Flight.Distance', 'Departure.Delay', 'Arrival.Delay')
+
+for (i in names_num) {
+  print(plothist(dta, i))
+  print(pbox(dta, i))
+}
+```
+
+
+
+```{r}
+names_chr <- c('Gender', 'Customer.Type','Type.of.Travel','Class','Satisfaction')
+for (i in names_chr) {
+  print(pplotbar(dta, i))
+}
+```
+
+```{r}
+for (i in names_chr) {
+  print(pplotpie(dta, i))
+}
+```
+
+Print the variabels to see the distribution of the services:
+```{r}
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+
+services_columns <- colnames(dta)[10:(ncol(dta)-4)] 
+
+
+plots <- list()
+
+
+for (col in services_columns) {
+  p <- dta %>%
+    ggplot(aes(x = .data[[col]])) + 
+    geom_bar(stat = "count", fill = "#67676c") +
+    geom_text(stat = 'count', aes(label = ..count..), vjust = -0.5, position = position_stack(vjust = 0.5)) +
+    labs(title = col, x = NULL, y = NULL) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1))
+  
+  plots[[length(plots) + 1]] <- p
+}
+
+
+plot_combined <- wrap_plots(plots, ncol = 3)
+
+print(plot_combined)
+
+```
+
+```{r}
+# 1- create a list for service names and another for total ratings
+service_names <- names(dta)
+total_ratings <- c()
+
+# 2- loop over service columns
+for (col in services_columns) {
+  total_ratings[col] <- sum(dta[[col]])
+}
+
+# 3- sort services by total rating
+sorted_indices <- order(total_ratings)
+sorted_service_names <- service_names[sorted_indices]
+sorted_total_ratings <- total_ratings[sorted_indices]
+
+# 4- create a dataframe to visualize the sorted ratings
+service_rating <- data.frame(Service = sorted_service_names, Total = sorted_total_ratings)
+service_rating
+```
+We can see that the most rated services are "Inflight wifi service", "Baggage.Handling" and "Seat.Comfort"; 
+and the least rated services are "In.flight.Wifi.Service", "Ease.of.Online.Booking" and "Gate.Location".
+
+```{r}
+summary(dta$Flight.Distance)
+```
+
+```{r}
+p <- ggplot(dta, aes(x = Class, y = Flight.Distance, fill = Class)) + 
+  geom_boxplot() +
+    labs(title = "Flight Distance by Class", x = "Class", y = "Flight Distance") +
+    theme_minimal() +
+    theme(legend.position = "none")
+
+print(p)
+```
+####################################
+#######**First heatmap here**##############
+```{r}
+# You code here
+
+```
+
+
+### 2.2 Data Cleaning
+
+Data cleaning is the process of identifying erroneous, incomplete, inaccurate or irrelevant portions of data and then modifying, replacing or deleting this dirty data. The purpose of data cleaning is to improve the quality of data to make it more suitable for analysis or modeling.
+
+Check the correlation between Departure Delay and Arrival Delay
+
+```{r}
+ggplot(dta, aes(x = Departure.Delay, y = Arrival.Delay)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+    labs(title = "Scatter Plot of Departure Delay and Arrival Delay", x = "Departure Delay", y = "Arrival Delay") +
+    theme_minimal()
+```
+
+Strongly correlated.
+
+```{r}
+# regression model to predict Arrival Delay
+lmAD <- lm(Arrival.Delay ~ Departure.Delay, data = dta)
+summary(lmAD)
+```
+
+Use the regression model to fill the missing values in Arrival Delay
+
+```{r}
+# fill missing values in Arrival Delay using the regression model
+dta$Arrival.Delay[is.na(dta$Arrival.Delay)] <- predict(lmAD, newdata = dta[is.na(dta$Arrival.Delay),])
+```
+
+```{r}
+# get the number of missing values in each column
+colSums(is.na(dta))
+```
+
+
+
+### 2.3 Feature Engineering
+
+#### 2.3.1 Standarization 
+
+In the previous section, we have seen that the distribution of Flight.Distance, Departure.Delay, and Arrival.Delay are not normal and have many outliers. We will use Box-Cox transformation to normalize Flight.Distance and arctan transformation to normalize Departure.Delay and Arrival.Delay.
+
+Using Box-Cox Transformation to Normalize Flight.Distance
+```{r}
+# boxcox transformation
+library(MASS)
+boxcox(dta$Flight.Distance ~ 1)
+# choose lambda as the one that maximizes the log-likelihood
+bcFD <- boxcox(dta$Flight.Distance ~ 1, plotit = FALSE)
+lambda <- bcFD$x[which.max(bcFD$y)]
+print(lambda)
+```
+
+```{r}
+# transform Flight.Distance using the lambda
+dta$bcFD <- (dta$Flight.Distance^lambda - 1) / lambda
+summary(dta$bcFD)
+```
+
+*bcFD* means the box-cox transformation of Flight.Distance.
+
+```{r}
+pbox(dta, "bcFD")
+```
+
+Now form the boxplot, we can see that the transformed Flight.Distance that there are no outliers and the distribution. And we scaling the bcFD to 0-1 using min-max scaling.
+
+```{r}
+dta$bcFD <- (dta$bcFD - min(dta$bcFD)) / (max(dta$bcFD) - min(dta$bcFD))
+summary(dta$bcFD)
+```
+
+```{r}
+pbox(dta, "bcFD")
+```
+
+In the future section, we will use the bcFD as the new variable for Flight.Distance.
+
+
+```{r}
+# see distribution of Departure Delay
+pbox(dta, "Departure.Delay")
+```
+
+```{r}
+summary(dta$Departure.Delay)
+```
+
+Define arctan transformation function and scaling it to -1-1
+Because the arctan transformation is helpful to normalize the data and reduce the impact of outliers as it compresses the range of the data especially when the data is skewed.
+
+```{r}
+# arctan transformation adjusted
+adjarctan <- function(x) {
+  (2/pi) * atan(x)
+}
+```
+
+```{r}
+dta$adjDD <- adjarctan(dta$Departure.Delay)
+summary(dta$adjDD)
+```
+
+```{r}
+pbox(dta, "adjDD")
+```
+
+Now we check the distribution of Arrival Delay
+
+```{r}
+summary(dta$Arrival.Delay)
+```
+
+```{r}
+pbox(dta, "Arrival.Delay")
+```
+
+```{r}
+# arctan transformation adjusted
+dta$adjAD <- adjarctan(dta$Arrival.Delay)
+summary(dta$adjAD)
+```
+
+```{r}
+pbox(dta, "adjAD")
+```
+
+Now we have the adjDD and adjAD as the new variables for Departure.Delay and Arrival.Delay. But in the next section, we will check the correlation between adjDD and adjAD. If they are correlated, we will use PCA to reduce the dimensionality of adjDD and adjAD.
+
+
+
+
+
+```{r}
+dta$Age <- (dta$Age - min(dta$Age)) / (max(dta$Age) - min(dta$Age)) #Scaling Age
+```
+
+
+
+
+#### 2.3.2 Dimensionality Reduction
+
+##### 2.3.2.1 Dummy variables
+
+```{r dta summary}
+summary(dta)
+```
+We identify that there are 4 non-numerical variables, they will be transformed to "Dummy" variables to be able to compute them.
+
+Splitting variables into different groups of dummy variables
+
+```{r}
+type_gender <- unique(dta$Gender)
+type_gender
+type_cust <- unique(dta$Customer.Type)
+type_cust
+type_travel <- unique(dta$Type.of.Travel)
+type_travel
+type_class <- unique(dta$Class)
+type_class
+type_satis <- unique(dta$Satisfaction)
+type_satis
+```
+
+gender: 1 for Male, 0 for Female Customer_type:
+1 for First-Time, 0 for Returning 
+Type_of_travel: 1 for Business, 0 for Personal 
+Class_business_isBusiness: 1 for Business, 0 for not Business Class_economy_isEconomy: 1 for Economy, 0 for not Economy Satisfaction_satis: 1 for Satisfied, 0 for Neutral or Dissatisfied
+
+```{r}
+# Gender, according to the unique values
+dta$Gender_dummy <- ifelse(dta$Gender %in% type_gender[1], 1, 0) #gender: 1 for Male, 0 for Female
+
+# Customer.Type, according to the unique values
+dta$Customer_type_dummy <- ifelse(dta$Customer.Type %in% type_cust[1], 1, 0)# Customer_type: 1 for first time; 2 for returning
+
+# Type.of.Travel, according to the unique values
+dta$Type_of_travel_dummy <- ifelse(dta$Type.of.Travel %in% type_travel[1], 1, 0)# Type_of_travel: 1 for buis; 0 for personal
+
+# Class, according to the unique values (3 classes so 2 dummy variables)
+dta$Class_business_dummy <- ifelse(dta$Class %in% type_class[1], 1, 0) #Class_business: 1 for business, 0 for not Business
+dta$Class_economy_dummy <- ifelse(dta$Class %in% type_class[2], 1, 0)#Class_economy_isEconomy: 1 for Economy; 0 for not Economy
+
+# Satisfaction, according to the unique values
+dta$Satisfaction_dummy <- ifelse(dta$Satisfaction %in% type_satis[2], 1, 0)#Satisfaction_satis: 1 for satisfied,; 0 for Neutral or Dissatisfied
+
+
+```
+
+```{r}
+dta <- dta[, !names(dta) %in% c("Gender", "Customer.Type", "Type.of.Travel", "Class", "Satisfaction")]
+#Removing non-numerical collums
+#dta <- dta[ ,-which(colnames(dta) == c("Gender", "Customer.Type", "Type.of.Travel", "Class", "Satisfaction"))]
+
+```
+
+
+
+
+##### 2.3.2.2 Principal Component Analysis (PCA)
+
+
+```{r scaling all variabels}
+# If applicable create a forloop that scalesthe rest of the variables, using a c("ALL COL NAMES with scale 1-5")
+```
+
+
+Now, check the adjDD and adjAD to see whether they are correlted with each other
+
+```{r}
+
+
+dta_loading <- prcomp(dta, scale = TRUE)
+summary(dta_loading)
+
+
+```
+
+Cut off at 90% PC16
+
+```{r}
+library("MASS")
+library("factoextra")# This library is needed to run it 
+fviz_eig(dta_loading, addlables= TRUE, ylim= c(0, 70))# Graph showing proportion of variance
+```
+
+```{r}
+fviz_pca_biplot(dta_loading) #graph showing directions or smthing
+```
+
+
+```{r}
+# draw scatter plot with regression line
+ggplot(dta, aes(x = adjDD, y = adjAD)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+    labs(title = "Scatter Plot of adjDD and adjAD", x = "adjDD", y = "adjAD") +
+    theme_minimal()
+```
+
+```{r}
+cor(dta$adjAD, dta$adjDD)
+
+```
+
+Still multicollinearity, so we can use PCA between adjDD and adjAD
+
+```{r}
+# PCA
+pca <- prcomp(dta[,c("adjDD", "adjAD")], scale = TRUE)
+summary(pca)
+```
+
+We can see that the first principal component explains 82.14% of the variance, so we can use the first principal component as the new variable.
+
+
+```{r}
+# choose the first principal component
+dta$PCDelay <- pca$x[,1]
+summary(dta$PCDelay)
+```
+
+```{r}
+# scaling PCDelay to 0-1
+dta$PCDelay <- (dta$PCDelay - min(dta$PCDelay)) / (max(dta$PCDelay) - min(dta$PCDelay))
+summary(dta$PCDelay)
+```
+
+####**Second heatmap here**
+
+
+```{r}
+correlation_matrix <- cor(dta) #Create correlation matrix
+
+melted_correlation_matrix <- melt(correlation_matrix) #Melt the correlation matrix
+```
+
+
+```{r heatmap, include=TRUE, error= TRUE}
+
+
+#Can I remove adjDD, adjAD, and bcFD?
+
+ggplot(data = melted_correlation_matrix, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                       midpoint = 0, limit = c(-1, 1), space = "Lab",
+                       name="Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(colour = "darkslategray1", angle = 45, hjust = 1, size = 40),
+        axis.text.y = element_text(colour = "lightcoral", angle = 45, hjust = 1, size = 40), # Increase size for Y axis labels as well
+        axis.title = element_blank()) +
+  geom_text(aes(label = sprintf("%.2f", value)), size = 3, vjust = 1.5) +
+  geom_tile(data = subset(melted_correlation_matrix, abs(value) > 0.65),
+            color = "lawngreen", size = 4, fill = NA)# Change before final, is ugly af with the green banner, only for easy visalisaton
+
+# Use ggsave to save the plot to a file, specifying the dimensions
+ggsave("heatmap.png", width = 40, height = 30, dpi = 600)
+#I want to print a table with the correlations, I will update later
+#print(if(melted_correlation_matrix))
+```
+
+
+######################################################
+## 3. Modelling
+
+We keep variables below as the analysis variables
+
+```{r}
+# Independent variables that are already cleaned
+IV <- c("Age","bcFD","PCDelay","gender","Customer_type","Type_of_travel","Class_business_isBusiness","Class_economy_isEconomy","Inflight.Wifi.Service","Departure.Arrival.time_convenient","Ease.of.Online.booking","Gate.location","Food.and.drink","Online.support","On.board.service","Leg.room.service","Baggage.handling","Checkin.service","Inflight.service")
+
+
+# Dependent variable
+DV <- "Satisfaction_satis"
+```
+
+```{r create new variabes}
+#Creat new variables to enhance model performance; methods such as clustering.
+
+```
+
+### 3.1 Model Selection and Rationale
+
+### 3.2 Model 1 Description and Training
+
+### 3.3 Model 2 Description and Training
+
+### 3.4 Model Refinement
+
+#####################################################
+## 4. Results and discussion 
+
+### 4.1 Model Comparison 
+
+######################################################
+## 5. Conclusion and future work
+
+### 5.1 Key Findings and Insights
+
+### 5.2 Recommendations for Business Action
+
+### 5.3 Limitations and Future Directions
+
+
+######################################################
+# References
+
+#Appendices

@@ -1,0 +1,1 @@
+{"frames":[],"message":"Error: unexpected input in \"dta$gender <- ifelse(dta$Gender %in type_gender[1], 1, 0)\"\n"}

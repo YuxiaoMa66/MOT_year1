@@ -1,0 +1,425 @@
+```{r installing packaged}
+install.packages("gplots")
+install.packages("caret")
+install.packages("randomForest")
+install.packages("Metrics")
+
+# Install the packages used for modelling:
+packages <- c("C50", "ggplot2", "gmodels", "Hmisc", "rsample")
+
+for (i in packages) {
+    if(!require(i, character.only = TRUE)) {
+        install.packages(i, dependencies = TRUE)
+    }
+}
+```
+
+```{r reading the data}
+df <- read.csv("airline_passenger_satisfaction.csv")
+df <- as.data.frame(df)
+```
+
+```{r}
+head(df)
+```
+
+Exploring the data:
+
+```{r}
+str(df)
+```
+
+```{r}
+df <- subset(df, select = -ID)
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+Col <- c('Gender', 'Customer Type','Type of Travel','Class','Satisfaction')
+```
+
+```{r}
+unique(df$Gender)
+```
+
+```{r}
+library(ggplot2)
+
+count_plot <- function(i) {
+  ggplot(data=df, aes(x=i)) +
+    geom_bar(stat="count") + 
+    geom_text(stat="count", aes(label=after_stat(count)), vjust=1.6, color="white")
+}
+```
+
+```{r}
+count_plot(df$Gender)
+```
+
+```{r}
+ggplot(df, aes(x=Age)) + geom_histogram(aes(y=after_stat(density)), bins = 15) + geom_vline(aes(xintercept=median(Age))) + geom_density()
+
+
+```
+
+```{r}
+unique(df$Customer.Type)
+```
+
+```{r}
+count_plot(df$Customer.Type)
+```
+
+```{r}
+unique(df$Type.of.Travel)
+```
+
+```{r}
+count_plot(df$Type.of.Travel)
+```
+
+```{r}
+unique(df$Class)
+```
+
+```{r}
+count_plot(df$Class)
+```
+
+```{r}
+summary(df$Flight.Distance)
+```
+
+```{r}
+boxplot(df$Flight.Distance, ylab="Flight Distance")
+```
+
+```{r}
+summary(df$Departure.Delay)
+```
+
+```{r}
+boxplot(df$Departure.Delay, ylab="Departure Delay")
+```
+
+```{r}
+remove_outliers <- function(df, column_name) {
+  Q1 <- quantile(df[[column_name]], probs=.25)
+  Q3 <- quantile(df[[column_name]], probs=.75)
+
+  IQR <- Q3 - Q1
+
+  Upper_boundary <- Q3 + (1.5 * IQR)
+  Lower_boundary <- Q1 - (1.5 * IQR)
+
+  # Replace numbers outside the specified range with NaN
+  df[[column_name]] <- replace(df[[column_name]], df[[column_name]] > Upper_boundary | df[[column_name]] < Lower_boundary, NaN)
+
+  # Calculate the mean excluding NaN values
+  mean_delay <- mean(df[[column_name]][!is.nan(df[[column_name]])])
+
+  # Replace NaN values with the mean
+  df[[column_name]][is.nan(df[[column_name]])] <- mean_delay
+  
+  return(df)
+}
+```
+
+```{r}
+df <- remove_outliers(df, "Departure.Delay")
+```
+
+```{r}
+boxplot(df$Departure.Delay, ylab="Departure Delay")
+```
+
+```{r}
+sum(is.na(df$Arrival.Delay))
+```
+
+```{r}
+null_data <- df[is.na(df$Arrival.Delay), ]
+```
+
+```{r}
+dim(null_data)
+```
+
+```{r}
+summary(null_data)
+```
+
+```{r}
+df$Arrival.Delay[is.na(df$Arrival.Delay)] <- 0
+```
+
+```{r}
+colSums(is.na(df))
+```
+
+```{r}
+summary(df$Arrival.Delay)
+```
+
+```{r}
+boxplot(df$Arrival.Delay, ylab="Arrival Delay")
+```
+
+```{r}
+df <- remove_outliers(df, "Arrival.Delay")
+```
+
+```{r}
+boxplot(df$Arrival.Delay, ylab="Arrival Delay")
+```
+
+```{r}
+services_columns <- names(df)[10:(ncol(df)-1)]
+```
+
+```{r}
+services_columns
+```
+
+```{r}
+library(ggplot2)
+
+# Set figure size
+options(repr.plot.width=15, repr.plot.height=20)
+
+# Loop over services list to plot columns
+for (col in services_columns) {
+    # Create sub-plot
+    plot <- ggplot(df, aes_string(x = col)) +
+                geom_bar() +
+                labs(title = col, x = "", y = "")
+    
+    # Set title to each plot
+    plot <- plot + theme(plot.title = element_text(hjust = 0.5))
+    
+    print(plot)
+}
+
+# Set layout between two plots
+par(mfrow=c((length(services_columns) + 1) %/% 2, 2), mar=c(2,2,2,2))
+
+```
+
+```{r}
+# 1- create a list for service names and another for total ratings
+service_names <- names(df)
+total_ratings <- c()
+
+# 2- loop over service columns
+for (col in services_columns) {
+  total_ratings[col] <- sum(df[[col]])
+}
+
+# 3- sort services by total rating
+sorted_indices <- order(total_ratings)
+sorted_service_names <- service_names[sorted_indices]
+sorted_total_ratings <- total_ratings[sorted_indices]
+
+# 4- create a dataframe to visualize the sorted ratings
+service_rating <- data.frame(Service = sorted_service_names, Total = sorted_total_ratings)
+service_rating
+```
+
+```{r}
+unique(df$Satisfaction)
+```
+
+```{r}
+count_plot(df$Satisfaction)
+```
+
+```{r}
+library(gplots)
+
+numeric_data <- df[, sapply(df, is.numeric)] # Select numeric columns only
+
+correlation_matrix <- cor(numeric_data) # Calculate correlation matrix
+
+heatmap(correlation_matrix)
+```
+
+```{r}
+# Define your data frame df
+
+# Define columns to encode
+clm <- c('Gender', 'Customer.Type', 'Type.of.Travel', 'Class', 'Satisfaction')
+
+# Define a function for label encoding
+label_encode <- function(x) {
+  levels <- unique(x)
+  as.integer(factor(x, levels = levels))
+}
+
+# Apply label encoding to each column
+for (col in clm) {
+  df[[col]] <- label_encode(df[[col]])
+}
+
+
+```
+
+```{r}
+str(df)
+# Convert all columns to numeric
+dta <- sapply(dta, as.numeric)
+```
+
+```{r}
+# Selecting specific columns from a dataframe in R
+x <- df[, c('Gender', 'Age', 'Customer.Type', 'Type.of.Travel', 'Class',
+            'Flight.Distance', 'Departure.Delay', 'Arrival.Delay',
+            'Departure.and.Arrival.Time.Convenience', 'Ease.of.Online.Booking',
+            'Check.in.Service', 'Online.Boarding', 'Gate.Location',
+            'On.board.Service', 'Seat.Comfort', 'Leg.Room.Service', 'Cleanliness',
+            'Food.and.Drink', 'In.flight.Service', 'In.flight.Wifi.Service',
+            'In.flight.Entertainment', 'Baggage.Handling')]
+
+y <- df[['Satisfaction']]
+```
+
+```{r}
+dta_standardized <- scale(x, center = TRUE, scale = TRUE)
+```
+
+```{r}
+library(caret)
+
+# set.seed(42)  # Setting random seed for reproducibility
+
+# Assuming x is your data frame or matrix containing your features
+# and y is a vector containing your labels
+
+# Splitting the data into training and testing sets
+
+
+train_index <- createDataPartition(y, p = 0.75, list = FALSE)
+x_train <- x[train_index, ]
+x_test <- x[-train_index, ]
+y_train <- y[train_index]
+y_test <- y[-train_index]
+
+```
+
+```{r}
+dim(x_train)
+```
+
+```{r}
+set.seed(100)
+
+proportion <-  .7# <type the desired proportion here>
+split <- rsample::initial_split(df, prop = proportion)
+training <- training(split)
+testing <- testing(split)
+
+```
+
+```{r}
+training$Satisfaction <- factor(training$Satisfaction)
+model <- C50::C5.0(Satisfaction ~ ., data = training)
+
+summary(model)
+```
+
+```{r}
+print("Confusion matrix based on testing data")
+pred.test <- predict(model, testing)
+gmodels::CrossTable(testing$Satisfaction, pred.test,
+                    prop.chisq = FALSE,
+                    prop.c = FALSE,
+                    prop.r = FALSE,
+                    prop.t = FALSE,
+                    dnn = c("Actual satisfaction", "Predicted satisfaction"))
+```
+
+```{r}
+# Add boosting
+model_boost <- C5.0(Satisfaction ~., data = training, trials = 10)
+
+# Predicting on the testing data
+print("Confusion matrix based on testing data (boosting)")
+pred.test <- predict(model_boost, testing)
+CrossTable(testing$Satisfaction, pred.test,
+           prop.chisq = FALSE,
+           prop.c = FALSE,
+           prop.r = FALSE,
+           prop.t = FALSE,
+           dnn = c("Actual credit rating", "Predicted credit rating"))
+```
+
+```{r}
+# Set parameters
+iterations <- 10 # how many trees do you want to estimate?
+randomize <- FALSE # use a randomly selected set of predictor variables?
+min_randomize <- 2 # if randomize is set to TRUE, how many predictor variables do you want to sample (min = 2, max = 5)
+
+# Split tree_credit in training and testing set
+proportion <-  .7# <type the desired proportion here>
+split <- rsample::initial_split(df, prop = proportion)
+training <- training(split)
+testing <- testing(split)
+
+
+training$Satisfaction <- factor(training$Satisfaction)
+testing$Satisfaction <- factor(testing$Satisfaction)
+str(training$Satisfaction)
+
+# Make predictions for multiple trees
+for (i in seq(iterations)) {
+    if (isFALSE(randomize)) {
+        tmp <- training(rsample::initial_split(training, prop = proportion))
+        model <- C50::C5.0(Satisfaction ~., 
+                           data = tmp)
+        testing <- cbind(testing, data.frame(predict(model, testing)))
+    } else {
+        tmp <- training(rsample::initial_split(training, prop = proportion))
+        names <- names(tmp)[ -which(names(tmp) %in% "Satisfaction") ]
+        names <- sample(names, sample(min_randomize:length(names), 1))
+        tmp <- cbind(Satisfaction = tmp$Satisfaction, tmp[ names ])
+        model <- C50::C5.0(Satisfaction ~., 
+                           data = tmp)
+        testing <- cbind(testing, data.frame(predict(model, testing)))
+    }
+}
+```
+
+```{r}
+str(testing)
+```
+
+```{r}
+counts <- testing[, 7:ncol(testing) ]
+counts <- data.frame(lapply(counts, as.numeric)) - 1
+counts$Sum <- rowSums(counts)
+counts$Satisfaction.predicted <- ifelse(counts$Sum / (ncol(counts) - 1) > 0.5, "Good",
+                                         ifelse(counts$Sum / (ncol(counts) - 1) == 0.5, sample(c("Good", "Bad"), 1), 
+                                                "Bad"))
+testing <- cbind(testing[, c(1:6)], Satisfaction.predicted = counts$Satisfaction.predicted)
+remove(counts)
+```
+
+```{r}
+CrossTable(testing$Satisfaction, testing$Satisfaction.predicted,
+           prop.chisq = FALSE,
+           prop.c = FALSE,
+           prop.r = FALSE,
+           prop.t = FALSE,
+           dnn = c("Actual satisfaction", "Predicted satisfaction"))
+```
+
+```{r}
+str(testing)
+# randomForest::randomForest(Satisfaction ~., 
+#                            data = testing,
+#                            ntree = 500, # how many trees should be grown?
+#                            mtry = 2, # how many variables to sample at each split?
+#                            replace = TRUE) # sampling of cases with or without replacement?
+```

@@ -1,0 +1,4 @@
+"0","# arctan transformation adjusted"
+"0","adjarctan <- function(x) {"
+"0","  (2/pi) * atan(x)"
+"0","}"

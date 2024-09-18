@@ -1,0 +1,8 @@
+"0","# boxplot of Flight.Distance"
+"0","p <- ggplot(dta, aes(x = Class, y = Flight.Distance, fill = Class)) + "
+"0","  geom_boxplot() +"
+"0","    labs(title = ""Flight Distance by Class"", x = ""Class"", y = ""Flight Distance"") +"
+"0","    theme_minimal() +"
+"0","    theme(legend.position = ""none"")"
+"0",""
+"0","print(p)"

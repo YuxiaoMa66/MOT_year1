@@ -1,0 +1,396 @@
+```{r example}
+c(1, 2, 3, 4)
+c(1, 2, 3, 4)
+x <- c(1, 2, 3, 4)
+```{r vector print}
+x
+x <- c(1:25)
+x
+for (i in seq(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+x <- c(1:25) # initialize x to its default values
+for (i in range(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+for (i in range(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+x <- c(1:25) # initialize x to its default values
+for (i in seq(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+x <- c(1:25) # initialize x to its default values
+for (i in range(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+x <- c(1:25)
+x
+for (i in range(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+for (i in seq(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+range(x)
+print(range(x))
+x <- c(1:25) # initialize x to its default values
+```{r for loop}
+for (i in seq(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+print(range(x))
+x <- c(1:25) # initialize x to its default values
+for (i in seq(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+print(range(x))
+x <- c(1:25) # initialize x to its default values
+for (i in range(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+print(range(x))
+x <- c(1:25) # initialize x to its default values
+seq
+for (i in seq(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+print(range(x))
+x <- c(1:25) # initialize x to its default values
+for (i in seq(length(x))) {
+x[i] <- x[i] * 2
+}
+x
+print(range(x))
+x <- c(1:25) # initialize x to its default values
+x <- x * 2
+x
+x <- c(1:25) # initialize x to its default values
+nchar(x)
+nchar(x) %>% zh
+# 计算x每个元素的字符数
+nchar(x)
+# 计算x每个元素的字符数
+y <- x + 2*x
+y
+words <- c("R", "is", "awesome")
+words
+length(words)
+words <- c("R", "is", "awesome", 4)
+words
+words[4] * 2
+class(words)
+class(words[4])
+as.numeric(words[4]) * 2
+x[5]
+x[ c(5:10) ]
+x %% 4
+x %% 4 == 0
+x [ x %% 4 == 0 ]
+x [ -5 ]
+breaking_bad <- data.frame(main_character = c("Walt", "Todd", "Skyler", "Gus", "Lydia", "Jimmy"),
+first_occurence = c("S01E01", "S05E03", "S01E01", "S02E11", "S05E02", "S92E11"),
+actors_yob = c(1956, 1988, 1968, 1958, 1975, 1962),
+sex = c(NA, 1, 0, 1, 0, 1))
+head(breaking_bad)
+?head
+str(breaking_bad)
+summary(breaking_bad)
+table(breaking_bad$first_occurence)
+breaking_bad$main_character
+sort(breaking_bad$main_character)
+as.numeric(format(Sys.Date(), "%Y")) - breaking_bad$actors_yob
+mean(as.numeric(format(Sys.Date(), "%Y")) - breaking_bad$actors_yob)
+breaking_bad[4, 3]
+breaking_bad[ c(4:6), c(1, 3:4) ]
+breaking_bad$main_character
+breaking_bad[, 1]
+breaking_bad[ breaking_bad$sex == 1, ]
+na.omit(breaking_bad[ breaking_bad$sex == 1, ])
+breaking_bad[ which(breaking_bad$sex %in% 1), ]
+order(breaking_bad$actors_yob)
+breaking_bad[ order(breaking_bad$actors_yob), ]
+breaking_bad[ which(breaking_bad$main_character %in% "Walt"), ]$sex <- 1
+ls()
+remove(i, words, x, y)
+episodes <- read.csv("breaking_bad.csv")
+str(episodes)
+breaking_bad$first_occurence
+head(cbind(Season = episodes$Season, Episode = episodes$Episode))
+paste("R", "is", "awesome", sep = " ")
+sprintf("%02d", c(1, 10, 100))
+episodes$season_episode <- paste("S", # first letter denotes season
+sprintf("%02d", as.numeric(episodes$Season)), # season no.
+"E", # second letter denotes episode
+sprintf("%02d", as.numeric(episodes$Episode)), # episode no.
+sep = "") # do not separated components
+merge(breaking_bad, episodes,
+by.x = "first_occurence", # x is left (breaking_bad)
+by.y = "season_episode", # y is right (episodes)
+all.x = TRUE) # all.y = right join, all = full join, leave out for inner join
+breaking_bad[ which(breaking_bad$main_character %in% "Jimmy"), ]$first_occurence <- "S02E11"
+breaking_bad <- merge(breaking_bad, episodes,
+by.x = "first_occurence",
+by.y = "season_episode",
+all.x = TRUE)
+aggregate(breaking_bad$Rating_IMDB,
+by = list("sex" = breaking_bad$sex),
+FUN = mean)
+breaking_bad$age <- (as.numeric(format(Sys.Date(), "%Y")) - breaking_bad$actors_yob) # create the age variable
+lm <- lm(breaking_bad$Duration_mins ~ breaking_bad$age) # estimating the linear (regression) model (lm)
+summary(lm) # look at the model results
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 4) # different plot character (value can range between 0 and 25)
+abline(lm, # adding the regression line
+lty = 5, # specifying line type (ranges from 0 to 6)
+lwd = 2, # specifying line width (default = 1)
+col = "blue")
+as.numeric(words[1])
+words <- c("R", "is", "awesome", 4)
+words
+class(words)
+class(words[4])
+class(words)
+class(words[4])
+as.numeric(words[1])
+as.numeric(words[4]) * 2
+as.numeric(words[1])
+as.numeric(words[4]) * 2
+```{r breaking bad}
+breaking_bad <- data.frame(main_character = c("Walt", "Todd", "Skyler", "Gus", "Lydia", "Jimmy"),
+first_occurence = c("S01E01", "S05E03", "S01E01", "S02E11", "S05E02", "S92E11"),
+actors_yob = c(1956, 1988, 1968, 1958, 1975, 1962),
+sex = c(NA, 1, 0, 1, 0, 1))
+head(breaking_bad)
+?head
+breaking_bad['main_character']
+breaking_bad$main_character
+breaking_bad[, 1]
+breaking_bad['main_character']
+breaking_bad[ which(breaking_bad$sex %in% 1), ]
+breaking_bad[ which(breaking_bad$sex %in% 1)]
+breaking_bad[ which(breaking_bad$sex %in% 1)]
+breaking_bad[ which(breaking_bad$sex %in% 1), ]
+ls()
+View(lm)
+remove(i, words, x, y)
+View(episodes)
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 1) # different plot character (value can range between 0 and 25)
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 4) # different plot character (value can range between 0 and 25)
+episodes <- read.csv("breaking_bad.csv")
+str(episodes)
+breaking_bad$first_occurence
+head(cbind(Season = episodes$Season, Episode = episodes$Episode))
+paste("R", "is", "awesome", sep = " ")
+sprintf("%02d", c(1, 10, 100))
+episodes$season_episode <- paste("S", # first letter denotes season
+sprintf("%02d", as.numeric(episodes$Season)), # season no.
+"E", # second letter denotes episode
+sprintf("%02d", as.numeric(episodes$Episode)), # episode no.
+sep = "") # do not separated components
+merge(breaking_bad, episodes,
+by.x = "first_occurence", # x is left (breaking_bad)
+by.y = "season_episode", # y is right (episodes)
+all.x = TRUE) # all.y = right join, all = full join, leave out for inner join
+breaking_bad[ which(breaking_bad$main_character %in% "Jimmy"), ]$first_occurence <- "S02E11"
+breaking_bad <- merge(breaking_bad, episodes,
+by.x = "first_occurence",
+by.y = "season_episode",
+all.x = TRUE)
+aggregate(breaking_bad$Rating_IMDB,
+by = list("sex" = breaking_bad$sex),
+FUN = mean)
+breaking_bad$age <- (as.numeric(format(Sys.Date(), "%Y")) - breaking_bad$actors_yob) # create the age variable
+lm <- lm(breaking_bad$Duration_mins ~ breaking_bad$age) # estimating the linear (regression) model (lm)
+summary(lm) # look at the model results
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 4) # different plot character (value can range between 0 and 25)
+abline(lm, # adding the regression line
+lty = 5, # specifying line type (ranges from 0 to 6)
+lwd = 2, # specifying line width (default = 1)
+col = "blue")
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 1) # different plot character (value can range between 0 and 25)
+abline(lm, # adding the regression line
+lty = 5, # specifying line type (ranges from 0 to 6)
+lwd = 2, # specifying line width (default = 1)
+col = "blue")
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 6) # different plot character (value can range between 0 and 25)
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 7) # different plot character (value can range between 0 and 25)
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 4) # different plot character (value can range between 0 and 25)
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 4) # different plot character (value can range between 0 and 25)
+abline(lm, # adding the regression line
+lty = 5, # specifying line type (ranges from 0 to 6)
+lwd = 2, # specifying line width (default = 1)
+col = "blue")
+abline(lm, # adding the regression line
+lty = 1, # specifying line type (ranges from 0 to 6)
+lwd = 2, # specifying line width (default = 1)
+col = "blue")
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 4) # different plot character (value can range between 0 and 25)
+abline(lm, # adding the regression line
+lty = 1, # specifying line type (ranges from 0 to 6)
+lwd = 2, # specifying line width (default = 1)
+col = "blue")
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+xlab = "Actors age",
+ylab = "Episode duration",
+pch = 4) # different plot character (value can range between 0 and 25)
+abline(lm, # adding the regression line
+lty = 6, # specifying line type (ranges from 0 to 6)
+lwd = 2, # specifying line width (default = 1)
+col = "blue")
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+dta <- read.csv("listings.csv")
+plot(x = iris$Sepal.Width,
+y = iris$Sepal.Length)
+plot(x = iris$Sepal.Width,
+y = iris$Sepal.Length,
+xlab = "Sepal width",
+ylab = "Sepal length")
+plot(x = iris$Sepal.Width,
+y = iris$Sepal.Length,
+xlab = "Sepal width",
+ylab = "Sepal length",
+main = "Sepal width vs. Sepal length", # add title
+col = iris$Species, # color code by species
+pch = 19, # change shape of plotting points
+xlim = c(0, max(iris$Sepal.Width) + 0.5), # change x axis scale
+ylim = c(0, max(iris$Sepal.Length) + 0.5)) # change y axis scale
+legend("topright", legend = unique(iris$Species),
+col = 1:length(levels(iris$Species)), pch = 19)
+lattice::xyplot(Sepal.Length ~ Sepal.Width | Species,
+data = iris,
+layout = c(3, 1), # arrange the panels in 3 columns and 1 row
+type = c("p"), # 'p' for points
+xlab = "Sepal Width",
+ylab = "Sepal Length",
+main = "Sepal width vs. Sepal length by Species")
+lattice::xyplot(Sepal.Length ~ Sepal.Width | Species,
+data = iris,
+groups = Species, # color points by species
+layout = c(3, 1),
+xlab = "Sepal Width",
+ylab = "Sepal Length",
+main = "Sepal width vs. Sepal length by Species",
+auto.key = FALSE, # add a legend yes or no
+par.settings = list(
+strip.background = list(col = "lightblue"), # set strip background color
+superpose.symbol = list(col = c("red", "green", "blue"), # color points by species
+pch = c(16, 17, 18)) # use different shapes for each species
+),
+panel = function(x, y, ...) {
+lattice::panel.superpose(x, y, ...,
+panel.groups = function(x, y, col, ...) {
+lattice::panel.xyplot(x, y, col = col, ...)
+})
+lattice::panel.grid(h = -1, v = -1, col = "gray")
+})
+p <- ggplot2::ggplot(data = iris, ggplot2::aes(x = Sepal.Width, y = Sepal.Length))
+p
+library(ggplot2)
+p <- p + ggplot2::geom_point()
+p
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+dta <- read.csv("listings.csv")
+install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+dta <- read.csv("listings.csv")
+plot(x = iris$Sepal.Width,
+y = iris$Sepal.Length)
+plot(x = iris$Sepal.Width,
+y = iris$Sepal.Length,
+xlab = "Sepal width",
+ylab = "Sepal length")
+plot(x = iris$Sepal.Width,
+y = iris$Sepal.Length,
+xlab = "Sepal width",
+ylab = "Sepal length",
+main = "Sepal width vs. Sepal length", # add title
+col = iris$Species, # color code by species
+pch = 19, # change shape of plotting points
+xlim = c(0, max(iris$Sepal.Width) + 0.5), # change x axis scale
+ylim = c(0, max(iris$Sepal.Length) + 0.5)) # change y axis scale
+legend("topright", legend = unique(iris$Species),
+col = 1:length(levels(iris$Species)), pch = 19)
+lattice::xyplot(Sepal.Length ~ Sepal.Width | Species,
+data = iris,
+layout = c(3, 1), # arrange the panels in 3 columns and 1 row
+type = c("p"), # 'p' for points
+xlab = "Sepal Width",
+ylab = "Sepal Length",
+main = "Sepal width vs. Sepal length by Species")
+lattice::xyplot(Sepal.Length ~ Sepal.Width | Species,
+data = iris,
+groups = Species, # color points by species
+layout = c(3, 1),
+xlab = "Sepal Width",
+ylab = "Sepal Length",
+main = "Sepal width vs. Sepal length by Species",
+auto.key = FALSE, # add a legend yes or no
+par.settings = list(
+strip.background = list(col = "lightblue"), # set strip background color
+superpose.symbol = list(col = c("red", "green", "blue"), # color points by species
+pch = c(16, 17, 18)) # use different shapes for each species
+),
+panel = function(x, y, ...) {
+lattice::panel.superpose(x, y, ...,
+panel.groups = function(x, y, col, ...) {
+lattice::panel.xyplot(x, y, col = col, ...)
+})
+lattice::panel.grid(h = -1, v = -1, col = "gray")
+})
+p <- ggplot2::ggplot(data = iris, ggplot2::aes(x = Sepal.Width, y = Sepal.Length))
+p
+library(ggplot2)
+p <- p + ggplot2::geom_point()
+p
+p <- p + geom_smooth(method = "lm")
+p
+unlink("Data preparation_cache", recursive = TRUE)

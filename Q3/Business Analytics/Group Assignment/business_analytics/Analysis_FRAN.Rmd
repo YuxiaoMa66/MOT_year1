@@ -1,0 +1,67 @@
+---
+title: "Analysis tutorial - Section 3 & 4"
+author: "Fran"
+date: "2024-03-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# install.packages(tidymodels) #used for Feature engineering
+library(tidyverse)
+
+```
+#### Data integration
+```{r load_csv_data}
+dta <- read.csv("airline_passenger_satisfaction.csv")
+
+```
+### Data cleaning and preparation
+
+```{r check duplicates}
+dta <- dta[!duplicated(dta),] #remove duplicated rows
+```
+
+```{r explore classes}
+table(dta$Class)
+
+```
+##### Dealing with inconsistent variable formats
+No inconsistent formats found
+##### Dealing with missing values
+No inconsistent formats found
+```{R Check missing values}
+print("Arrival Delay")
+table(is.na(dta$Arrival.Delay))
+
+
+
+```
+
+#### Feature Engineering
+##### Creating Dummies
+```{R Dummy variables of dta}
+num_dta <- dta #Copy dta to a new dataset where categorical variables will be converted to dummies.
+
+str(dta)
+
+num_dta$Gender <- ifelse(num_dta$Gender %in% "Male",0,1) #Male 0 Female 1
+
+num_dta$Customer.Type <- ifelse(num_dta$Customer.Type %in% "Male",0,1) #Male 0 Female 1
+num_dta$Type.of.Travel  <- ifelse(num_dta$Type.of.Travel  %in% "Male",0,1) #Male 0 Female 1
+num_dta$Class <- ifelse(num_dta$Class %in% "Male",0,1) #Male 0 Female 1
+num_dta$Satisfaction <- ifelse(num_dta$Satisfaction %in% "Male",0,1) #Male 0 Female 1
+
+```
+
+##### Variable normalization and variable scaling
+
+### Principal Component Analysis (PCA)
+```{R Correlation heatmap}
+# Calculate correlations
+cor_matrix <- cor(num_dta[,-Satisfaction])
+
+# Basic visualization using 'heatmap'
+heatmap(cor_matrix)
+```
+

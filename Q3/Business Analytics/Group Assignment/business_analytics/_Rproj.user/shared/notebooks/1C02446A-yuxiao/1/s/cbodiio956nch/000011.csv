@@ -1,0 +1,15 @@
+"0","barplot(imp_gain_ratio, main = ""Importance of the Variables (Gain Ratio)"", col = ""lightgreen"")"
+"2","Warning in min(w.l) :"
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in max(w.r) :"
+"2"," no non-missing arguments to max; returning -Inf
+"
+"2","Warning in min(x) :"
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in max(x) :"
+"2"," no non-missing arguments to max; returning -Inf
+"
+"2","Error in plot.window(xlim, ylim, log = log, ...) : 'xlim'值不能是无限的
+"

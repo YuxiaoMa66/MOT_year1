@@ -1,0 +1,5 @@
+"0","# implement the function"
+"0","accuracy <- train_and_predict_logistic_regression(train_data_new, test_data_new, ""Satisfaction_dummy"", lambda = 1)"
+"2","Error in data.frame(lambda = model$lambda, deviance = model$deviance) : 
+  参数值意味着不同的行数: 1, 0
+"

@@ -1,0 +1,8 @@
+"0","# function to compute the importance of the variables"
+"0","importance <- function(data, method) {"
+"0","  # create a decision tree"
+"0","  tree <- rpart(Satisfaction_dummy ~ ., data = data, method = method)"
+"0","  # compute the importance of the variables"
+"0","  imp <- varImp(tree)"
+"0","  return(imp)"
+"0","}"

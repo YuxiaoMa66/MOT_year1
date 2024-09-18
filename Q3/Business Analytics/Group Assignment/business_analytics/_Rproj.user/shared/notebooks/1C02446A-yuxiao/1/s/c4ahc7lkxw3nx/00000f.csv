@@ -1,0 +1,37 @@
+"0","# implement the function"
+"0","model_results <- lapply(seq(length(train_data_list)), function(x) build_logistic_regression(train_data_new[[x]], test_data_new[[x]]))"
+"2","Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type ==  :"
+"2","
+ "
+"2"," 用秩缺乏拟合来进行预测的结果很可能不可靠
+"
+"2","Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type ==  :"
+"2","
+ "
+"2"," 用秩缺乏拟合来进行预测的结果很可能不可靠
+"
+"2","Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type ==  :"
+"2","
+ "
+"2"," 用秩缺乏拟合来进行预测的结果很可能不可靠
+"
+"2","Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type ==  :"
+"2","
+ "
+"2"," 用秩缺乏拟合来进行预测的结果很可能不可靠
+"
+"2","Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type ==  :"
+"2","
+ "
+"2"," 用秩缺乏拟合来进行预测的结果很可能不可靠
+"
+"2","Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type ==  :"
+"2","
+ "
+"2"," 用秩缺乏拟合来进行预测的结果很可能不可靠
+"
+"2","Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type ==  :"
+"2","
+ "
+"2"," 用秩缺乏拟合来进行预测的结果很可能不可靠
+"

@@ -1,0 +1,8 @@
+"0","# logistic regression model for the training dataset IV3"
+"0","train_data_new3 <- train_data_new[, c(IV1, ""leaf_mean"", ""Satisfaction_dummy"")]"
+"0","test_data_new3 <- test_data_new[, c(IV1, ""leaf_mean"", ""Satisfaction_dummy"")]"
+"0","model <- glm(Satisfaction_dummy ~ ., data = train_data_new[, c(IV3, ""Satisfaction_dummy"")], family = ""binomial"")"
+"0","train_data_new3$IV3_predict <- predict(model, newdata = train_data_new, type = ""response"")"
+"0",""
+"0","# Also for the testing dataset"
+"0","test_data_new3$IV3_predict <- predict(model, newdata = test_data_new, type = ""response"")"

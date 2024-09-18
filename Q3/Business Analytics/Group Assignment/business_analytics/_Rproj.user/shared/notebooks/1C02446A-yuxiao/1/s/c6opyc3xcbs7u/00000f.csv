@@ -1,0 +1,4 @@
+"0","# Gender, according to the unique values"
+"0","dta$gender <- ifelse(dta$Gender %in type_gender[1], 1, 0)"
+"2","Error: unexpected input in ""dta$gender <- ifelse(dta$Gender %in type_gender[1], 1, 0)""
+"

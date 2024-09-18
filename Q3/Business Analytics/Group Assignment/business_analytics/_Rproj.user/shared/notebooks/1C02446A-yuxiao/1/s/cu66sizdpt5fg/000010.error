@@ -1,0 +1,1 @@
+{"frames":[{"func":"data.frame(train_data_list_new2[[i]], Satisfaction_dummy = train_data_list_new2[[i]]$Satisfaction_dummy)","file":"","line_number":0,"end_line_number":0,"character_number":0,"end_character_number":0}],"message":"Error: $ operator is invalid for atomic vectors\n"}

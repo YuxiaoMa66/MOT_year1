@@ -1,0 +1,10 @@
+"1","NULL
+"
+"2","Warning:"
+"2"," [38;5;232mRemoved 393 rows containing non-finite outside the scale range
+(`stat_bin()`).[39m
+"
+"2","Warning:"
+"2"," [38;5;232mRemoved 393 rows containing non-finite outside the scale range
+(`stat_density()`).[39m
+"

@@ -1,0 +1,5 @@
+"0","# implement the function"
+"0","accuracy <- train_and_evaluate_models(train_data_list, test_data_new, ""Satisfaction_dummy"", lambda = 1)"
+"2","Error in predict.glmnet(model, newx = x_test, type = ""class"") : 
+  The number of variables in newx must be 22
+"

@@ -1,0 +1,2 @@
+"0","dta <- read.csv(""airline_passenger_satisfaction.csv"")"
+"0","head(dta)"

@@ -1,0 +1,2 @@
+"0","# get train_data_list from leaves_data, which is a list of dataframes and is the odd elements of leaves_data"
+"0","train_data_list <- leaves_data[sapply(seq(leaves_data), function(x) x %% 2 == 1)]"

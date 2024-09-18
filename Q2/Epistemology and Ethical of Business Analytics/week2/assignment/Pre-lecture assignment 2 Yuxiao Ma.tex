@@ -1,0 +1,336 @@
+% \special{dvipdfmx:config z 0}
+\documentclass[UTF8,a4paper,AutoFakeBold,AutoFakeSlant]{article}
+\usepackage[a4paper,left=2.8cm,right=2.6cm,top=3.7cm,bottom=3.5cm]{geometry}
+\usepackage{ctex}
+% \usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\usepackage[mathscr]{eucal}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{capt-of} 
+\usepackage{hyperref} 
+\usepackage{abstract}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{amsfonts} 
+\usepackage{CJK,CJKnumb}
+\usepackage{float}
+% \usepackage{gbt7714}
+\usepackage{framed}
+\usepackage{multirow}
+\usepackage{animate}
+\usepackage[framemethod=tikz]{mdframed}
+
+
+\newcommand{\tnewroman}{\fontspec{Times New Roman}}
+\newcommand{\song}{\CJKfamily{song}}    % 宋体   (Windows自带simsun.ttf)
+\newcommand{\fs}{\CJKfamily{fs}}        % 仿宋体 (Windows自带simfs.ttf)
+\newcommand{\kai}{\CJKfamily{kai}}      % 楷体   (Windows自带simkai.ttf)
+\newcommand{\hei}{\CJKfamily{hei}}      % 黑体   (Windows自带simhei.ttf)
+\newcommand{\li}{\CJKfamily{li}}        % 隶书   (Windows自带simli.ttf) 
+\newcommand{\ssong}{\CJKfamily{STSong}}
+% \newfontfamily{\heiti}{SimHei}
+
+\xeCJKsetup{SlantFactor = 0.3}
+% \xeCJKsetup{SlantFactor = -0.7}
+\setCJKmainfont[BoldFont=SimHei, SlantedFont=KaiTi]{SimSun}
+
+
+
+\usepackage{xcolor}  	%高亮使用的颜色
+\definecolor{commentcolor}{RGB}{85,139,78}
+\definecolor{stringcolor}{RGB}{206,145,108}
+\definecolor{keywordcolor}{RGB}{34,34,250}
+\definecolor{backcolor}{RGB}{220,220,220}
+
+\usepackage{accsupp}	
+\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+
+
+
+
+
+\title{\textbf{\textsf{{\textsf{Pre-lecture assignment 2}}}}} 
+\author{\tnewroman Yuxiao Ma~~~~~5916305}
+\date{}
+
+% 去掉红框
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+
+\begin{document}
+
+
+
+\maketitle
+
+
+\section{Argurements}
+
+\subsection{}
+
+The validity is if $p \rightarrow q$ is valid, then if the p is true, the q must be true; 
+or if the p is false, the truth value of q does not matter whether it is true or false. This condition is always valid.
+
+
+\subsection{}
+
+A valid argument is one in which the conclusion necessarily follows from the premises. In other words, if all of the premises are true, then the conclusion must also be true.
+A valid argument can have a false conclusion if its premises are false.
+
+A sound argument is a valid argument in which all of the premises are true. A sound argument is a stronger requirement than validity, as it requires that the premises be true in addition to the argument being valid.
+A sound argument cannot have a false conclusion.
+
+
+\subsection{}
+
+Aruguement themselves can neither be true nor false.
+An argument is valid if and only if the truth of its premises entails the truth of its conclusion.
+
+
+\subsection{}
+
+P1: All fish live in water.
+
+P2: Whales live in water.
+
+C: Whales are fish.
+
+The argument is valid, but the conclusion is false.
+
+
+\subsection{}
+
+No, the argument is not valid. The conclusion (2+2=4) does not necessarily follow from the premises.
+
+
+\subsection{}
+
+P1: Light is a particle.
+
+P2: Light is a wave.
+
+C: Light is a particle and at the same time a wave.
+
+
+
+\section{Propositional Logic}
+
+\subsection{}
+
+$ P \lor \lnot P $
+
+
+\subsection{}
+
+% draw truth table of $ P \lor \lnot P $
+The truth table is as follows:
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+$P$ & $P \lor \lnot P$ \\ \hline
+T   & T                \\ \hline
+F   & T                \\ \hline
+\end{tabular}
+\end{table}
+
+
+\subsection{}
+
+\subsubsection{}
+$A \rightarrow B$
+
+\subsubsection{}
+% draw truth table of $ A \rightarrow B $
+The truth table is as follows:
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+$A$ & $B$ & $A \rightarrow B$ \\ \hline
+T   & T   & T                 \\ \hline
+T   & F   & F                 \\ \hline
+F   & T   & T                 \\ \hline
+F   & F   & T                 \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{}
+To demonstrate that the argument is valid, we need to show that the conclusion (C) is always true whenever the premises (P1 and P2) are both true. 
+Looking at the truth table, we can see that the only row where both P1 and P2 are true is the first row. In this row, C is also true. Therefore, we can conclude that the argument is valid.
+
+
+\subsection{}
+
+\subsubsection{}
+Rewrite the argument in symbolic form:
+\begin{itemize}
+    \item R: It rains
+    \item W: The floor is wet
+\end{itemize}
+Therefore, the argument can be rewritten as:
+\begin{itemize}
+    \item P1: $R \rightarrow W$
+    \item P2: $W$
+    \item C: $R$
+\end{itemize}
+
+\subsubsection{}
+% draw truth table of $ P1 \land P2 \rightarrow C $
+The truth table is as follows:
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+$R$ & $W$ & $R \rightarrow W$ & Conclusion $R$ \\ \hline
+T   & T   & T                 & T              \\ \hline
+T   & F   & F                 & T              \\ \hline
+F   & T   & T                 & F              \\ \hline
+F   & F   & T                 & F              \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{}
+An argument is considered valid if the conclusion is always true whenever the premises are both true.
+And the premises are $R \rightarrow W$ and $W$, the conclusion is $R$.
+The only scenario where both premises are true is on the first line where $R$ and $W$ are both true.
+However, in the third line the premises are true but the conclusion is false.(The floor is wet but it does not rain.)
+
+Therefore, the argument is invalid.
+
+\begin{itemize}
+    \item bonus question:
+\end{itemize}
+
+"Affirming the consequent," and its Latin name is "Affirmatio consequentis."
+
+
+\subsection{}
+% draw truth table of $ P, Q, P\rightarrow Q, P \leftrightarrow Q $
+The truth table is as follows:
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$P$ & $Q$ & $P \rightarrow Q$ & $Q \rightarrow P$ &$P \leftrightarrow Q$($P \rightarrow Q \land Q \rightarrow P$)  \\ \hline
+T   & T   & T                 & T &T                       \\ \hline
+T   & F   & F                 & T &F                       \\ \hline
+F   & T   & T                 & F &F                       \\ \hline
+F   & F   & T                 & T &T                       \\ \hline
+\end{tabular}
+\end{table}
+
+Observe that the columns for \( P \rightarrow Q \) and \( Q \rightarrow P \) must both be true 
+for \( P \leftrightarrow Q \) to be true. Conversely, if either \( P \rightarrow Q \) or 
+\( Q \rightarrow P \) is false, then \( P \leftrightarrow Q \) is also false.
+
+% The last column shows the result of the 
+% biconditional \( p \leftrightarrow q \). 
+% If you compare this with the logical AND of \( P \rightarrow Q \) and \( Q \rightarrow P \), you'll notice that they are identical in all cases. Therefore, the statement \( (p \rightarrow q) \) and \( (q \rightarrow p) \) is logically equivalent to \( p \leftrightarrow q \), as demonstrated by the matching values in the last column of the truth table. This proves the equivalence of the two expressions using a truth table.
+
+
+\subsection{}
+
+Premise 1: All dogs are mammals. (P1: D $\rightarrow$ M)
+
+Premise 2: Samoyed is a dog. (P2: D)
+
+Conclusion: Therefore, Samoyed is a mammal. (C: M)
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    $D$ & $M$ & $P_1$ & $P_2$ & $C$ \\ \hline
+    T & T & T & T & T \\ \hline
+    T & F & F & T & F \\ \hline
+    F & T & T & T & F \\ \hline
+    F & F & T & T & F \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\subsection{}
+
+Premise 1: All birds have feathers. (P1: B $\rightarrow$ F)
+
+Premise 2: Ostriches are birds. (P2: B)
+
+Conclusion: Therefore, ostriches have feathers. (C: F)
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    $B$ & $F$ & $P_1$ & $P_2$ & $C$ \\ \hline
+    T & T & T & T & T \\ \hline
+    T & F & F & T & F \\ \hline
+    F & T & T & T & F \\ \hline
+    F & F & T & T & T \\ \hline
+    \end{tabular}
+\end{table}
+    
+
+
+\section{Propositional Logic (difficult)}
+
+\subsection{}
+
+Define:
+\begin{itemize}
+    \item B(x) to be the predicate "x is a ball"
+    \item R(x) to be the predicate "x is red"
+\end{itemize}
+
+Translate "the ball is red" into predicate logic as follows:
+\begin{equation}
+    \exists x(B(x) \land R(x))
+\end{equation} 
+This states that b is a ball and b is red.
+
+
+\subsection{}
+
+The sentence "all balls are red" can be translated into predicate logic as:
+\begin{equation}
+    \forall x(B(x) \land R(x))
+\end{equation}
+For all x, if x is a ball, then x is red. Every object that is a ball is also red. This is equivalent to saying that "all balls are red.
+
+
+\subsection{}
+\begin{table}[H]
+\begin{tabular}{cc|c|c|c}
+    \hline
+    \( P \) & \( Q \) & \( P \rightarrow Q \) & \( \neg (P \wedge (Q \rightarrow P) \wedge (P \rightarrow \neg Q)) \) & \( ((P \rightarrow Q) \vee \neg (P \wedge (Q \rightarrow P) \wedge (P \rightarrow \neg Q))) \) \\
+    \hline
+    T & T & T & T & T \\
+    T & F & F & F & F \\
+    F & T & T & T & T \\
+    F & F & T & T & T \\
+    \hline
+    \end{tabular} 
+\end{table}   
+
+
+% \bibliographystyle{gbt7714-numerical}
+% % \bibliographystyle{7714-author-year}
+% \bibliographystyle{ieeetr}
+% \bibliography{bibl}
+
+\end{document}
+
+
+% \bibliographystyle{gbt7714-numerical}
+% % \bibliographystyle{7714-author-year}
+% \bibliographystyle{ieeetr}
+% \bib

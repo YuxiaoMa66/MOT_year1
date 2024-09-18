@@ -1,0 +1,5 @@
+"0","# print the leaf nodes, dropping the NULL values"
+"0","leaves_data <- leaves_data[!sapply(leaves_data, is.null)]"
+"0","leaves_data"
+"1","$data
+"

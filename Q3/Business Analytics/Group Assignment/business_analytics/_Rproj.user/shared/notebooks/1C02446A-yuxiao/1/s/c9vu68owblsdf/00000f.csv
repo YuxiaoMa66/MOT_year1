@@ -1,0 +1,5 @@
+"0","# compute the importance of the variables using the three different methods"
+"0","imp_info_gain <- importance(dta2, DV)"
+"2","Error in rpart(Satisfaction_dummy ~ ., data = data, method = method) : 
+  Invalid method
+"

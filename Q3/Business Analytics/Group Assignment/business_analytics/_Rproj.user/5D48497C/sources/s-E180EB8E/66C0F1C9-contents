@@ -1,0 +1,412 @@
+---
+title: 'Workshop: Supervised Learning: Classification'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+## Working with this document
+
+### Before you begin
+
+Before you start working through this tutorial, please ensure you have followed the tutorial 'An introduction to working with R', as it contains crucial information about how to work with an R Markdown document. In addition, this tutorial builds upon some of the basics explained in that introductory tutorial.
+
+### Proceeding through the tutorial
+
+This tutorial consists of three main parts: (1) An introduction to the tutorial's objectives, the mandatory literature and the data that will be used, (2) an introduction to the problem we'll address in this tutorial and how we'll address it, and (3) a walk-through. Work your way through these different parts, and note that sometimes, we'll ask you to add small elements to the code yourself. Doing so is pivotal for all code to run! Once you have made it to the tutorial's end, you can click the **Knit** button. This generates an HTML document that includes content and the output of the code chunks.
+
+## Introduction tutorial 4: Objectives and data
+
+### Objectives
+
+After having followed this tutorial, you will be able to:
+
+-   Explain the basic rationale of and steps in classification techniques in machine learning
+-   Interpret the results of a decision tree and evaluate its performance
+-   Build a decision tree in RStudio using the C5.0 algorithm and optimize its performance
+
+## The data
+
+tree_credit.csv (in the .zip file downloaded from Brightspace)
+
+### Data dictionary
+
+Field name    | Data type | Description
+--------------|-----------|------------
+Credit_rating |   Ordinal | Credit rating: 0 = Bad, 1 = Good, 9 = Missing
+          Age |     Ratio | Age in years
+       Income |   Ordinal | Income level: 1 = Low, 2 = Medium, 3 = High
+ Credit_cards |   Ordinal | Number of credit cards held: 1 = Less than five, 2 = Five or more
+    Education |   Ordinal | Level of education: 1 = High school, 2 = College
+    Car_loans |   Ordinal | Number of car loans taken out: 1 = None or one, 2 = More than 2
+
+## Classification: Introduction
+
+When facing a complex decision, you can weigh your options by making lists of pros and cons for each possibility. Say you are considering several potential holiday destinations, some closer or further from home, with various climates and things to do. You can create a list with each destiny's features and create rules that you can use to eliminate some options. For example, "if I have to travel less than 2 hours, then it won't feel like I am going on a holiday", or "if there is nothing to do, I will get bored". The complex task of picking a holiday destination now is reduced to a series of small and increasingly specific choices.
+
+In this tutorial, we'll cover decision trees. Decision trees are a machine learning method to apply a similar strategy of dividing data into smaller and smaller parts to identify patterns that can be used for prediction. These patterns are presented using logical structures that can be understood without statistical knowledge. This aspect makes these models particularly useful for business strategy and process improvement.
+
+### Understanding decision trees
+
+As the name suggests, decision tree learners build a model with a tree structure. The model aims to predict a *target class* (e.g., holiday destination) using several features (e.g., distance from home, climate type, and things to do). The model comprises a series of logical decisions, with *decision nodes* that indicate a decision to be made on a feature. These nodes, in turn, split off into branches that indicate the decision's choices. The tree is terminated with *leaf* or *terminal nodes* that depict the result of following a combination of decisions. Essentially being a flowchart, decision trees are appropriate for applications where the classification mechanism must be transparent for legal reasons or where the results must be shared to facilitate decision-making. Some possible uses include:
+
+-   Credit scoring models (in which specification of criteria that cause an applicant to be rejected must be well-specified)
+-   Customer turnover ('churn') models (to be shared with management or advertising agencies)
+-   Diagnosis of medical conditions (based on measurements, symptoms or disease progress)
+-   .. and many other applications: decision trees are widely used techniques and can be applied for modelling many types of data, often with unparalleled performance
+
+### Divide and conquer
+
+Decision trees use a 'divide and conquer' approach when partitioning data: they use feature values to split the data into subsets of similar classes further and further. The algorithm starts with the entire data set (called the *root node*) and then chooses the most predictive feature of the target class. The data then is partitioned into groups of distinct values of this feature, expressed by the first set of tree branches. The algorithm then chooses the best features to partition the resulting nodes until a stopping criterion is reached. Such a criterion could be (1) nearly all cases in a node have a similar value for the target class, (2) there are no remaining features to further distinguish among cases, or (3) the tree has grown to a predefined size.
+
+### The C5.0 algorithm
+
+This tutorial aims to show you how to build your first decision tree in R using the C5.0 algorithm. This is the most well-known algorithm among the numerous implementations of decision trees. Computer scientist J. Ross Quinlan developed it. It has become the industry standard for producing decision trees because it works well off the shelf for most problems and is easy to understand and deploy.
+
+### The case
+
+A North American bank has recruited you to build a predictive model identifying the potential creditors who have difficulty paying back their loans (bad credit rating). The bank wants to use the model as a decision support system for its loan approvals. You have been given a data set that contains anonymised information on 2,464 current bank customers. The data dictionary above shows that this data set includes some personal information (potential predictors) and each customer's credit rating (outcome variable). You have used a decision tree to extract simple decision rules for future loan approvals.
+
+## Tutorial walkthrough
+
+### 1. Setting-up the R Workspace and loading the data
+
+We use several packages in this tutorial. As explained in the second tutorial, a package is a bundle of code, data, documentation and tests that extend the basic functionality of R. You could compare it with a plugin for, e.g., MS Word. We use the following packages in this tutorial:
+
+* `C50`
+    + This package allows you to generate decision trees using the C5.0 algorithm. Learning to work with this package is the aim of this tutorial.
+
+* `ggplot2`
+    + With this package, we'll generate plots that look nicer than R's basic plotting functionality. In addition, it gives you more flexibility in generating plots. The package is called in the code chunk we named 'r plot' that we'll ask you to run. If you're interested, you can see what the code does, but understanding it is *not* the aim of this tutorial, and we won't ask questions about it later on in the quiz based on this tutorial.
+
+* `gmodels`
+    + This package allows us to create the confusion matrix based on the estimated decision tree. In a confusion matrix (or contingency table), the number of correctly (true positives and negatives) and incorrectly (false positives and negatives) predicted cases are shown. Understanding this matrix is essential (we'll always ask questions about them!), but knowing how to adjust the code for generating them is not.
+
+* `Hmisc`
+    + This package provides robust data analysis and statistical modelling tools, especially in the biomedical field. In this tutorial, we use its functionality to produce concise summaries of data frames, including descriptive statistics essential for preliminary data analysis. For example, the `describe()` function that we use in this tutorial offers detailed summaries for each variable in a dataset, including counts of missing values, unique values, and basic statistical measures.
+
+* `randomForest`
+    + This is a popular and powerful tool for performing random forest analysis. This is a type of ensemble learning method used for classification and regression tasks. The random forest algorithm creates a "forest" of decision trees using random subsets of the data and then aggregates their predictions to improve accuracy and control over-fitting.
+    
+* `rsample`
+    + This package has a function for partitioning the data that is much easier to digest than the code needed if we want to do this with the basic R functionality. We expect you to be able to adjust this code when required.
+
+To install these packages, we first tell R where they can be downloaded by setting the CRAN mirror (CRAN stands for the "Comprehensive R Archive Network"). Next, we ask R to install the package using the `install.packages()`-command. Run the code chunk below by clicking the 'play'-button on its upper right (you don't have to change the code). You can always remove packages once you finish the course with the `remove.packages()` command, e.g. `remove.packages(c("rsample", "skimr")`.
+
+```{r setup}
+# Set the CRAN mirror:
+local({r <- getOption("repos")
+r["CRAN"] <- "https://cran.rstudio.com/"
+options(repos = r)})
+
+# Install the packages used in this tutorial:
+packages <- c("C50", "ggplot2", "gmodels", "Hmisc", "randomForest", "rsample")
+
+for (i in packages) {
+    if(!require(i, character.only = TRUE)) {
+        install.packages(i, dependencies = TRUE)
+    }
+}
+```
+
+Similar to previous tutorials, we will use the `::` operator to call functions from a package, except for the `ggplot2` package. We load this package with the `library()`-command. Decide yourself if you want to change the working directory (using the `setwd()` command). If you wish to do so, please make sure all contents of this tutorial's folder (including the `images` subfolder) are stored in this directory. Let's first read the data using the `read.csv` command by running the code chunk below.
+
+```{r data}
+# Load ggplot2
+library(ggplot2)
+
+# Read the data
+tree_credit <- read.csv("tree_credit.csv")
+```
+
+### 2. Data exploration
+
+The different variables in the .csv file result from a measurement process in which numbers were attached to individuals' characteristics and properties (e.g., age, income level, etc.). Depending on each variable's measurement level, the appropriate data type should be defined in R. It is good practice to check the data types of the different variables in the data set before you fit them in any analysis because, as you might recall from the lecture on data exploration and preparation, R does not necessarily detect these data types correctly by default. Check the data types of the variables in the tree_credit data frame by running the 'data_types' code chunk below.
+
+```{r data_types}
+str(tree_credit)
+```
+
+The output of this command shows the data type for each variable in the data set and the first four observations (see the data dictionary above for an explanation of each variable). From this overview, we see that currently, all variables are assigned the character ('chr') data type, except for age, which is numeric ('num'). It is essential to set these types correctly, as they can majorly affect the model outcome. More importantly, certain operations may be type-strict. For instance, the C5.0 algorithm can only model an outcome (in this tutorial, the outcome variable is Credit.rating) when the type of the outcome variable is set to a factor. In R, factors are typically used to represent nominal data types. The code below sets all 'chr' data types in the data to the 'factor' type. Note that, like in the tutorial on unsupervised learning, we use the `lapply` function to operate on multiple variables simultaneously. For code readability, we store the vector with the names of the variables that we want to transform in a separate vector, labelled `vrs`, which is removed afterwards.
+
+```{r set_data_types}
+vrs <- c("Credit.rating", "Income.level", "Number.of.credit.cards", "Education", "Car.loans")
+tree_credit[ vrs ] <- lapply(tree_credit[ vrs ], factor)
+remove(vrs)
+```
+
+To better understand the data structure and the values in the variables, the code below plots each variable (depending on the data type, this is either a histogram or a bar plot) and reports some basic descriptive statistics. Run the code chunk below and inspect the resulting plots.
+
+``` {r plot, message = FALSE, echo = FALSE}
+for (i in 1:dim(tree_credit)[2]) {
+  if (is.numeric(tree_credit[, i])) {
+    plt <- ggplot(data = tree_credit, aes(x = tree_credit[, i])) +
+      geom_histogram(aes(color = Credit.rating, fill = Credit.rating), alpha = .4) +
+      scale_color_manual(values = c("#0098C8", "#960634")) + 
+      scale_fill_manual(values = c("#0098C8", "#960634")) +
+      xlab(colnames(tree_credit[i]))
+    print(plt)
+  } else {
+    plt <- ggplot(data = tree_credit, aes(x = tree_credit[, i])) +
+      geom_bar(position = position_dodge(), aes(color = Credit.rating, fill = Credit.rating), alpha = .4) +
+      scale_color_manual(values = c("#0098C8", "#960634")) +
+      scale_fill_manual(values = c("#0098C8", "#960634")) +
+      xlab(colnames(tree_credit[i]))
+    print(plt)
+  }
+}
+```
+
+Now, run the code chunk below and inspect the descriptives per variable. Of course, feel free to explore the data further using the approaches you have learned in the tutorials on data exploration and clustering.
+
+``` {r describe_variables}
+Hmisc::describe(tree_credit)
+```
+
+The target field in our decision tree is called “Credit.rating”. Its distribution is shown in the first plot. Credit.rating is an ordinal variable that contains two unique values. Furthermore, one continuous variable (age) and four other ordinal variables (Income.level, Number.of.credit.cards, Education and Car.Loans) will be used as predictors for Credit.rating. The colours in the predictors' charts represent the target field scores (see the corresponding legends), so you can see how scores on Credit.rating are distributed across the different groups.
+
+### 3. Model preparation
+
+You will need a *training* data set and a *test* data set for your supervised machine learning algorithm (the C5.0 algorithm). The idea is to train the model using the training data set and, in turn, evaluate model performance with the testing data set. Since you don't have separate data sets for testing and training, you must partition your data. This is accomplished with the code chunk below. We'll explain each step in more detail: 
+
+* `set_seed()`
+    + This function was explained in the previous tutorial regarding clustering observations. Similar to the point we made there, it is crucial to ensure that each step is reproducible in the current tutorial. This is where the `set.seed()` function plays a pivotal role. It initialises R's random number generator to a specific state. This standardisation is vital for several reasons. First, we indicated earlier that we must split our dataset into a training and test subset to evaluate our model. This splitting process is inherently random. By employing `set.seed()`, we guarantee that everyone who follows this tutorial yields identical splits. This uniformity is essential in a tutorial setting to ensure that all learners work with the same dataset configuration, thus making the learning process smooth and comparable results. Second, decision trees are particularly sensitive to the data they're trained on. Even minor variations in the training dataset can significantly alter the tree's structure. We ensure that everyone constructs the same decision tree by fixing the seed before splitting the data. At the end of this tutorial, we will see how we can use this variation in generated trees to our advantage when exploring random forests. This is a method that builds multiple decision trees on varied data subsets. We then let these trees "vote" on the best classification for an observation in the test data.
+
+* `initial_split()`
+    + The `initial_split` function partitions your data in a training and a testing data set. The data proportion for the training data set is specified with the `prop`-argument. When working with a training and testing data set only, it is typical to use 70% of your data to train the model (prop = .7). The proportion used for the testing data set is then automatically set to 30%. In the code below, assign the value of 0.7 to the `proportion` object.
+
+* Creating the `tree_credit_train` and `tree_credit_test` data frames
+    + After the data has been split, we create two new data objects that will be used for model estimation (training) and validation (testing). We will store the `testing` data and train our model using the `training` data. Once we want to estimate the accuracy of our model, we will run it on the `test` data to see how well the predicted `Credit.rating` values match the actual values in this data.
+
+```{r training_testing}
+set.seed(46748717)
+
+proportion <- 0.7 # <type the desired proportion here>
+split <- rsample::initial_split(tree_credit, prop = proportion)
+training <- training(split)
+testing <- testing(split)
+```
+
+### 4. Training a decision tree model on the data
+
+We are now set to estimate our decision tree using the C5.0 algorithm. The code chunk below estimates this tree using the default model specifications. The variable before the `~` is the variable we want to predict. As you might recall from the second tutorial, where we briefly discussed specifying a regression model in the context of imputing missing values, the `.` after this `~` indicates that we want to include all other variables in the data set as predictors. Using a `.` in this case is more efficient than writing out all predictor variables (`Credit.rating ~ Age + Income.level + Number.of.credit.cards + Education + Car.loans` works as well, but is much wordier. Please try specifying the model like this, though, as we might ask you to include only a subset of variables in a data set as predictor variables). The model is estimated using the `training` data. After estimating the model, we'll look at its results by calling it the `summary`-command.
+
+```{r decision_tree}
+model <- C50::C5.0(Credit.rating ~., 
+                   data = training)
+summary(model)
+```
+
+### 5. Interpreting the model
+
+The model output first displays some simple facts about the tree, including the function call that generated the tree, the number of features ('attributes'), and the number of cases used to grow the three (~70% of 2,464). After this basic information, the decision tree is shown. We can interpret the first five lines of this tree as follows:
+
+1. If the income level is high, then classify the credit rating of this customer as 'good';
+2. Otherwise, if the number of credit cards is less than five, then classify as 'good';
+3. Otherwise, if the number of credit cards is more than five and the income level is low, classify as 'bad'.
+
+When analyzing the outcomes of a decision tree model, it is crucial to pay attention to the depth of the tree and the role of each decision point or node. The depth of a tree refers to the longest path from the root node (the initial decision point) to a leaf (the final classification). The depth indicates the complexity of the model: deeper trees have more decision points and can capture more nuanced patterns in the data. However, it is essential to balance complexity with the risk of overfitting, where a model might perform well on training data but poorly on unseen data.
+
+Each decision point in the tree represents a question based on one of the features (e.g., "Is the income level high?"), with the path branching off into different directions based on the answers ("Yes" or "No"). These nodes are where the algorithm makes its splits, using the feature that best separates the classes according to some criterion. So, a data record is classified by going through the tree, starting at the root node, deciding which conditions the particular variable satisfies in each tree node, and following the branch of this condition. This procedure is repeated until a leaf is reached that brings the combination of decisions made thus far to a final classification. The numbers in parentheses indicate the number of cases that meet the criteria for that decision and the number of incorrectly classified cases.
+
+For example, this decision tree predicts a 'Good' credit rating for all customers in the data with a 'High' income level (547 out of a total of 1724 cases) because most of these customers (547 - 54 = 493) have this rating. However, 54 of the 547 customers have a 'Bad' credit rating. The distribution 'Bad'/'Good' in the group of customers with a 'Medium' or 'Low' income rating is much more equal, so the algorithm seeks to find another split to get a subgroup with a more pronounced proportion between 'Bad'/'Good'. This split is found by dividing this group based on the variable 'Number of credit cards'.
+
+Understanding the terminology regarding (mis)-classified cases is essential, for example, for evaluating model quality. For that reason, we now take a moment to elaborate on this. First, run the code chunk below.
+
+```{r confusion_matrix, out.width = "60%", fig.cap = "Confusion matrix"}
+knitr::include_graphics("images/confusion_matrix.png")
+```
+
+The cross table above is what we call a 'confusion matrix'. In short, this matrix compares the predicted scores of a model (in this, our decision tree) with the actual scores in the data. As you can deduce, there are four possible combinations:
+
+1. **True positives**: the number of cases where the model correctly predicts the *positive* class
+2. **True negatives**: the number of cases where the model correctly predicts the *negative* class
+3. **False positives**: the number of cases where the model incorrectly predicts the *negative* class as *positive*
+4. **False negatives**: the number of cases where the model incorrectly predicts the *positive* class as *negative*
+
+Although the term 'confusion matrix' comes from showing if the model confuses two classes (i.e., mislabeling one as another), the matrix also tends to confuse the person who must interpret it. To avoid this type of confusion, note the following points. First, what is considered a 'positive' or a 'negative' depends on the class we want to predict. In this tutorial, we want to predict those cases with a `bad` credit rating. Hence, and despite the negative connotation of the word `bad`, this is our model's positive class. A typical mistake in interpreting a confusion matrix is to confuse a label's normative meaning with its actual role (do we want to predict it) in the analysis. Second, whereas confusion matrices sometimes show actual classes in the rows and predicted classes in the columns (see the above table), this can be the other way around. The practical consequence of both points is that the location of the different combinations in the above table is never fixed. Although inconvenient, this lack of standardization is a fact of life that you have to deal with. So, **always** ascertain which class we want to predict and which dimension (row, column) refers to which class (actual, predicted).
+
+From the confusion matrix derived from the decision tree we just modelled, we can deduce that we have 436 true positives, 964 true negatives, 257 false negatives and 67 false positives. The 'attribute usage' part of the output shows the percentage of cases in the training data set for which the attribute's value is known and used in predicting a class. For example, the 68.27% shows that the decision tree uses a known value of Number.of.credit.cards when classifying 1,177/1,724 (= 68.27%) of the training cases. As such, attribute usage denotes variable importance. Attributes for which the value is less than 1% are not shown. Information on attribute usage can be used to refine the model, such as by excluding less important variables in subsequent analyses to simplify the model or improve performance.
+
+To help you understand the results further, we (not R!) created a graphical representation of the decision tree that the model generated. First, run the code chunk below and see if you can derive this tree based on the output generated in R.
+
+```{r model_interpretation, out.width = "60%", fig.cap = "Decision tree for future loan approvals"}
+knitr::include_graphics("images/tree.png")
+```
+
+### 6. Evaluating the model
+
+A crucial step in evaluating how well a model does in machine learning is to apply it to a new, unseen data set. This helps us build models that generalize well to new, unseen data rather than just memorizing the training data. For this purpose, we held apart the testing data set in one of the previous steps. In the code chunk below, we'll reproduce the confusion matrix discussed above by letting our model make predictions using the training data. Then, we create the confusion matrix for the prediction made when applying the model to the testing data. Two functions in the code warrant further elaboration:
+
+* `predict()`
+    + This function takes a model specification (called `model` in the code below. We created this object in the `decision_tree` code chunk above) and a data set to create a vector of predicted values for the target field. In turn, these predicted values can be compared with the actual values in the target field to evaluate how well the model does. As indicated, we predict using the unseen testing data.
+
+* `CrossTable()`
+    + This function allows us to compare predicted and actual values by creating a confusion matrix. As you can see, we have set several aspects in this function to `FALSE` to ensure that the table does not overflow with distracting information.
+
+```{r model_evaluation}
+print("Confusion matrix based on testing data")
+pred.test <- predict(model, testing)
+gmodels::CrossTable(testing$Credit.rating, pred.test,
+                    prop.chisq = TRUE,
+                    prop.c = TRUE,
+                    prop.r = TRUE,
+                    prop.t = TRUE,
+                    dnn = c("Actual credit rating", "Predicted credit rating"))
+```
+
+Out of the 740 records in the testing data, our model correctly predicts that 191 persons have a 'Bad' credit rating, and 389 persons have a 'Good' credit rating. This results in an accuracy percentage (TP + TN / n) of 78.38%. If you compare the accuracy of the predictions based on the testing set with those made for the training set (calculate this yourself!), you'll see that the model's accuracy is lower when applied to the testing set. We often see this: models sometimes get a little tuned to the noise in the data they are trained on and, hence, will perform worse on unseen data.
+
+At this point, we want to raise two issues. First, earlier, we alluded to the caveat of using decision trees: the output is highly sensitive to variations in the training data. In this tutorial, we fixed this problem by fixing the random seed (see the code chunk `training_testing`), but if you comment out this line in the code (i.e. put a # in front of the `set.seed`-command), you'll get different results every time you estimate a decision tree. Second, from the confusion matrix based on the testing data, we deduce that our model only correctly predicts 191 out of 327 cases (58.41%) with a 'Bad' credit rating. Given the business context of this tutorial, predicting a 'Good' rating for the remaining 41.5% of 'Bad' credit rating cases is a costly mistake! Luckily, we have some options to explore (success is not guaranteed) to see if we can make our results more robust and less expensive.
+
+### 7. Improving model performance
+
+We'll discuss three options to improve model results: (1) boosting, (2) making some mistakes more costly than others, and (3) utilizing random forests. 
+
+* Boosting
+    + Boosting is a technique where multiple decision trees are built sequentially, with each tree aiming to correct the errors made by the previous ones. Unlike methods that use random modifications of the training data (such as Random Forest, which we will discuss later), boosting adjusts the focus on training instances based on the performance of previous trees, typically by increasing the influence of harder-to-classify instances. This process creates a series of trees whose collective decision, often through a weighted vote, leads to a significantly more accurate classification than any single tree could achieve. Boosting is easily implemented in the C5.0-function: we add `trials = 10` to the `C5.0`-function. This indicates the number of separate decision trees that will be used in the corrected sequence (although 100 is the maximum, 10 is a typical value to use):
+
+```{r boosting}
+# Add boosting
+model_boost <- C5.0(Credit.rating ~.,
+                    data = training,
+                    trials = 10)
+
+# Predicting on the testing data
+print("Confusion matrix based on testing data (boosting)")
+pred.test <- predict(model_boost, testing)
+CrossTable(testing$Credit.rating, pred.test,
+           prop.chisq = FALSE,
+           prop.c = FALSE,
+           prop.r = FALSE,
+           prop.t = FALSE,
+           dnn = c("Actual credit rating", "Predicted credit rating"))
+```
+
+This results in an accuracy for the testing set of ((242 + 355) / 739) 80.68%. This is a slight improvement compared to the 78.38% we found before. Once again, boosting does not always lead to improvements but is worth trying.
+
+* Assigning costs to mistakes
+    + As said, approving a loan to someone with a bad credit rating can be costly. A solution to this is to reject a larger number of borderline applicants: the interest a bank would earn from a risky loan is far outweighed by the losses incurred if the money was never paid back. We can assign a penalty to different types of errors to discourage a tree from making more costly mistakes. For this, we use a *cost matrix*. This matrix specifies how much more costly each error is than any other. Let's say that we think that a loan that is not paid back (i.e. a False negative) costs the bank twice as much as a missed opportunity (i.e. a False positive). Our cost matrix then would look as follows (inspect and run the code chunk below):
+
+```{r cost_matrix}
+# Specifying the cost matrix
+cost.matrix <- matrix(c(NA, 2,  # FN costs of predicting "Good" whereas actual value is "Bad"
+                        1, NA), # FP costs of predicting "Bad" whereas actual value is "Good"
+                      nrow = 2, 
+                      ncol = 2,
+                      byrow = FALSE)
+rownames(cost.matrix) <- colnames(cost.matrix) <- c("Bad", "Good")
+```
+
+As you can deduce from the code, the structure of this matrix follows the structure of the confusion matrix presented earlier (see the output of the code chunk "confusion_matrix". By entering two instead of one in the FN row, we assign twice the costs to cases predicted to have a 'Good' credit rating, whereas they actually have a 'Bad' credit rating. We'll now add this cost matrix to our model specification and estimate the model again (note that if you would inspect the cost.matrix object, you will see that the FN costs end up in the lower left of this table instead of the upper right. This is because the `C5.0` function expects a matrix where columns display actual ratings and rows predicted ratings. See our earlier remark about this aspect being non-standardized):
+
+```{r model_cost}
+# Estimating the model with the cost matrix
+model.cost <- C5.0(Credit.rating ~., 
+              data = training,
+              costs = cost.matrix)
+
+print("Confusion matrix based on testing data (costs")
+pred.test <- predict(model.cost, testing)
+CrossTable(testing$Credit.rating, pred.test,
+           prop.chisq = FALSE,
+           prop.c = FALSE,
+           prop.r = FALSE,
+           prop.t = FALSE,
+           dnn = c("Actual credit rating", "Predicted credit rating"))
+```
+
+Without the cost matrix, we saw that 191 out of 327 (58.40%) cases were correctly assigned a 'Bad' credit rating (see the output of the "model_evaluation" code chunk). The remainder of the cases (41.60%) were predicted to have a 'Good' credit rating, although their actual rating was 'Bad'. By making the latter type of mistakes more costly, we now see that 255 out of 327 cases correctly are assigned a 'Bad' credit rating: the initial 58.40% has increased to 77.98%, meaning that the percentage of false positives decreased from 41.6% to 22.02%. This is quite an improvement!
+
+* Random forests
+    + Whereas boosting builds multiple decision trees sequentially and focuses on correcting the prediction errors made by previous trees, random forest combines the predictions from various decision tree models to improve the overall prediction accuracy and robustness of the model. Models for running a random forest in R tend to be a bit of a black box, so let's first try to grasp the process more fully by building a primitive random forest ourselves. This happens in the below code. Let's go through this code step by step. 
+    
+In essence, this code is an extension of the code you have seen earlier in this tutorial. However, instead of building *one* decision tree, we now will build multiple trees. The exact amount can be specified by assigning the desired number to the `iterations` object. Note that building decision trees can quickly become computationally expensive, so we have assigned the number 10 as a default. Feel free to increase this number, but be prepared to exercise patience. Also, although we have used a fixed set of predictors so far, we have incorporated an option to build trees with a different set of predictors for each iteration (default = FALSE). Setting the `randomize` object to TRUE will activate this option. If you choose to do so, assign the number of variables you want to include in the `min_randomize` object (default = 2).
+
+The code then creates a training and testing data set, like we did in the "training_testing". Note that this time, we do not specify a seed through the `set.seed()` function, as we expect the accuracy of our models, whatever the initial distribution is, to converge as we start combining their results. Then, the for loop iterates the specified number of times, and in each iteration, a prediction is made using the `testing` data, which in turn is also added to this data frame. Hence, we add a number of columns to this testing data frame that equals the number of iterations we have chosen. If `randomize` is set to TRUE, a tree is built using a randomly selected set of predictors in each iteration.
+
+```{r random_forest_pseudo}
+# Set parameters
+iterations <- 10 # how many trees do you want to estimate?
+randomize <- FALSE # use a randomly selected set of predictor variables?
+min_randomize <- 2 # if randomize is set to TRUE, how many predictor variables do you want to sample (min = 2, max = 5)
+
+# Split tree_credit in training and testing set
+split <- rsample::initial_split(tree_credit, prop = proportion)
+training <- training(split)
+testing <- testing(split)
+
+# Make predictions for multiple trees
+for (i in seq(iterations)) {
+    if (isFALSE(randomize)) {
+        tmp <- training(rsample::initial_split(training, prop = proportion))
+        model <- C50::C5.0(Credit.rating ~., 
+                           data = tmp)
+        testing <- cbind(testing, data.frame(predict(model, testing)))
+    } else {
+        tmp <- training(rsample::initial_split(training, prop = proportion))
+        names <- names(tmp)[ -which(names(tmp) %in% "Credit.rating") ]
+        names <- sample(names, sample(min_randomize:length(names), 1))
+        tmp <- cbind(Credit.rating = tmp$Credit.rating, tmp[ names ])
+        model <- C50::C5.0(Credit.rating ~., 
+                           data = tmp)
+        testing <- cbind(testing, data.frame(predict(model, testing)))
+    }
+}
+```
+
+Let's explore the structure of the `testing` data frame below. Note that if you have assigned a large number to the `iterations` object, the output of the `str()` function can be substantial.
+
+```{r testing_structure}
+str(testing)
+```
+
+The `Credit.rating` column contains the actual observed ratings. Then, in each column that starts with `predict.model`, a prediction given by one of the trees built in one of the iterations is given. If you closely inspect these predictions, you will see they sometimes differ. The trick, now, is to determine what the majority vote is of these models for each observation and use this vote as the final prediction. This is accomplished in the code below. We first extract the predictions from the `testing` data frame and assign them to the `counts` object. We then convert the predictions in this object (1 for Bad, 2 for Good) to a 0 and 1. Then, by dividing row sum scores by the total number of iterations, we assign a prediction of "Good" if this proportion is larger than 0.5 and a prediction of "Bad" if this proportion is smaller than 0.5. We randomly predict in case of a tie (the proportion equals 0.5). Lastly, we add the predicted values to the `testing` data frame, from which we removed the individual model predictions.
+
+```{r voter}
+counts <- testing[, 7:ncol(testing) ]
+counts <- data.frame(lapply(counts, as.numeric)) - 1
+counts$Sum <- rowSums(counts)
+counts$Credit.rating.predicted <- ifelse(counts$Sum / (ncol(counts) - 1) > 0.5, "Good",
+                                         ifelse(counts$Sum / (ncol(counts) - 1) == 0.5, sample(c("Good", "Bad"), 1), 
+                                                "Bad"))
+testing <- cbind(testing[, c(1:6)], Credit.rating.predicted = counts$Credit.rating.predicted)
+remove(counts)
+```
+
+We now can tabulate actual and predicted values again, like we did before.
+
+```{r random_forest_pseudo_crosstable}
+CrossTable(testing$Credit.rating, testing$Credit.rating.predicted,
+           prop.chisq = FALSE,
+           prop.c = FALSE,
+           prop.r = FALSE,
+           prop.t = FALSE,
+           dnn = c("Actual credit rating", "Predicted credit rating"))
+```
+
+The initial model explored earlier in this tutorial achieved an accuracy of 78.38%. With boosting (10 trials), we achieved an accuracy of 80.68%. What about the above approach? With the default setting (10 iterations, no random variable sampling), we achieve an accuracy of about 79.50%, somewhere between our first tree and the boosted tree. Can you increase this accuracy? We invite you, our dear Padawan, to explore several alternative specifications in the "random_forest_pseudo" chunk. What happens if you increase the number of iterations? Does randomly selecting variables play a role, and if so, is there a minimum number of variables that yields the best outcomes? You are also invited to further explore the other code chunks in this tutorial. For example, what happens if we increase the cost of misclassified cases? And what happens if we increase the number of iterations in our boosted model? Or if we change the proportion used for creating the training and testing data? And lastly, what happens if we change the set of input variables of our baseline model? 
+
+While the above approach mimics the random forest approach, fundamental differences exist. Random forests inherently involve randomness in selecting training data (via bootstrapping or a sample drawn with replacement) and selecting features at each split within a tree (feature bagging). This enhances the diversity of the trees in the forest. Both increase the diversity among the trees and contribute to the model's robustness. The C5.0 model used in our approach is typically built without these specific types of randomness unless you manually introduce them, and C5.0 has its own algorithmic improvements and features, like rule-based pruning. A straightforward implementation of a random forest algorithm can be found in the `randomForest` package. Below is a code chunk that estimates a random forest using the earlier partitioned `tree_credit` data. Again, explore the settings given and type `?randomForest` in the console to explore this function further. The accuracy of this forest seems to be a tiny bit higher than the model we developed to explain the principle behind random forests.
+
+```{r random forest}
+model.forest <- randomForest::randomForest(Credit.rating ~., 
+                                           data = training,
+                                           ntree = 500, # how many trees should be grown?
+                                           mtry = 2, # how many variables to sample at each split?
+                                           replace = TRUE) # sampling of cases with or without replacement?
+
+print("Confusion matrix based on testing data (costs")
+pred.test <- predict(model.forest, testing)
+CrossTable(testing$Credit.rating, pred.test,
+           prop.chisq = FALSE,
+           prop.c = FALSE,
+           prop.r = FALSE,
+           prop.t = FALSE,
+           dnn = c("Actual credit rating", "Predicted credit rating"))
+```
+
+### Concluding remarks
+
+In this tutorial, we scratched the surface of a machine-learning approach for classification. We used the popular and easy-to-interpret C5.0 algorithm and looked for ways to improve this algorithm's performance. To develop your machine learning skills further in R, look at the `tidymodels` package. This package comes from the developers of `ggplot2`. It is the successor of the popular `caret` package. `tidymodels` is a collection of packages (including the C50 package) that can be used within a harmonized framework. Learning this framework requires some investment but offers greater modelling flexibility. You can check the [website](https://www.tidymodels.org) (or the similar yet alternative [mlr3-package](https://mlr3.mlr-org.com)) if you're interested in learning it. Once again, click the 'Knit' button above to convert this file to a .html file.

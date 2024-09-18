@@ -1,0 +1,50 @@
+"0","# Implement the function"
+"0","Build_tree(dta2, IV2, DV, 4)"
+"2","Warning in min(imp_info_gain) :"
+"2","
+ "
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in max(imp_info_gain) :"
+"2","
+ "
+"2"," no non-missing arguments to max; returning -Inf
+"
+"2","Warning in min(imp_info_gain) :"
+"2","
+ "
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in min(imp_gain_ratio) :"
+"2","
+ "
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in max(imp_gain_ratio) :"
+"2","
+ "
+"2"," no non-missing arguments to max; returning -Inf
+"
+"2","Warning in min(imp_gain_ratio) :"
+"2","
+ "
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in min(imp_gini_index) :"
+"2","
+ "
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in max(imp_gini_index) :"
+"2","
+ "
+"2"," no non-missing arguments to max; returning -Inf
+"
+"2","Warning in min(imp_gini_index) :"
+"2","
+ "
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Error in .subset2(x, i, exact = exact) : 
+  attempt to select less than one element in get1index
+"

@@ -1,0 +1,14 @@
+"0","for (i in 1:length(leaves_data)) {"
+"0","  print(leaves_data[[i]]$path)"
+"0","  print(leaves_data[[i]]$leaf_avg)"
+"0","}"
+"1","NULL
+"
+"1","NULL
+"
+"1","NULL
+"
+"1","NULL
+"
+"2","Error: $ operator is invalid for atomic vectors
+"

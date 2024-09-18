@@ -1,0 +1,14 @@
+"0","# p <- ggplot(dta, aes(x = Class, y = Flight.Distance, fill = Class)) + "
+"0","#   geom_boxplot() +"
+"0","#     labs(title = ""Flight Distance by Class"", x = ""Class"", y = ""Flight Distance"") +"
+"0","#     theme_minimal() +"
+"0","#     theme(legend.position = ""none"")"
+"0",""
+"0","# pbox ""Flight.Distance"""
+"0","pbox(dta, ""Flight.Distance"")"
+"2","Warning in geom_boxplot() :"
+"2","
+ "
+"2"," [38;5;232mAll aesthetics have length 1, but the data has 129880 rows.
+[36mℹ[38;5;232m Did you mean to use `annotate()`?[39m
+"

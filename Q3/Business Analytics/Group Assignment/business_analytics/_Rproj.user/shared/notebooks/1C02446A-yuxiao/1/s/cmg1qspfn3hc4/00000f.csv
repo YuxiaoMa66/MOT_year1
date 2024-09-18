@@ -1,0 +1,2 @@
+"0","# fill missing values in Arrival Delay using the regression model"
+"0","dta$Arrival.Delay[is.na(dta$Arrival.Delay)] <- predict(lmAD, newdata = dta[is.na(dta$Arrival.Delay),])"

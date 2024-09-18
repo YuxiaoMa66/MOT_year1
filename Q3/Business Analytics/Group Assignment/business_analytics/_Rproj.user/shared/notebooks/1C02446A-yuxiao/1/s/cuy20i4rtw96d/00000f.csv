@@ -1,0 +1,7 @@
+"0","# Implement the function for the testing data which means we need to adjust the path for the testing data into the leaf nodes"
+"0","leaves_data_test <- lapply(leaves_data, function(x) {"
+"0","  data <- adjust_path(test_data, x$path)"
+"0","  return(list(data = data, path = x$path))"
+"0","})"
+"2","Error in if (grepl(""="", path[i])) { : argument is of length zero
+"

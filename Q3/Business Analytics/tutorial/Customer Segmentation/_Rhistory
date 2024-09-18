@@ -1,0 +1,250 @@
+# Set the CRAN mirror:
+local({r <- getOption("repos")
+r["CRAN"] <- "https://cran.rstudio.com/"
+options(repos = r)})
+# Install the packages used in this tutorial:
+packages <- c("apaTables", "C50", "cluster", "factoextra", "ggplot2", "gmodels", "lattice", "reshape2")
+# for (i in packages) {
+#     if(!require(i, character.only = TRUE)) {
+#         install.packages(i, dependencies = TRUE)
+#     }
+# }
+# Loading the `ggplot2` package
+library(ggplot2)
+# Set the working directory (optional)
+# setwd("TYPE YOUR WORKING DIRECTORY HERE. USE / instead of \") # specify the working directory (make sure the data is stored in that directory)
+# Read the data
+customer_01 <- read.csv("customer.csv")
+customer_02 <- read.csv("customer - set2.csv")
+customer_dta <- rbind(customer_01, customer_02)
+str(customer_dta)
+summary(customer_dta)
+customer_dta$education_reclassified <- ifelse(customer_dta$EDUCATION == "SCHOOL", 1,
+ifelse(customer_dta$EDUCATION == "UNDER GRADUATE", 2,
+ifelse(customer_dta$EDUCATION == "POST GRADUATE", 3,
+ifelse(customer_dta$EDUCATION == "DOCTRATE", 4,
+ifelse(customer_dta$EDUCATION == "POST DOCTORAL RESEARCH", 5, NA)))))
+colnames(customer_dta) <- tolower(colnames(customer_dta))
+apaTables::apa.cor.table(customer_dta[ c("age", "education_reclassified", "yearsemployed", "income", "carddebt", "otherdebt") ])
+customer_dta$debtincomeratio <- (customer_dta$carddebt + customer_dta$otherdebt) / customer_dta$income * 100
+cls_sel <- c("age", "yearsemployed", "education_reclassified", "debtincomeratio")
+dta_cls <- customer_dta[, cls_sel ]
+## Applying the scale function using a for-loop
+# dta_cls_z <- data.frame(matrix(ncol = ncol(dta_cls), nrow = nrow(dta_cls))) # create the empty dta_cls_z to store the scaled columns
+# names(dta_cls_z) <- names(dta_cls) # set the names of the new data frame to match the original
+# for (i in 1:ncol(dta_cls)) { # loop through each column by its index
+#   dta_cls_z[[i]] <- scale(dta_cls[[i]])
+# }
+# rownames(dta_cls_z) <- rownames(dta_cls) # optionally, convert row names to match original (if necessary)
+## Applying the lapply function instead
+dta_cls_z <- as.data.frame(lapply(dta_cls, scale))
+set.seed(57498351)
+k <-  5# set the number of clusters here
+clusters <- kmeans(dta_cls_z, k)
+dta_cls <- cbind(dta_cls, cluster = clusters$cluster)
+factoextra::fviz_cluster(clusters, dta_cls[, -which(colnames(dta_cls) %in% "cluster") ],
+geom = "point",
+ellipse.type = "convex",
+ggtheme = theme_bw())
+plot_data_long <- reshape2::melt(dta_cls, id.vars = "cluster") # converting the data frame to a 'long' format (see earlier explanation of the reshape2 package)
+normalized_densities <- data.frame() # create empty data frame to store results
+# Calculate normalized densities for each combination of variable and cluster
+for (variable_name in unique(plot_data_long$variable)) {
+for (cluster_name in unique(plot_data_long$cluster)) {
+subset_data <- subset(plot_data_long, variable == variable_name & cluster == cluster_name)
+dens <- density(subset_data$value, na.rm = TRUE) # Ensure to handle NAs if present
+normalized_density <- dens$y / sum(dens$y)
+temp_df <- data.frame(value = dens$x, density = normalized_density, variable = variable_name, cluster = cluster_name)
+normalized_densities <- rbind(normalized_densities, temp_df)
+}
+}
+# Create the ggplot object with relative density plots for each variable, faceted by variable
+plt <- ggplot(normalized_densities, aes(x = value, y = density, colour = as.factor(cluster))) +
+geom_line() +
+facet_wrap(~ variable, scales = "free") + # Adjust 'nrow' and 'ncol' based on the number of variables
+theme_minimal() +
+theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(),
+strip.background = element_rect(fill = "lightgrey"),
+legend.position = "bottom") +
+labs(colour = "Cluster")
+# Print the plot
+print(plt)
+# Clean up the working space a bit
+remove(plot_data_long, normalized_densities, variable_name, cluster_name, subset_data, dens, normalized_density, temp_df, plt)
+# Calculate mean scores per cluster
+aggregate(. ~ cluster,
+data = dta_cls,
+FUN = mean)
+siz <- data.frame(cls = sort(unique(as.character(paste("Cluster", clusters$cluster)))),
+frq = as.vector(table(clusters$cluster)))
+siz$prp <- siz$frq / sum(siz$frq) * 100
+ggplot(siz, aes(x = "", y = frq, fill = cls)) +
+geom_bar(stat = "identity", width = 1) +
+coord_polar("y", start = 0) +
+theme_void() +
+scale_fill_discrete(name = "Clusters",
+breaks = siz$cls,
+labels = paste(siz$cls, "-", paste(round(siz$prp, 1), "%", sep = "")))
+model <- C50::C5.0(as.factor(cluster) ~.,
+data = dta_cls)
+summary(model)
+dis = dist(dta_cls_z)
+sil = cluster::silhouette(clusters$cluster, dis)
+plot(sil, border = NA)
+cbind(dta_cls[ which(sil[, 3] < 0), ], sil[,2:3][which( sil[,3] < 0), ])
+dta_def <- cbind(dta_cls, defaulted = customer_dta$defaulted)
+dta_def[ is.na(dta_def$defaulted), ]$defaulted <- 99
+gmodels::CrossTable(dta_def$defaulted, dta_def$cluster,
+prop.chisq = FALSE,
+prop.c = TRUE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Defaulted (0 = no, 1 = yes, 99 = missing)", "Clusters"))
+# Set the CRAN mirror:
+local({r <- getOption("repos")
+r["CRAN"] <- "https://cran.rstudio.com/"
+options(repos = r)})
+# Install the packages used in this tutorial:
+packages <- c("apaTables", "C50", "cluster", "factoextra", "ggplot2", "gmodels", "lattice", "reshape2")
+# for (i in packages) {
+#     if(!require(i, character.only = TRUE)) {
+#         install.packages(i, dependencies = TRUE)
+#     }
+# }
+# Loading the `ggplot2` package
+library(ggplot2)
+# Set the working directory (optional)
+# setwd("TYPE YOUR WORKING DIRECTORY HERE. USE / instead of \") # specify the working directory (make sure the data is stored in that directory)
+# Read the data
+customer_01 <- read.csv("customer.csv")
+customer_02 <- read.csv("customer - set2.csv")
+customer_dta <- rbind(customer_01, customer_02)
+str(customer_dta)
+summary(customer_dta)
+customer_dta$education_reclassified <- ifelse(customer_dta$EDUCATION == "SCHOOL", 1,
+ifelse(customer_dta$EDUCATION == "UNDER GRADUATE", 2,
+ifelse(customer_dta$EDUCATION == "POST GRADUATE", 3,
+ifelse(customer_dta$EDUCATION == "DOCTRATE", 4,
+ifelse(customer_dta$EDUCATION == "POST DOCTORAL RESEARCH", 5, NA)))))
+colnames(customer_dta) <- tolower(colnames(customer_dta))
+apaTables::apa.cor.table(customer_dta[ c("age", "education_reclassified", "yearsemployed", "income", "carddebt", "otherdebt") ])
+customer_dta$debtincomeratio <- (customer_dta$carddebt + customer_dta$otherdebt) / customer_dta$income * 100
+cls_sel <- c("age", "yearsemployed", "education_reclassified", "debtincomeratio")
+dta_cls <- customer_dta[, cls_sel ]
+## Applying the scale function using a for-loop
+# dta_cls_z <- data.frame(matrix(ncol = ncol(dta_cls), nrow = nrow(dta_cls))) # create the empty dta_cls_z to store the scaled columns
+# names(dta_cls_z) <- names(dta_cls) # set the names of the new data frame to match the original
+# for (i in 1:ncol(dta_cls)) { # loop through each column by its index
+#   dta_cls_z[[i]] <- scale(dta_cls[[i]])
+# }
+# rownames(dta_cls_z) <- rownames(dta_cls) # optionally, convert row names to match original (if necessary)
+## Applying the lapply function instead
+dta_cls_z <- as.data.frame(lapply(dta_cls, scale))
+set.seed(57498351)
+k <-  5# set the number of clusters here
+clusters <- kmeans(dta_cls_z, k)
+dta_cls <- cbind(dta_cls, cluster = clusters$cluster)
+factoextra::fviz_cluster(clusters, dta_cls[, -which(colnames(dta_cls) %in% "cluster") ],
+geom = "point",
+ellipse.type = "convex",
+ggtheme = theme_bw())
+plot_data_long <- reshape2::melt(dta_cls, id.vars = "cluster") # converting the data frame to a 'long' format (see earlier explanation of the reshape2 package)
+normalized_densities <- data.frame() # create empty data frame to store results
+# Calculate normalized densities for each combination of variable and cluster
+for (variable_name in unique(plot_data_long$variable)) {
+for (cluster_name in unique(plot_data_long$cluster)) {
+subset_data <- subset(plot_data_long, variable == variable_name & cluster == cluster_name)
+dens <- density(subset_data$value, na.rm = TRUE) # Ensure to handle NAs if present
+normalized_density <- dens$y / sum(dens$y)
+temp_df <- data.frame(value = dens$x, density = normalized_density, variable = variable_name, cluster = cluster_name)
+normalized_densities <- rbind(normalized_densities, temp_df)
+}
+}
+# Create the ggplot object with relative density plots for each variable, faceted by variable
+plt <- ggplot(normalized_densities, aes(x = value, y = density, colour = as.factor(cluster))) +
+geom_line() +
+facet_wrap(~ variable, scales = "free") + # Adjust 'nrow' and 'ncol' based on the number of variables
+theme_minimal() +
+theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(),
+strip.background = element_rect(fill = "lightgrey"),
+legend.position = "bottom") +
+labs(colour = "Cluster")
+# Print the plot
+print(plt)
+# Clean up the working space a bit
+remove(plot_data_long, normalized_densities, variable_name, cluster_name, subset_data, dens, normalized_density, temp_df, plt)
+# Calculate mean scores per cluster
+aggregate(. ~ cluster,
+data = dta_cls,
+FUN = mean)
+siz <- data.frame(cls = sort(unique(as.character(paste("Cluster", clusters$cluster)))),
+frq = as.vector(table(clusters$cluster)))
+siz$prp <- siz$frq / sum(siz$frq) * 100
+ggplot(siz, aes(x = "", y = frq, fill = cls)) +
+geom_bar(stat = "identity", width = 1) +
+coord_polar("y", start = 0) +
+theme_void() +
+scale_fill_discrete(name = "Clusters",
+breaks = siz$cls,
+labels = paste(siz$cls, "-", paste(round(siz$prp, 1), "%", sep = "")))
+model <- C50::C5.0(as.factor(cluster) ~.,
+data = dta_cls)
+summary(model)
+dis = dist(dta_cls_z)
+sil = cluster::silhouette(clusters$cluster, dis)
+plot(sil, border = NA)
+cbind(dta_cls[ which(sil[, 3] < 0), ], sil[,2:3][which( sil[,3] < 0), ])
+dta_def <- cbind(dta_cls, defaulted = customer_dta$defaulted)
+dta_def[ is.na(dta_def$defaulted), ]$defaulted <- 99
+gmodels::CrossTable(dta_def$defaulted, dta_def$cluster,
+prop.chisq = FALSE,
+prop.c = TRUE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Defaulted (0 = no, 1 = yes, 99 = missing)", "Clusters"))
+dta_cls
+dta_cls.head()
+head(dta_cls)
+plot_data_long <- reshape2::melt(dta_cls, id.vars = "cluster") # converting the data frame to a 'long' format (see earlier explanation of the reshape2 package)
+head(plot_data_long )
+tail(plot_data_long )
+plot_data_long <- reshape2::melt(dta_cls, id.vars = "cluster") # converting the data frame to a 'long' format (see earlier explanation of the reshape2 package)
+normalized_densities <- data.frame() # create empty data frame to store results
+# Calculate normalized densities for each combination of variable and cluster
+for (variable_name in unique(plot_data_long$variable)) {
+for (cluster_name in unique(plot_data_long$cluster)) {
+subset_data <- subset(plot_data_long, variable == variable_name & cluster == cluster_name)
+dens <- density(subset_data$value, na.rm = TRUE) # Ensure to handle NAs if present
+normalized_density <- dens$y / sum(dens$y)
+temp_df <- data.frame(value = dens$x, density = normalized_density, variable = variable_name, cluster = cluster_name)
+normalized_densities <- rbind(normalized_densities, temp_df)
+}
+}
+# Create the ggplot object with relative density plots for each variable, faceted by variable
+plt <- ggplot(normalized_densities, aes(x = value, y = density, colour = as.factor(cluster))) +
+geom_line() +
+facet_wrap(~ variable, scales = "free") + # Adjust 'nrow' and 'ncol' based on the number of variables
+theme_minimal() +
+theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(),
+strip.background = element_rect(fill = "lightgrey"),
+legend.position = "bottom") +
+labs(colour = "Cluster")
+# Print the plot
+print(plt)
+# Clean up the working space a bit
+remove(plot_data_long, normalized_densities, variable_name, cluster_name, subset_data, dens, normalized_density, temp_df, plt)
+# Calculate mean scores per cluster
+aggregate(. ~ cluster,
+data = dta_cls,
+FUN = mean)
+head(cluster)
+head(dis)
+length(clusters)
+shape(clusters)
+head(sil)
+head(dta_cls_z)
+dis[1,1]
+head(customer_dta$defaulted)

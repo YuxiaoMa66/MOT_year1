@@ -1,0 +1,6 @@
+\babel@toc {english}{}
+\contentsline {section}{References}{1}{section*.1}%
+\contentsline {section}{\numberline {1}Question 1}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Problem Statement}{1}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Current Situation}{1}{subsubsection.1.1.1}%
+\contentsline {section}{References}{1}{subsubsection.1.1.1}%

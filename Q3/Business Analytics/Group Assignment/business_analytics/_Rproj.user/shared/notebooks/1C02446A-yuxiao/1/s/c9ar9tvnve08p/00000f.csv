@@ -1,0 +1,4 @@
+"0","names_chr <- c('Gender', 'Customer.Type','Type.of.Travel','Class','Satisfaction')"
+"0","for (i in names_chr) {"
+"0","  print(pplot(dta, i))"
+"0","}"

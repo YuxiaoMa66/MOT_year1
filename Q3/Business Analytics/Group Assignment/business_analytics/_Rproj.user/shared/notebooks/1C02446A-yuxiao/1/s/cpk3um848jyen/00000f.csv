@@ -1,0 +1,6 @@
+"0","# compute the importance of the variables"
+"0","# in this case, we only use the dummy variables to see the importance according to the DV, "
+"0","# which means only compute the IV2"
+"0","imp_info_gain <- sapply(IV2, function(x) compute_importance(dta2, x, DV)$info_gain)"
+"0","imp_gain_ratio <- sapply(IV2, function(x) compute_importance(dta2, x, DV)$gain_ratio)"
+"0","imp_gini_index <- sapply(IV2, function(x) compute_importance(dta2, x, DV)$gini_index)"

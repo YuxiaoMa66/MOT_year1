@@ -1,0 +1,6 @@
+"0","# regular boxplot function"
+"0","pbox <- function(df, col) {"
+"0","  ggplot(df$col, yalb = col) + "
+"0","    geom_boxplot() +"
+"0","    labs(title = paste(col, ""Boxplot""), x = col, y = ""Value"")"
+"0","}"

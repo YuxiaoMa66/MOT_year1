@@ -1,0 +1,5 @@
+"0","# implement the function"
+"0","accuracy2 <- train_and_evaluate_models(train_data_list_new, test_data_list_new, ""Satisfaction_dummy"", lambda = 1)"
+"2","Error in train_and_evaluate_models(train_data_list_new, test_data_list_new,  : 
+  unused argument (lambda = 1)
+"

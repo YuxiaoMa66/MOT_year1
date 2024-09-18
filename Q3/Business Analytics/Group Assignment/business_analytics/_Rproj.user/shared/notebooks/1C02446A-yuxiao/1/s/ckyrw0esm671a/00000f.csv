@@ -1,0 +1,2 @@
+"0","# implement the function"
+"0","accuracy1 <- train_and_predict_logistic_regression(train_data_new, test_data_new, ""Satisfaction_dummy"")"

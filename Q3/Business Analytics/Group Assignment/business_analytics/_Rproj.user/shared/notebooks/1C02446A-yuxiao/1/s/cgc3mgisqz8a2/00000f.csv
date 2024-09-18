@@ -1,0 +1,2 @@
+"0","train_data_list_new <- lapply(train_data_list_new, function(x) x[, !names(x) %in% IV2])"
+"0","test_data_list_new <- lapply(test_data_list_new, function(x) x[, !names(x) %in% IV2])"

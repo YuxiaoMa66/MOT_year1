@@ -1,0 +1,12 @@
+"0",""
+"0","# pbox ""Flight.Distance"""
+"0","pbox(dta, ""Flight.Distance"")"
+"2","Warning in min(x) :"
+"2"," no non-missing arguments to min; returning Inf
+"
+"2","Warning in max(x) :"
+"2"," no non-missing arguments to max; returning -Inf
+"
+"2","Error in plot.window(xlim = xlim, ylim = ylim, log = log, yaxs = pars$yaxs) : 
+  'ylim'值不能是无限的
+"

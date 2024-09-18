@@ -1,0 +1,7 @@
+"0","# Function to compute the accuracy of the logistic regression model"
+"0","compute_accuracy <- function(data) {"
+"0","  data$prediction <- ifelse(data$prediction > 0.5, 1, 0)"
+"0","  accuracy <- sum(data$prediction == data$Satisfaction_dummy) / nrow(data)"
+"0","  return(accuracy)"
+"0","}"
+"0",""

@@ -1,0 +1,5 @@
+"0","# implement the function"
+"0","train_data_list <- split_train_data(train_data, leaves_data)"
+"2","Error in split_train_data(train_data, leaves_data) : 
+  could not find function ""split_train_data""
+"

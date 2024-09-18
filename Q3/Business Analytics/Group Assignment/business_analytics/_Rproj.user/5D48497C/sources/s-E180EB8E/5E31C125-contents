@@ -1,0 +1,1050 @@
+---
+title: "Business Analytics MOT143A" author: "Group 7: Francisco Salas, Ketill
+Halldórsson, Mihkel Kaalep, Stefan Bras, Yuxiao Ma" date: '2024-04-19' output:
+html_document: default word_document: default pdf_document: default
+editor_options: markdown: wrap: sentence bibliography: references.bib
+  markdown: 
+    wrap: 72
+---
+
+```{r message to reader,echo = FALSE}
+#For better readability, knit this file into html_document output.
+```
+
+```{r setup, message = FALSE, warning = FALSE, cache = TRUE, include = FALSE}
+# Set the CRAN mirror:
+local({r<-getOption("repos")
+r["CRAN"] <- "https://cran.rstudio.com/"
+options(repos = r)})
+## Loading all project packages using {pacman} package
+install.packages("pacman")
+pkgs <- c("knitr","dplyr","corrplot","reshape2")
+pacman::p_load(pkgs) #checks if package is installed, if not it attempts to install the package. Then loads all.
+#Chunks setup
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load CSV, echo = FALSE}
+dta_csv <- read.csv("airline_passenger_satisfaction.csv") #Saving the original dataframe
+dta <- dta_csv #Create dta for data processing
+```
+
+## Airline Passenger Satisfaction {.tabset}
+
+### 1. Introduction
+
+```{r intro image, echo = FALSE, out.width = "60%",fig.align='center',fig.cap = "https://www.pexels.com/photo/group-of-tourists-in-queue-before-boarding-4606684/"}
+knitr::include_graphics("images/plane-queue.jpeg")
+```
+
+The airline industry faces a persistent challenge in customer satisfaction, a matter that affect company´s reputation and loyalty. When considering the fierce competence in the industry, customer satisfaction makes plays a major role in a business trade-off that may lead either to substantial economic profits or losses depending on the management adopted. Airlines must diligently assess their service chains to pinpoint areas that impact customer journey experience. Before, in-flight, or customer service play a pivotal role, as they directly influence passenger perceptions. \#### 1.1 Business Problem Identification Thus, the central business problem lies in pinpointing the specific elements of flight services that become most influential on passenger satisfaction. This knowledge paves the way for airlines to develop targeted strategies to mitigate customer dissatisfaction and improve their service offerings during potential disruptive events. \#### 1.2 Translation to Machine Learning Task Currently, research on customer satisfaction often lacks an individualized perspective, generally focusing on airport or airline-level assessments. We can therefore translate this business problem into a prediction task by analyzing data on passenger experience that train machine learning models to predict levels of passenger satisfaction. Ultimately, the insights of this analysis serves to make business decisions on whether improve services, reputation management, and a broader understanding of the customer side. \###################################################### \### 2. Data Preparation
+
+```{=html}
+<!-- -  PCA only for categorical variables because of information loss. We found that accuracy in Model 1 is lower for a PCA in all variables.  
+-   Elaborate on not losing critical information.-->
+```
+#### 2.1 Exploratory Data Analysis
+
+The dataset, called "airline_passenger_satisfaction.csv" [@kaggle]
+
+```{r dataset features, echo = FALSE}
+dta_features <- data.frame(
+  Field.Name = character(length(dta_csv)),  # Character vector for field names
+  Field.Info = character(length(dta_csv)),  # Character vector for field descriptions
+  Variable.Type = character(length(dta_csv))  # Character vector for variable types
+)
+#temporal vector with dictionary raw information
+tmp <- c(
+  "ID", "Unique passenger identifier", "Character",
+  "Gender", "Gender of the passenger (Female/Male)", "Character",
+  "Age", "Age of the passenger", "Numeric",
+  "Customer Type", "Type of airline customer (First-time/Returning)", "Character",
+  "Type of Travel", "Purpose of the flight (Business/Personal)", "Character",
+  "Class", "Travel class in the airplane for the passenger seat", "Character",
+  "Flight Distance", "Flight distance in miles", "Numeric",
+  "Departure Delay", "Flight departure delay in minutes", "Numeric",
+  "Arrival Delay", "Flight arrival delay in minutes", "Numeric",
+  "Departure and Arrival Time Convenience", "Satisfaction level (1-5) with departure/arrival times (0: not applicable)", "Numeric",
+  "Ease of Online Booking", "Satisfaction level (1-5) with online booking experience (0: not applicable)", "Numeric",
+  "Check-in Service", "Satisfaction level (1-5) with check-in service (0: not applicable)", "Numeric",
+  "Online Boarding", "Satisfaction level (1-5) with online boarding experience (0: not applicable)", "Numeric",
+  "Gate Location", "Satisfaction level (1-5) with gate location (0: not applicable)", "Numeric",
+  "On-board Service", "Satisfaction level (1-5) with on-boarding service (0: not applicable)", "Numeric",
+  "Seat Comfort", "Satisfaction level (1-5) with airplane seat comfort (0: not applicable)", "Numeric",
+  "Leg Room Service", "Satisfaction level (1-5) with airplane seat leg room (0: not applicable)", "Numeric",
+  "Cleanliness", "Satisfaction level (1-5) with airplane cleanliness (0: not applicable)", "Numeric",
+  "Food and Drink", "Satisfaction level (1-5) with food and drinks (0: not applicable)", "Numeric",
+  "In-flight Service", "Satisfaction level (1-5) with in-flight service (0: not applicable)", "Numeric",
+  "In-flight Wifi Service", "Satisfaction level (1-5) with in-flight Wifi service (0: not applicable)", "Numeric",
+  "In-flight Entertainment", "Satisfaction level (1-5) with in-flight entertainment (0: not applicable)", "Numeric",
+  "Baggage Handling", "Satisfaction level (1-5) with baggage handling (0: not applicable)", "Numeric",
+  "Satisfaction", "Overall satisfaction level with the airline (Satisfied/Neutral or unsatisfied)", "Character"
+)
+dta_features$Field.Name <- tmp[seq(1, length(tmp), 3)]
+dta_features$Field.Info <- tmp[seq(2, length(tmp), 3)]
+dta_features$Variable.Type <- tmp[seq(3, length(tmp), 3)]
+```
+
+```{r show dataframe, echo = FALSE}
+knitr::kable(dta_features, caption = "TABLE: Dataset features")
+```
+
+In the table here above all the variables are displayed here above and their key characteristics. Most of the variables are Numeric, there are 6 non-numeric variables, that have to be converted to numeric, except for the **ID**, that one will be deleted.
+
+#### 2.2 Data Pre-processing 
+<!-- Stefan
+
+2.1 and 2.2 -->
+
+##### 2.2.1 Data cleaning
+
+##### 2.2.2 Dummy variables
+
+Having non-numeric variables can call for data manipulation such as creating "dummy" variables.\
+We have identified that there are 5 non-numeric variables in the dataset.
+
+```{r Make the difference between numerical and non-numerical variables}
+#Determine the number of numerical and non-numerical names
+numerical_columns <- table(sapply(dta,is.numeric))
+rownames(numerical_columns) <- c("Non-Numerical","Numerical")
+print(numerical_columns)
+```
+
+The 5 non-numerical variables are as follows:
+
+**1.** *Gender*
+
+**2.** *Customer.Type*
+
+**3.** *Type.of.Travel*
+
+**4.** *Class*
+
+**5.** *Satisfaction*
+
+The next step is to split the non-numeric variables into different groups of dummy variables
+
+```{r splitting variables to groups}
+type_gender <- unique(dta$Gender)
+type_gender
+type_cust <- unique(dta$Customer.Type)
+type_cust
+type_travel <- unique(dta$Type.of.Travel)
+type_travel
+type_class <- unique(dta$Class)
+type_class
+type_satis <- unique(dta$Satisfaction)
+type_satis
+```
+
+```{r}
+# Gender, according to the unique values
+dta$Gender_dummy <- ifelse(dta$Gender %in% type_gender[1], 1, 0) #gender: 1 for Male, 0 for Female
+
+# Customer.Type, according to the unique values
+dta$Customer_type_dummy <- ifelse(dta$Customer.Type %in% type_cust[1], 1, 0)# Customer_type: 1 for first time; 2 for returning
+
+# Type.of.Travel, according to the unique values
+dta$Type_of_travel_dummy <- ifelse(dta$Type.of.Travel %in% type_travel[1], 1, 0)# Type_of_travel: 1 for buis; 0 for personal
+
+# Satisfaction, according to the unique values
+dta$Satisfaction_dummy <- ifelse(dta$Satisfaction %in% type_satis[2], 1, 0)#Satisfaction_satis: 1 for satisfied,; 0 for Neutral or Dissatisfied
+
+# Class, according to the unique values (3 classes so 2 dummy variables)
+dta$Class_business_dummy <- ifelse(dta$Class %in% type_class[1], 1, 0) #Class_business: 1 for business, 0 for not Business
+
+dta$Class_economy_dummy <- ifelse(dta$Class %in% type_class[2], 1, 0)
+#Class_economy_isEconomy: 1 for Economy; 0 for not Economy
+
+```
+
+In the code chunk above the non-numeric variables are transformed in to dummy variables the structure of them is as follows:
+
+Gender: 1 for Male, 0 for Female
+
+Customer_type: 1 for First-Time, 0 for Returning
+
+Type_of_travel: 1 for Business, 0 for Personal
+
+Satisfaction: 1 for satisfied, 0 for Neutral or Dissatisfied
+
+Class is the the only transformed variable that has 3 classes, the number of dummy variables is FORMULA, ergo 2 dummy variables for the variable class
+
+Class_business: 1 for business, 0 for not Business
+
+Class_economy: 1 for Economy; 0 for not Economy
+
+```{r}
+dta <- dta[, !names(dta) %in% c("Gender", "Customer.Type", "Type.of.Travel", "Class", "Satisfaction")]
+#Removing non-numerical collums
+#dta <- dta[ ,-which(colnames(dta) == c("Gender", "Customer.Type", "Type.of.Travel", "Class", "Satisfaction"))]
+
+```
+
+Lastly the original variables are removed from the dataset
+
+##### 2.2.3 Standarization
+
+#### 2.3 Feature analysis
+
+##### 2.3.1 Principal Component Analysis (PCA) (Likely has to be only 2.3)
+
+<!-- Ketill takes 2.3, and the dummies -->
+
+###################################################### 
+
+### 3. Model 1, Tree-based
+
+
+Based on our processing and analysis of the data in the previous section, the final predictor variable is considered to be a 0-1 binary label, which can be associated with the decision tree content of the course for machine learning. But at the same time, considering the number of independent variables we have, directly using decision trees will cause overfitting due to the "curse of dimensionality".
+
+As a result, instead of using the decision tree model directly in the first stage of this model, we borrow the idea of its algorithm to select features and split the data considering the size of the dimension.
+
+```{r}
+# All variables
+allnames <- colnames(dta)
+print(allnames)
+```
+
+We keep variables below as the analysis variables
+
+```{r}
+# Independent variables that are already cleaned
+# Numerical variables
+IV1 <- c("Age","bcFD","PCDelay")
+# Dummy
+IV2 <- c("Gender_dummy","Customer_type_dummy","Type_of_travel_dummy","Class_business_dummy","Class_economy_dummy")
+# Categorical variables
+IV3 <- c("Departure.and.Arrival.Time.Convenience", 
+              "Ease.of.Online.Booking", 
+              "Check.in.Service", 
+              "Online.Boarding", 
+              "Gate.Location", 
+              "On.board.Service", 
+              "Seat.Comfort", 
+              "Leg.Room.Service", 
+              "Cleanliness", 
+              "Food.and.Drink", 
+              "In.flight.Service", 
+              "In.flight.Wifi.Service", 
+              "In.flight.Entertainment", 
+              "Baggage.Handling")
+
+IV <- c(IV1, IV2, IV3)
+# Dependent variable
+DV <- "Satisfaction_dummy"
+```
+
+```{=html}
+<!-- **-    Elaborate on the selection of the decision trees and deep-wide 
+o   Decision tree rationale: explanability in the decision. Random forest always
+outperforms decision tree.** -->
+```
+#### 3.1 Advanced decision-tree-logistic fusion model
+
+Consider implementing the algorithm of the decision tree, we can use the 3 different algorithms to compute the importance of the variables.
+
+1.  Information Gain: $$ \operatorname{Gain}(D, a)=\operatorname{Entropy}(D)-\sum_{k=1}^{V} \frac{\left|D^{v}\right|}{|D|} \operatorname{Entropy}\left(D^{v}\right) $$ where $$ \operatorname{Entropy}(D)=-\sum_{k=1}^{|y|} p_{k} \log _{2} p_{k} $$ and $$ \operatorname{Entropy}\left(D^{v}\right)=-\sum_{k=1}^{|y|} p_{k} \log _{2} p_{k} $$
+
+2.  gain ratio: $$\operatorname{Gain\_ ratio}(D, a)=\frac{\operatorname{Gain}(D, a)}{I V(a)}$$ where $$ IV(a)=-\sum_{v=1}^{V} \frac{\left|D^{v}\right|}{|D|} \log _{2} \frac{\left|D^{v}\right|}{|D|} $$
+
+3.  Gini index: For the dataset D, the Gini index is defined as: $$ \operatorname{Gini}(D)=\sum_{k=1}^{|y|} \sum_{k^{\prime} \neq k} p_{k} p_{k^{\prime}}=1-\sum_{k=1}^{|y|} p_{k}{ }^{2} $$ and the Gini index of attribute a is defined as: $$ \operatorname{Gini\_index} (D, a)=\sum_{v=1}^{V} \frac{\left|D^{v}\right|}{|D|} \operatorname{Gini}\left(D^{v}\right) $$ where $D^{v}$ is the subset of D for which attribute a has the vth value.
+
+```{r}
+# function to compute the importance of the variables
+compute_importance <- function(data, attribute, target) {
+
+  entropy <- function(p) {
+    if (all(p == 0)) return(0) 
+    -sum(p * log2(p))
+  }
+  
+
+  gini <- function(p) {
+    1 - sum(p^2)
+  }
+  
+
+  total_entropy <- entropy(table(data[[target]]) / nrow(data))
+
+  total_gini <- gini(table(data[[target]]) / nrow(data))
+  
+
+  weighted_entropy <- 0
+  weighted_gini <- 0
+  split_info <- 0
+  
+  attribute_levels <- unique(data[[attribute]])
+  for (level in attribute_levels) {
+    subset <- data[data[[attribute]] == level,]
+    level_prob <- nrow(subset) / nrow(data)
+    
+    subset_entropy <- entropy(table(subset[[target]]) / nrow(subset))
+    subset_gini <- gini(table(subset[[target]]) / nrow(subset))
+    
+    weighted_entropy <- weighted_entropy + level_prob * subset_entropy
+    weighted_gini <- weighted_gini + level_prob * subset_gini
+    split_info <- split_info + (-level_prob * log2(level_prob))
+  }
+  
+  info_gain <- total_entropy - weighted_entropy
+  gain_ratio <- ifelse(split_info == 0, 0, info_gain / split_info) 
+  imp_gini_index <- total_gini - weighted_gini
+  
+  return(list(info_gain = info_gain, gain_ratio = gain_ratio, gini_index = imp_gini_index))
+}
+
+```
+
+We copy the data from the "dta" in case in the future we change the data which influences other models.
+
+```{r}
+# copy the dataframe in case we need to use the original dataframe
+dta2 <- dta
+
+# create a new dataframe with the selected variables
+dta2 <- dta2[,c(IV1, IV2, IV3, DV)]
+head(dta2)
+
+```
+
+```{r}
+# compute the importance of the variables
+# in this case, we only use the dummy variables to see the importance according to the DV, 
+# which means only compute the IV2
+imp_info_gain <- sapply(IV2, function(x) compute_importance(dta2, x, DV)$info_gain)
+imp_gain_ratio <- sapply(IV2, function(x) compute_importance(dta2, x, DV)$gain_ratio)
+imp_gini_index <- sapply(IV2, function(x) compute_importance(dta2, x, DV)$gini_index)
+```
+
+```{r}
+# plot the importance of the variables, using the 3 different algorithms
+par(mfrow = c(3,1))
+barplot(imp_info_gain, main = "Importance of the Variables (Information Gain)", col = "lightblue")
+barplot(imp_gain_ratio, main = "Importance of the Variables (Gain Ratio)", col = "lightgreen")
+barplot(imp_gini_index, main = "Importance of the Variables (Gini Index)", col = "lightcoral")
+```
+
+All the 3 algorithms show that gender does not have much importance in predicting the satisfaction, so we can remove it from the analysis. There for we will have no more than $2^4=16$ leaf nodes, which is not too much.
+
+```{r}
+# remove the gender variable
+IV_temp <- c("Customer_type_dummy","Type_of_travel_dummy","Class_business_dummy","Class_economy_dummy")
+
+# create a new dataframe with the selected variables
+dta2 <- dta2[,c(IV1, IV_temp, IV3, DV)]
+
+# separate the data into training and testing sets
+set.seed(46)
+train_index <- sample(1:nrow(dta2), 0.8 * nrow(dta2))
+train_data <- dta2[train_index,]
+test_data <- dta2[-train_index,]
+```
+
+And we can see that the most important variable is the Class_business_dummy, so we pick it as the first variable to build the decision tree. Now we can compute the importance of the other variables using the 3 algorithms
+
+Here is the new Selection Algorithm of Variables:
+
+```{=tex}
+\begin{itemize}
+  \item 1. Compute the importance of the variables using the 3 algorithms.In case 3 algs give different results, we scale each alg's result to 0-1 and take the average of the 3 results. 
+  \item 2. Pick the biggest result as the selection critera for this node.
+  \item 3. For new sepration, we get the new 2 datasets forthe child nodes, and repeat step 1 and 2 until we have 4 variables to build the decision tree.
+\end{itemize}
+```
+
+```{r}
+# Selection Algorithm of Variables function
+select_var <- function(data, IV, DV) {
+
+  # compute the importance of the variables
+  imp_info_gain <- sapply(IV, function(x) compute_importance(data, x, DV)$info_gain)
+  imp_gain_ratio <- sapply(IV, function(x) compute_importance(data, x, DV)$gain_ratio)
+  imp_gini_index <- sapply(IV, function(x) compute_importance(data, x, DV)$gini_index)
+  
+  # scale the importance to 0-1
+  imp_info_gain <- (imp_info_gain - min(imp_info_gain)) / (max(imp_info_gain) - min(imp_info_gain))
+  imp_gain_ratio <- (imp_gain_ratio - min(imp_gain_ratio)) / (max(imp_gain_ratio) - min(imp_gain_ratio))
+  imp_gini_index <- (imp_gini_index - min(imp_gini_index)) / (max(imp_gini_index) - min(imp_gini_index))
+  
+  # take the average of the 3 results
+  imp_avg <- (imp_info_gain + imp_gain_ratio + imp_gini_index) / 3
+  
+  # pick the biggest result as the selection critera for this node
+  selected_var <- IV[which.max(imp_avg)]
+  
+  return(selected_var)
+}
+
+# Implement the function
+Build_tree <- function(data, IV, DV, depth) {
+  variables <- IV
+
+  if (depth == 0) return()
+  
+  # select the variable if there are more than 1 variable left
+  if (length(variables) > 1)
+    selected_var <- select_var(data, variables, DV)
+  else
+    selected_var <- variables[1]
+  
+  # split the data
+  left_data <- data[data[[selected_var]] == 0,]
+  right_data <- data[data[[selected_var]] == 1,]
+  
+  # print the selected variable
+  print(paste("Selected Variable:", selected_var))
+
+  # drop the selected variable from the list of variables
+  variables <- variables[!variables %in% selected_var]
+  
+  # # print the importance of the selected variable
+  # print(paste("Importance of the Selected Variable:", compute_importance(data, selected_var, DV)))
+  
+  # print the number of observations in the left and right nodes
+  print(paste("This is level:", 4-depth+1))
+  print("variables left:")
+  print(variables)
+  print(paste("Number of Observations in the Left Node:", nrow(left_data)))
+  print(paste("Number of Observations in the Right Node:", nrow(right_data)))
+
+  
+  # repeat the process for the left and right nodes
+  Build_tree(left_data, variables, DV, depth - 1)
+  Build_tree(right_data, variables, DV, depth - 1)
+}
+```
+
+```{r}
+# Implement the function
+Build_tree(train_data, IV2, DV, 4)
+```
+
+This can be considered as a DFS output of the decision tree.(not exactly DFS, but similar to it because we print the path of the tree in a depth-first manner.) It works but seeing that some leaf nodes have only few observations, so we concider pruning the tree in the future.
+
+We can compute the mean of the observations in each leaf node as the new numerical value and later use it combining with other variables to build a logistic regression model.
+
+There might be 2 ways to do this: 1. Not prune the tree and use the leaf nodes' average of the observations as the new numerical value to build one logistic regression model. 2. Prune the tree and store the leaf nodes to build several logistic regression models.
+
+After we built in total 6 models based on the description above, we keep the best way as shown in the following. By comaprison, we choose the 2nd way to build the logistic regression model.
+
+Now let's build the decision tree and prune it.
+
+```{r}
+# Recursive function to build the decision tree and prune it. Store the leaf nodes in a list and return it.
+Build_tree_prune <- function(data, IV, DV, depth, min_obs) {
+  leaves <- list()
+  
+  recursive_build <- function(data, IV, DV, depth, min_obs, path = list()) {
+
+    if (nrow(data) < min_obs || depth == 0 || length(IV) == 0) {
+      return(list(data = data, path = path)) 
+    }
+    
+
+    if (length(IV) > 1) {
+      selected_var <- select_var(data, IV, DV)
+    } else {
+      selected_var <- IV[1]
+    }
+    
+
+    left_data <- data[data[[selected_var]] == 0, ]
+    right_data <- data[data[[selected_var]] == 1, ]
+    
+
+    if (nrow(left_data) < min_obs || nrow(right_data) < min_obs) {
+      return(list(data = data, path = path))
+    }
+
+    new_path_left <- c(path, paste(selected_var, "= 0"))
+    new_path_right <- c(path, paste(selected_var, "= 1"))
+    
+    left_leaves <- if (nrow(left_data) > 0) recursive_build(left_data, IV[!IV %in% selected_var], DV, depth - 1, min_obs, new_path_left) else NULL
+    right_leaves <- if (nrow(right_data) > 0) recursive_build(right_data, IV[!IV %in% selected_var], DV, depth - 1, min_obs, new_path_right) else NULL
+
+    return(c(left_leaves, right_leaves))
+  }
+  
+  leaves <- recursive_build(data, IV, DV, depth, min_obs)
+  
+  return(leaves)
+}
+
+```
+
+Consider the dataset's size is in total 129880, and the train_data is 103904, so we can set the minimum number of observations in a leaf node to be 1% of the train_data, which is 1039.04, using 1000 as the minimum number of observations in a leaf node. After pruning, store the leaf nodes in a list, and we can consider the mean of the observations in each leaf node as the new numerical value and later use it combining with other variables to build a logistic regression model.
+
+```{r}
+# Implement the function
+leaves_data <- Build_tree_prune(train_data, IV2, DV, 4, 1000)
+# print the leaf nodes, dropping the NULL values
+leaves_data <- leaves_data[!sapply(leaves_data, is.null)]
+leaves_data
+# get train_data_list from leaves_data, which is a list of dataframes and is the odd elements of leaves_data
+train_data_list <- leaves_data[sapply(seq(leaves_data), function(x) x %% 2 == 1)]
+
+# compute the mean of the observations in each leaf node and store each mean in the data's new column named "leaf_mean"
+for (i in seq(length(train_data_list))) {
+  train_data_list[[i]]$leaf_mean <- compute_mean(train_data_list[[i]])
+}
+```
+```{r, warning=FALSE}
+# implement the function
+train_data_new <- add_leaf_mean(train_data, train_data_list)
+test_data_new <- add_leaf_mean(test_data, train_data_list)
+```
+
+Drop the IV2 from the training and testing data, and we can build the logistic regression model using the new variables.
+
+```{r}
+# drop the IV2 from the training and testing data
+train_data_new <- train_data_new[, !names(train_data_new) %in% IV2]
+test_data_new <- test_data_new[, !names(test_data_new) %in% IV2]
+```
+
+```{r}
+# Function to adjust the path for the testing data
+
+split_test_data <- function(test_data, leaves_data) {
+  split_datasets <- list()
+
+  len <- length(leaves_data)
+  
+  for (i in seq(len/2)) {
+
+    current_subset <- test_data
+    
+
+    conditions <- leaves_data[2*i]$path
+    # print(conditions)
+    
+    for (condition in conditions) {
+
+      parts <- strsplit(condition, " = ")[[1]]
+      variable <- parts[1]
+      value <- as.numeric(parts[2])
+      
+
+      current_subset <- current_subset[current_subset[[variable]] == value, ]
+    }
+    
+
+    split_datasets[[i]] <- current_subset
+  }
+  
+  return(split_datasets)
+}
+
+```
+
+```{r}
+# implement the function
+train_data_list_new <- split_test_data(train_data, leaves_data)
+test_data_list_new <- split_test_data(test_data, leaves_data)
+```
+
+Logsitic Regression Model $$ \log \left(\frac{p}{1-p}\right)=\beta_{0}+\beta_{1} x_{1}+\beta_{2} x_{2}+\ldots+\beta_{n} x_{n} $$ where $p$ is the probability of the event that the dependent variable is 1, and $x_{1}, x_{2}, \ldots, x_{n}$ are the independent variables.
+
+Explaining the logistic regression model: - The left-hand side of the equation is the log-odds of the dependent variable being 1.
+- The right-hand side of the equation is the linear combination of the independent variables.
+- The coefficients $\beta_{0}, \beta_{1}, \beta_{2}, \ldots, \beta_{n}$ are the parameters of the model that need to be estimated.
+- The logistic function is used to transform the log-odds to the probability of the dependent variable being 1.
+
+For the logistic regression model, we use the binomial family and the logit link function.
+In addion,In order to solve the issue arising in (f), we add a ridge penalty to the log-likelihood criterion: J(\boldsymbol{\beta})=-\ell(\boldsymbol{\beta})+\lambda\left[\alpha \sum_{j=1}^{p}\left|\beta_{j}\right|+\frac{1-\alpha}{2} \sum_{j=1}^{p} \beta_{j}^{2}\right]where $\ell(\boldsymbol{\beta})$ is the log-likelihood criterion, $\lambda$ is the penalty parameter, and $p$ is the number of parameters in the model.
+where $\ell$($\beta$) denotes the log-likelihood function of the logistic regression model.
+Adapt the Newton-Raphson algorithm such that we obtain the regularised estimator of $\beta$ that minimizes J($\beta$).
+And $\alpha$ is the elastic net mixing parameter betwee 0 and1, which controls the trade-off between the L1 and L2 penalties.
+- When $\alpha=0$, the penalty is an L2 penalty, which is the ridge penalty.
+- When $\alpha=1$, the penalty is an L1 penalty, which is the lasso penalty.
+- When $0<\alpha<1$, the penalty is an elastic net penalty, which is a combination of the L1 and L2 penalties.
+
+Newton-Raphson algorithm: 1.
+Initialize $\beta^{(0)}$.
+2.
+For $k=0,1,2, \ldots$ until convergence: - Compute the gradient vector $\nabla J\left(\beta^{(k)}\right)$.
+- Compute the Hessian matrix $H\left(\beta^{(k)}\right)$.
+- Update $\beta^{(k+1)}=\beta^{(k)}-H^{-1}\left(\beta^{(k)}\right) \nabla J\left(\beta^{(k)}\right)$.
+- Check for convergence.
+- If converged, stop; otherwise, go to step 2.
+- The convergence criterion can be based on the change in the log-likelihood function or the change in the parameter estimates.
+-
+
+Bulid different logistic regression models for each leaf node.
+
+First of all, compute the accuracy of the original train_data and test_data into the logistic regression model as the baseline so that we can compare the accuracy of the new model with the baseline that we have.
+
+```{r}
+# Function to build the logistic regression model
+library(glmnet)
+library(ggplot2)
+
+train_and_predict_logistic_regression <- function(train_data, test_data, predictor_col) {
+  y_train <- train_data[[predictor_col]]
+  x_train <- as.matrix(train_data[, setdiff(names(train_data), predictor_col)])
+  y_test <- test_data[[predictor_col]]
+  x_test <- as.matrix(test_data[, setdiff(names(test_data), predictor_col)])
+  
+
+  cv_results <- list()
+  alpha_values <- seq(0, 1, by = 0.1)
+  
+  for (alpha in alpha_values) {
+    print(alpha)
+    cv_fit <- cv.glmnet(x_train, y_train, family = "binomial", alpha = alpha)
+    cv_results[[as.character(alpha)]] <- cv_fit
+  }
+  
+
+  best_cvm <- Inf
+  best_alpha <- NA
+  best_lambda <- NA
+  for (alpha in names(cv_results)) {
+    print(alpha)
+    cv_fit <- cv_results[[alpha]]
+    if (min(cv_fit$cvm) < best_cvm) {
+      best_cvm <- min(cv_fit$cvm)
+      best_alpha <- as.numeric(alpha)
+      best_lambda <- cv_fit$lambda.min
+    }
+  }
+  
+
+  final_model <- glmnet(x_train, y_train, family = "binomial", alpha = best_alpha, lambda = best_lambda)
+  predictions <- predict(final_model, newx = x_test, type = "class", s = best_lambda)
+  
+  accuracy <- mean(predictions == y_test)
+  
+  return(list(accuracy = accuracy, best_alpha = best_alpha, best_lambda = best_lambda))
+}
+
+
+# implement the function
+accuracy0 <- train_and_predict_logistic_regression(train_data, test_data, "Satisfaction_dummy")
+accuracy0
+```
+
+Accuracy is 0.8763859. This is our baseline.
+
+```{r}
+# Function to build the logistic regression model for each leaf node
+library(glmnet)
+
+train_and_evaluate_models <- function(train_data_list, test_data_list, target_column_name) {
+  alpha_values <- seq(0, 1, by = 0.1)  
+  accuracy_list <- numeric(length(train_data_list))
+  best_parameters <- list()
+  
+  for (i in seq_along(train_data_list)) {
+    print(i)
+    train_data <- train_data_list[[i]]
+    test_data <- test_data_list[[i]]
+    
+    y_train <- train_data[[target_column_name]]
+    x_train <- as.matrix(train_data[, setdiff(names(train_data), target_column_name)])
+    y_test <- test_data[[target_column_name]]
+    x_test <- as.matrix(test_data[, setdiff(names(test_data), target_column_name)])
+    
+    best_acc <- 0
+    best_alpha <- NA
+    best_lambda <- NA
+    
+    for (alpha in alpha_values) {
+      cv_model <- cv.glmnet(x_train, y_train, family = "binomial", alpha = alpha)
+      lambda <- cv_model$lambda.min
+      predictions <- predict(cv_model, s = lambda, newx = x_test, type = "class")
+      accuracy <- mean(predictions == y_test)
+      
+      if (accuracy > best_acc) {
+        best_acc <- accuracy
+        best_alpha <- alpha
+        best_lambda <- lambda
+      }
+    }
+    
+    accuracy_list[i] <- best_acc
+    best_parameters[[i]] <- list(alpha = best_alpha, lambda = best_lambda)
+    
+    cat("Best alpha for dataset", i, ":", best_alpha, "\n")
+    cat("Best lambda for dataset", i, ":", best_lambda, "\n")
+    cat("Accuracy for dataset", i, ":", best_acc, "\n\n")
+  }
+  
+  overall_accuracy <- mean(accuracy_list)
+  cat("Overall accuracy:", overall_accuracy, "\n")
+  
+  return(list(overall_accuracy = overall_accuracy, best_parameters = best_parameters))
+}
+
+
+```
+
+```{r}
+# implement the function
+accuracy1 <- train_and_evaluate_models(train_data_list_new, test_data_list_new, "Satisfaction_dummy")
+```
+
+From the results, we can see that the overall accuracy is 0.880086, which is higher than the baseline's accuracy.
+But Also, Accuracy for dataset are : 0.9244302, 0.8659287, 0.8474576, 0.8999653, 0.9003623, 0.9138666, 0.8085916.
+Especially the 7th dataset has a low accuracy.
+
+We can use IV3 to build the logistic regression model for each leaf node and use the regression coefficients to predict the Satisfaction_dummy for the training dataset.
+Then, we can use the predicted Satisfaction_dummy named "IV3_predict" as a new variable to build the logistic regression model for the testing dataset.
+
+```{r}
+# logistic regression model for the training dataset IV3
+train_data_list_new3 <- list()
+test_data_list_new3 <- list()
+# for the training dataset
+for (i in seq(length(train_data_list_new))) {
+  model <- glm(Satisfaction_dummy ~ ., data = train_data_list_new[[i]], family = "binomial")
+  train_data_list_new3[[i]] <- train_data_list_new[[i]]
+  train_data_list_new3[[i]]$IV3_predict <- predict(model, newdata = train_data_list_new[[i]], type = "response")
+  
+  # for the testing dataset
+  test_data_list_new3[[i]] <- test_data_list_new[[i]]
+  test_data_list_new3[[i]]$IV3_predict <- predict(model, newdata = test_data_list_new[[i]], type = "response")
+}
+# drop the IV3 from the training and testing data
+train_data_list_new3 <- lapply(train_data_list_new3, function(x) x[, !names(x) %in% IV3])
+test_data_list_new3 <- lapply(test_data_list_new3, function(x) x[, !names(x) %in% IV3])
+```
+
+```{r}
+# implement the function
+accuracy2 <- train_and_evaluate_models(train_data_list_new3, test_data_list_new3, "Satisfaction_dummy")
+```
+
+Overall accuracy: 0.8852135 Accuracy for datasets are: 0.9378915, 0.8622386, 0.8487614, 0.9086488, 0.923913, 0.9129745, 0.8020663.
+Better than any other model we have.
+
+This subsection the model is the one using IV3_predict as a new variable!
+
+
+```{=html}
+<!-- **-    Elaborate on the selection of the decision trees and deep-wide 
+o   Decision tree rationale: explanability in the decision. Random forest always
+outperforms decision tree.** -->
+```
+
+#### 3.2 Model, improvement, Random Forest
+
+So far we have a not bad model but we still think the result is not good enough even though we mix different models' algorithms together.
+Now in this subsection, also take concern about avoiding overfitting, consider improving the tree-based model by implementing Random Forest algorithm.
+
+
+```{r}
+# Install the packages used in this tutorial:
+packages <- c("C50", "ggplot2", "gmodels", "Hmisc", "randomForest", "rsample")
+
+for (i in packages) {
+    if(!require(i, character.only = TRUE)) {
+        install.packages(i, dependencies = TRUE)
+    }
+}
+# Load necessary libraries
+packages <- c("caret", "e1071", "pROC")
+for (pkg in packages) {
+    if (!require(pkg, character.only = TRUE)) {
+        install.packages(pkg, dependencies = TRUE)
+        library(pkg, character.only = TRUE)
+    }
+}
+
+# Ensure the target variable is treated as a categorical variable (for classification)
+train_data$Satisfaction_dummy <- as.factor(train_data$Satisfaction_dummy)
+test_data$Satisfaction_dummy <- as.factor(test_data$Satisfaction_dummy)
+
+# Build the random forest model
+pmodel.forest <- randomForest(Satisfaction_dummy ~ ., 
+                              data = train_data,
+                              ntree = 50,   # Number of trees to grow
+                              mtry = 2,     # Number of variables sampled at each split
+                              replace = TRUE) # Sampling with replacement
+
+# Predict the response on the test dataset
+pred.test <- predict(pmodel.forest, newdata = test_data)
+
+# Generate the confusion matrix
+conf_matrix <- table(Actual = test_data$Satisfaction_dummy, Predicted = pred.test)
+print("Confusion matrix:")
+print(conf_matrix)
+
+# Use CrossTable to generate a detailed confusion matrix if needed
+conf_matrix <- CrossTable(x = test_data$Satisfaction_dummy, y = pred.test,
+           prop.chisq = FALSE,
+           prop.c = FALSE,
+           prop.r = FALSE,
+           prop.t = FALSE,
+           dnn = c("Actual satisfaction", "Predicted satisfaction"))
+conf_matrix
+```
+
+Based on the Confusion matrix we can calculate the accuracy of the model predictions:
+
+```{r}
+accuracy3 <- sum(diag(conf_matrix$t)) / sum(conf_matrix$t)
+print(paste("Accuracy:", accuracy3))
+```
+
+
+As we can see from the result, this model has better performance!
+
+Now we calculate the Precision, Recall, F1-Score, AUC of this model:
+
+```{r}
+# Calculate precision, recall, and F1-score
+precision <- posPredValue(pred.test, test_data$Satisfaction_dummy, positive = "1")
+recall <- sensitivity(pred.test, test_data$Satisfaction_dummy, positive = "1")
+f1_score <- (2 * precision * recall) / (precision + recall)
+
+print(paste("Precision:", round(precision, 4)))
+print(paste("Recall:", round(recall, 4)))
+print(paste("F1-Score:", round(f1_score, 4)))
+
+# Calculate AUC
+roc_obj <- roc(test_data$Satisfaction_dummy, as.numeric(pred.test))
+auc_value <- auc(roc_obj)
+print(paste("AUC:", round(auc_value, 4)))
+
+```
+
+
+
+
+```{=html}
+<!-- Yuxiao 
+
+- A detailed explanation of each chosen model, including the rationale for their
+selection and any assumptions made.
+- Presentation of the results from each model.
+-->
+```
+###################################################### 
+
+### 4. Model 2, Wide & Deep
+
+```{=html}
+<!-- **(this is a comment, DELETE before going furhter)**
+o   Deep-wide: talk about how deep learning helps with over-fitting problem. Research what loss means.
+Mihkel on it.
+
+- A detailed explanation of each chosen model, including the rationale for their
+selection and any assumptions made.
+- Presentation of the results from each model.
+-->
+```
+
+Next up we will use a more sophisticated algorithm, which is a combination of a generalized linear model and a feed-forward neural network: the Wide & Deep algorithm. This has the benefit of capturing better frequent co-occurrences in data through its wide linear model, while at the same time learning complex patterns through neural networks. In comparison to tree-based algorithms as discussed before, this algorithm should be more resilient to over-fitting. We expect to get a higher accuracy, but the result will be less interpretable than with tree-based models.
+
+```{r}
+dta4 <- dta
+
+# create a new dataframe with the selected variables
+dta4 <- dta4[,c(IV1, IV2, IV3, DV)]
+
+```
+
+Installing the required package for the model:
+```{r}
+if(!require(tensorflow)) install.packages("tensorflow")
+library(tensorflow)
+
+```
+
+```{r}
+library(tidyverse)
+library(tensorflow)
+library(keras)
+library(dplyr)
+
+# Partitioning the data:
+set.seed(46) 
+train_indices <- sample(seq_len(nrow(dta4)), size = floor(0.8 * nrow(dta4)))
+train_data <- dta4[train_indices, ]
+test_data <- dta4[-train_indices, ]
+
+# Labeling the data
+train_labels <- train_data$Satisfaction_dummy
+test_labels <- test_data$Satisfaction_dummy
+
+train_data <- dplyr::select(train_data, -Satisfaction_dummy)
+test_data <- dplyr::select(test_data, -Satisfaction_dummy)
+```
+
+Rather just implementing the basic wide & deep model, we make some improvement by involving the drop out rate to give the possibility to reset the cells and avoid over-fitting, and using the residual connection which first came up with the ResNet model in deep learning by Professor Jian Sun (Yuxiao's professor).
+```{r}
+# For wide models, we use numerical features directly
+# For deep models, we use embedding layers to handle a mixture of categorical features and numerical features
+
+# define input
+numeric_inputs <- lapply(names(train_data), function(name) layer_input(shape = 1, name = paste0(name, "_input")))
+all_inputs <- numeric_inputs
+all_inputs_list <- unlist(numeric_inputs)
+
+# Define wide model section
+wide_features <- layer_concatenate(all_inputs_list) %>% 
+  layer_dense(units = 1, activation = 'linear') 
+
+# Define deep model part
+deep_features <- layer_concatenate(all_inputs_list) %>%
+  layer_dense(units = 64, activation = 'relu') %>%
+  layer_batch_normalization() %>%
+  layer_dropout(rate = 0.5) %>%
+  layer_dense(units = 128, activation = 'relu') %>%
+  layer_batch_normalization() %>%
+  layer_dropout(rate = 0.5)
+
+
+# Optionally adding Residual Connections
+# First dense layer
+residual_input <- deep_features
+residual_output <- layer_dense(units = 64, activation = 'relu')(residual_input) %>%
+  layer_batch_normalization()
+
+# Second dense layer (repeat structure if needed and then add the residual)
+residual_output <- layer_dense(units = 128, activation = 'relu')(residual_output) %>%
+  layer_batch_normalization()
+
+
+# Adding the residual connection
+residual_output <- layer_add(list(residual_input, residual_output)) %>%
+  layer_activation('relu') %>%
+  layer_dropout(rate = 0.5)
+
+# Use the output from the residual block as the final deep feature representation
+deep_features <- residual_output
+
+# Combine the output of wide and deep models
+final_output <- layer_concatenate(list(wide_features, deep_features)) %>%
+  layer_dense(units = 1, activation = 'sigmoid')
+
+#Create model
+model <- keras_model(inputs = all_inputs_list, outputs = final_output)
+
+# Compile model
+model %>% compile(
+  loss = 'binary_crossentropy',
+  optimizer = 'adam',
+  metrics = c('accuracy')
+)
+# Convert training data and test data to the format of model input
+train_list <- lapply(names(train_data), function(name) as.matrix(train_data[[name]]))
+test_list <- lapply(names(test_data), function(name) as.matrix(test_data[[name]]))
+
+```
+
+```{r}
+# Train the model.
+history <- model %>% fit(
+  x = train_list,
+  y = train_labels,
+  batch_size = 32,
+  epochs = 10,
+  validation_split = 0.2
+)
+
+# Evaluate the model on unseen data.
+model %>% evaluate(test_list, test_labels)
+
+```
+
+```{r}
+packages <- c("caret", "e1071", "pROC","gmodels")
+for (pkg in packages) {
+    if (!require(pkg, character.only = TRUE)) {
+        install.packages(pkg, dependencies = TRUE)
+        library(pkg, character.only = TRUE)
+    }
+}
+
+# Predict probabilities for the test set
+predictions_prob <- model %>% predict(test_list)
+predictions <- ifelse(predictions_prob > 0.5, 1, 0)
+
+# Convert predictions and test_labels to factors if they are not already
+# This ensures that CrossTable handles the data correctly
+predictions_factor <- factor(predictions, levels = c(0, 1))
+test_labels_factor <- factor(test_labels, levels = c(0, 1))
+
+# Use CrossTable to generate a detailed confusion matrix
+conf_matrix <- CrossTable(x = test_labels_factor, y = predictions_factor,
+                          prop.chisq = FALSE,  # Turn off chi-squared test p-value calculation
+                          prop.c = FALSE,      # Do not show column percentages
+                          prop.r = FALSE,      # Do not show row percentages
+                          prop.t = FALSE,      # Do not show table percentages
+                          dnn = c("Actual satisfaction", "Predicted satisfaction"),
+                          format = "SPSS")  # This format is akin to what SPSS outputs, very detailed
+
+# Print the detailed confusion matrix
+print("Detailed Confusion Matrix:")
+print(conf_matrix)
+```
+
+Here we caculate the Precision, Recall, F1-Score, AUC of this model again:
+
+```{r}
+# Calculate Precision, Recall, and F1-Score
+predictions_factor <- factor(predictions, levels = c(0, 1))
+test_labels_factor <- factor(test_labels, levels = c(0, 1))
+
+# Calculate confusion matrix and extract metrics
+conf_matrix <- confusionMatrix(predictions_factor, test_labels_factor)
+precision <- conf_matrix$byClass['Pos Pred Value']
+recall <- conf_matrix$byClass['Sensitivity']
+f1_score <- 2 * precision * recall / (precision + recall)
+
+print(paste("Precision:", round(precision, 4)))
+print(paste("Recall:", round(recall, 4)))
+print(paste("F1-Score:", round(f1_score, 4)))
+```
+
+###################################################### 
+
+### 5. Results, conclusions and recommendations
+
+1.  **Accuracy** (ACC) proportion of correctly classified instances out of the total instances evaluated:
+
+    $$
+    ACC = \frac{TP + TN}{TP + TN + FP + FN}
+    $$
+
+2.  **Precision** (PREC) proportion of correctly predicted positive instances out of all instances that were predicted as positive. It is calculated as:
+
+    $$
+    PREC = \frac{TP}{TP + FP}
+    $$
+
+3.  **Recall (Sensitivity)** (REC), also known as sensitivity, quantifies the ability of a model to correctly identify positive instances out of all actual positive instances. It is calculated as:
+
+    $$
+    REC = \frac{TP}{TP + FN}
+    $$
+
+4.  **F1 Score**: The F1 score is the harmonic mean of precision and recall. It provides a single metric that balances both precision and recall, calculated as:
+
+    $$
+    F1 = 2 \times \frac{PREC \times REC}{PREC + REC}
+    $$
+
+5.  **AUC (Area Under the ROC Curve)**: AUC measures the performance of a classification model at various threshold settings. It is the area under the Receiver Operating Characteristic (ROC) curve, which plots the true positive rate (TPR) against the false positive rate (FPR) at various threshold values. A higher AUC indicates better performance of the model in distinguishing between positive and negative instances.
+
+Table. Performance comparison results.
+
+```{r define performance comparison dataframe}
+prf.comp <- data.frame(accuracy = character(2),
+                       precision = character(2),
+                       recall = character(2),
+                       f1score = character(2),
+                       auc = character(2))
+```
+
+```{r auc calculation}
+# # code for generating ROC curve and computing AUC
+# library(pROC)
+# r <- roc(df$actual, df$prob)
+# plot.roc(r)
+# # compute auc
+# auc(r)
+```

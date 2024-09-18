@@ -1,0 +1,3 @@
+"0","correlation_matrix <- cor(dta) #Create correlation matrix"
+"0",""
+"0","melted_correlation_matrix <- melt(correlation_matrix) #Melt the correlation matrix"

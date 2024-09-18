@@ -1,0 +1,5 @@
+"0","# Implement the function"
+"0","leaves_data <- Build_tree_prune(train_data, IV2, DV, 4, 2000)"
+"2","Error in `$<-.data.frame`(`*tmp*`, ""Leaf_avg"", value = 0) : 
+  替换数据里有1行，但数据有0
+"

@@ -1,0 +1,3 @@
+"0","# boxcox transformation"
+"0","library(MASS)"
+"0","boxcox(dta$Flight.Distance ~ 1)"

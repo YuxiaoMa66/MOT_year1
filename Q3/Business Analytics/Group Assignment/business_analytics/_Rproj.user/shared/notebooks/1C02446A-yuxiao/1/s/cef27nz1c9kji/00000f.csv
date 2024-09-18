@@ -1,0 +1,6 @@
+"0","# compute the importance of the variables using the three different methods, DV is the dependent variable"
+"0","imp_info_gain <- importance(dta2, ""class"")"
+"0","imp_gain_ratio <- importance(dta2, ""class"", parms = list(split = ""information""))"
+"2","Error in importance(dta2, ""class"", parms = list(split = ""information"")) : 
+  unused argument (parms = list(split = ""information""))
+"

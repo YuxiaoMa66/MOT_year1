@@ -1,0 +1,162 @@
+% \special{dvipdfmx:config z 0}
+\documentclass[UTF8,a4paper,AutoFakeBold,AutoFakeSlant]{article}
+\usepackage[a4paper,left=2.8cm,right=2.6cm,top=3.7cm,bottom=3.5cm]{geometry}
+\usepackage{ctex}
+% \usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\usepackage[mathscr]{eucal}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{capt-of} 
+\usepackage{hyperref} 
+\usepackage{abstract}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{amsfonts} 
+\usepackage{CJK,CJKnumb}
+\usepackage{float}
+% \usepackage{gbt7714}
+\usepackage{framed}
+\usepackage{multirow}
+\usepackage{animate}
+\usepackage[framemethod=tikz]{mdframed}
+
+\newcommand{\tnewroman}{\fontspec{Times New Roman}}
+\newcommand{\song}{\CJKfamily{song}}    % 宋体   (Windows自带simsun.ttf)
+\newcommand{\fs}{\CJKfamily{fs}}        % 仿宋体 (Windows自带simfs.ttf)
+\newcommand{\kai}{\CJKfamily{kai}}      % 楷体   (Windows自带simkai.ttf)
+\newcommand{\hei}{\CJKfamily{hei}}      % 黑体   (Windows自带simhei.ttf)
+\newcommand{\li}{\CJKfamily{li}}        % 隶书   (Windows自带simli.ttf) 
+\newcommand{\ssong}{\CJKfamily{STSong}}
+% \newfontfamily{\heiti}{SimHei}
+
+\xeCJKsetup{SlantFactor = 0.3}
+% \xeCJKsetup{SlantFactor = -0.7}
+\setCJKmainfont[BoldFont=SimHei, SlantedFont=KaiTi]{SimSun}
+
+
+
+\usepackage{xcolor}  	%高亮使用的颜色
+\definecolor{commentcolor}{RGB}{85,139,78}
+\definecolor{stringcolor}{RGB}{206,145,108}
+\definecolor{keywordcolor}{RGB}{34,34,250}
+\definecolor{backcolor}{RGB}{220,220,220}
+
+\usepackage{accsupp}	
+\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+
+
+
+
+
+\title{\textbf{\textsf{{\textsf{Assignment 4}}}}} 
+\author{\tnewroman Mihkel Kaalep ~\&~ Yuxiao Ma}
+\date{}
+
+% 去掉红框
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+
+\begin{document}
+
+
+
+\maketitle
+
+\section{Research Question}
+
+To what extent does the use of generative AI improve creativity of employees and the overall innovation output of an organization? (original question)
+
+How does the implementation of generative AI tools influence employee creativity and enhance the overall innovation output within organizations? (\textbf{new version})
+
+
+\section{Case Study Selection}
+
+The case study will be carried out by doing multiple holistic case studies on different companies in the Netherlands. Our research question is related to the general impact of generative AI on companies, therefore multiple case studies will help us to get a more generalizable result. At the same time, to gain the most direct insights into innovation outcomes, the scope will be limited to the R\&D departments, hence a holistic design is preferred.
+
+Our argument for this design is to ensure a comprehensive understanding of the phenomenon, capturing variation across companies using generative AI. This methodological choice enhances the external validity of our findings, making them more applicable and valuable to the wider business context.
+
+
+\section{Relevant Theoretical Dimension}
+
+A relevant theoretical dimension for sampling cases would be the industry in which the company operates. This will lead to more generalizable findings, as the study aims to find the general impact of generative AI on organizations.
+
+
+\section{Data Collection}
+
+Our data collection combines qualitative and quantitative methods, utilizing multiple sources to ensure a comprehensive, triangulated understanding of the impact of generative AI. Primary data sources include semi-structured interviews with key stakeholders in each organization, such as management and employees directly involved with AI tools. These interviews aim to gather insights into personal experiences, perceived changes in creativity, and organizational innovation post AI integration.
+
+Additionally, we will conduct surveys among a broader manager and employee base to quantify the perceived influence of generative AI on creativity and innovation. To complement these sources, we can analyze internal company documents and performance reports to objectively assess changes in innovative outputs pre and post AI adoption.
+
+This mix of data sources and methods — interviews for depth, surveys for breadth, and document analysis for objective measures — is designed to provide a comprehensive understanding of generative AI’s impact, addressing our research question from multiple angles.
+
+
+\section{Case Study Protocol}
+
+\begin{enumerate}
+    \item For Managers:
+
+    \textbf{Question}: “What changes in management strategies or practices have been implemented since the adoption of generative AI?”
+    
+    \textbf{Follow-up question}: “How do these relate to employee creativity and innovation output?”
+    
+    \textbf{Source of Evidence}: Interviews will be conducted with managers to gain insights into the strategic changes they've implemented following the adoption of generative AI. These discussions will shed light on the specific actions and decisions made by management that have an impact on enhancing employee creativity and fostering innovation.
+    \item For Managers:
+
+    \textbf{Question}: “Can you provide specific examples of how ChatGPT or similar service has been integrated into the prototyping process？”
+    
+    \textbf{Follow-up question}: “What impact this has had on the development timeline and quality of prototypes?”
+    
+    \textbf{Source of Evidence}: Gather case studies or project reports from teams that have used ChatGPT (or similar service) in their prototyping process. Examine these documents for details on the time taken for prototyping stages and the qualitative improvements in prototypes attributed to ChatGPT's (or similar service) involvement.
+    \item For Employees:
+
+    \textbf{Question}: "How has your day-to-day work process and creative approach been influenced by the use of generative AI tools?"
+    
+    \textbf{Source of Evidence}: Surveys or focus group discussions with employees. This will gather firsthand accounts of how their work routine and creative thinking have been affected by the integration of generative AI technologies.
+\end{enumerate}
+
+
+\section{Criteria \& Trctics}
+
+\subsection{Testing validity}
+
+\begin{enumerate}
+    \item \textbf{Tactic 1 (internal validity)}: Pattern matching during the data analysis phase involves the use of triangulation to improve the internal validity of the research. This approach combines data collected from diverse methods — including interviews, surveys, and document reviews — and then identifies and confirms consistent patterns across these different sources. By matching the information gathered from various angles, this tactic ensures that the conclusions drawn are robust and well-supported.
+    \item \textbf{Tactic 2 (external validity)}: Outline the logic for replicating the case studies. For the findings to be externally generalizable, the case study subjects should be diverse and involve companies from various industries. At the same time, the companies studied should involve an R\&D department.
+\end{enumerate}
+
+
+\subsection{Testing reliability}
+
+\begin{enumerate}
+    \item \textbf{Tactic 1}: Using a case study protocol: Establish a clear protocol for data collection and analysis. This tactic ensures that the process is consistent and can be repeated under similar conditions, which enhances reliability.
+    \item \textbf{Tactic 2}: Maintaining a chain of evidence: A detailed data collection plan will be created which includes step-by-step instructions for each data collection activity. 
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \bibliographystyle{gbt7714-numerical}
+% % \bibliographystyle{7714-author-year}
+% \bibliographystyle{ieeetr}
+% \bibliography{bibl}
+
+\end{document}

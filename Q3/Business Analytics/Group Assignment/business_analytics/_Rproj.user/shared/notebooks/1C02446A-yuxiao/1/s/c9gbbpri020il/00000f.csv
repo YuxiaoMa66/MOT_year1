@@ -1,0 +1,7 @@
+"0","# store the leaf nodes in a list"
+"0","leaves_info <- list()"
+"0","for(i in 1:length(leaves_data)) {"
+"0","  if (!is.null(leaves_data[[i]])) {"
+"0","    leaves_info <- c(leaves_info, leaves_data[[i]])"
+"0","  }"
+"0","}"

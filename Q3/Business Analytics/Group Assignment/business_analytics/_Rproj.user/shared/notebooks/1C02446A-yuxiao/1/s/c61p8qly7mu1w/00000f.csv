@@ -1,0 +1,23 @@
+"0","p <- ggplot(dta, aes(x = Age)) + "
+"0","  geom_histogram(aes(y = ..density..), bins = 15, fill = ""blue"", color = ""black"", alpha = 0.7) + "
+"0","  geom_density(color = ""red"", size = 1) + "
+"0","  geom_vline(aes(xintercept = median(Age)), color = ""red"", linetype = ""dashed"", size = 1) + "
+"0","  labs(title = ""Age Distribution"", x = ""Age"", y = ""Density"") +"
+"0","  theme_minimal() +"
+"0","  theme(legend.position = ""none"") + "
+"0","  annotate(""text"", x = median(dta$Age), y = Inf, label = paste(""Median ="", median(dta$Age)), vjust = 2, color = ""red"")"
+"2","Warning:"
+"2"," [38;5;232mUsing `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+[36mℹ[38;5;232m Please use `linewidth` instead.
+[90mThis warning is displayed once every 8 hours.[38;5;232m
+[90mCall `lifecycle::last_lifecycle_warnings()` to see where this warning was[38;5;232m
+[90mgenerated.[38;5;232m[39m
+"
+"0","print(p)"
+"2","Warning:"
+"2"," [38;5;232mThe dot-dot notation (`..density..`) was deprecated in ggplot2 3.4.0.
+[36mℹ[38;5;232m Please use `after_stat(density)` instead.
+[90mThis warning is displayed once every 8 hours.[38;5;232m
+[90mCall `lifecycle::last_lifecycle_warnings()` to see where this warning was[38;5;232m
+[90mgenerated.[38;5;232m[39m
+"

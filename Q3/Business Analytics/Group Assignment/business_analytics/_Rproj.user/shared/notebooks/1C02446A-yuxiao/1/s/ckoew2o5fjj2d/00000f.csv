@@ -1,0 +1,17 @@
+"0","# boxcox transformation"
+"0","library(MASS)"
+"2","
+载入程辑包：‘MASS’
+
+"
+"2","The following object is masked from ‘package:patchwork’:
+
+    area
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    select
+
+"
+"0","boxcox(dta$Flight.Distance ~ 1)"

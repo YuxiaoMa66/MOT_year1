@@ -1,0 +1,4 @@
+"0","# create a new dataframe with the selected variables"
+"0","dta2 <- dta2[,c(IV1, IV2, IV3, DV)]"
+"2","Error in `[.data.frame`(dta2, , c(IV1, IV2, IV3, DV)) : 选择了未定义的列
+"

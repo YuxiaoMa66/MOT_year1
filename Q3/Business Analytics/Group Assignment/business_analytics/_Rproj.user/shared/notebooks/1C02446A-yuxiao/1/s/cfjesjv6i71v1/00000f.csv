@@ -1,0 +1,4 @@
+"0","# drop the IV2 from the training and testing data"
+"0","train_data_new <- lapply(train_data_new, function(x) x[, !names(x) %in% IV2])"
+"2","Error in x[, !names(x) %in% IV2] : incorrect number of dimensions
+"

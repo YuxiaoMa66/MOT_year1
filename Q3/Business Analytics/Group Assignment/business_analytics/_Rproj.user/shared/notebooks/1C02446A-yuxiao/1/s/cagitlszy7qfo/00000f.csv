@@ -1,0 +1,4 @@
+"0","dta <- read.csv(""airline_passenger_satisfaction.csv"")"
+"0","dta_csv <- dta # Saveing the origional dataframe"
+"0","dta <- dta[ ,-which(colnames(dta) == ""ID"")]"
+"0","head(dta)"

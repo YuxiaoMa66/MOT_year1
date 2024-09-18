@@ -1,0 +1,8 @@
+"0","library(""MASS"")"
+"0","library(""factoextra"")# This library is needed to run it "
+"2","Warning:"
+"2"," 程辑包‘factoextra’是用R版本4.2.3 来建造的
+"
+"2","Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa
+"
+"0","fviz_eig(dta_loading, addlables= TRUE, ylim= c(0, 70))# Graph showing proportion of variance"

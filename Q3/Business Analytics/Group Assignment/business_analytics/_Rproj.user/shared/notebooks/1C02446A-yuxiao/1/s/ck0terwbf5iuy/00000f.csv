@@ -1,0 +1,3 @@
+"0","for (i in names_chr) {"
+"0","  print(pplotpie(dta, i))"
+"0","}"

@@ -1,0 +1,2 @@
+"0","# draw scatter plot with regression line"
+"0","plot(dta$adjAD, dta$adjDD, xlab = ""Adjusted Arrival Delay"", ylab = ""Adjusted Departure Delay"", main = ""Scatterplot of Adjusted Arrival Delay and Adjusted Departure Delay"")"

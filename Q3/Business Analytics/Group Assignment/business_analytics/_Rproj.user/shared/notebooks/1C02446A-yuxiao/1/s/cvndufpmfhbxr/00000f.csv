@@ -1,0 +1,7 @@
+"0","#  replace the ""IV3_predict"" with pred"
+"0","pred <- ifelse(train_data_new3$IV3_predict > 0.5, 1, 0)"
+"0","train_data_new3$IV3_predict <- pred"
+"0",""
+"0","# also for the testing dataset"
+"0","pred <- ifelse(test_data_new3$IV3_predict > 0.5, 1, 0)"
+"0","test_data_new3$IV3_predict <- pred"

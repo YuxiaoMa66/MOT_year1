@@ -1,0 +1,6 @@
+"0","# print the number of leaf nodes, dropping the NULL values"
+"0","print(paste(""Number of Leaf Nodes:"", length(leaves_data[!sapply(leaves_data, is.null)])))"
+"1","[1]"
+"1"," ""Number of Leaf Nodes: 20"""
+"1","
+"

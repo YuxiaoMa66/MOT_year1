@@ -1,0 +1,244 @@
+---
+title: "Ketill Data perperation"
+author: "khalldorsson"
+date: "2024-03-07"
+output: rmdformats::downcute
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#set.seed(210703) # 
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(fastDummies)
+library(corrplot)
+library(reshape2)
+
+```
+
+``` {r load_data, include=FALSE}
+flight <- read.csv("airline_passenger_satisfaction.csv")
+```
+
+## **Lidur 1**
+
+**Hérna skrifaru texta. $x_0 + 2x$ Og hér er meiri texti** (just a comment for me) $$x_o = 2$$ fyrir jöfnu ut i enda
+
+```{r inspecting data}
+head(flight)
+
+```
+```{r inspecting data further}
+str(flight)
+```
+
+Splitting variables into different groups of dummy variables
+```{r making types stolen from Yuxiao}
+type_gender <- unique(flight$Gender)
+print(type_gender)
+type_cust <- unique(flight$Customer.Type)
+print(type_cust)
+type_travel <- unique(flight$Type.of.Travel)
+print(type_travel)
+type_class <- unique(flight$Class)
+print(type_class)
+type_satis <- unique(flight$Satisfaction)
+print(type_satis)
+```
+
+
+```{r dummies from Yuxiao}
+# Gender, according to the unique values
+flight$gender <- ifelse(flight$Gender %in% type_gender[1], 1, 0)
+
+# Customer.Type, according to the unique values
+flight$Customer_type <- ifelse(flight$Customer.Type %in% type_cust[1], 1, 0)
+
+# Type.of.Travel, according to the unique values
+flight$Type_of_travel <- ifelse(flight$Type.of.Travel %in% type_travel[1], 1, 0)
+
+# Class, according to the unique values (3 classes so 2 dummy variables)
+flight$Class_business_isBusiness <- ifelse(flight$Class %in% type_class[1], 1, 0)
+flight$Class_economy_isEconomy <- ifelse(flight$Class %in% type_class[2], 1, 0)
+
+# Satisfaction, according to the unique values
+flight$Satisfaction_satis <- ifelse(flight$Satisfaction %in% type_satis[2], 1, 0)
+
+```
+
+
+
+
+
+
+```{r create_dummies, eval=FALSE, include=FALSE}
+#Remove chunk!!!!!!!!
+flight_dummie <- flight
+results <- subset(flight_dummie, select = c(ID, Gender, Customer.Type, Type.of.Travel, Class, Satisfaction))
+  #dummy_cols(flight_dummie, select = c( "ID", "Gender", "Customer.Type"))
+
+
+
+x<- dummy_cols(results$Gender, remove_selected_columns = TRUE) #Creating dummies for all non numeric variables, removing the original values
+colnames(x) <- c("Dummy_Female", 'Dummy_Male')
+
+y<- dummy_cols(results$Customer.Type, remove_selected_columns = TRUE)
+colnames(y) <- c("First_Time", 'Returning')
+
+z<- dummy_cols(results$Type.of.Travel, remove_selected_columns = TRUE)
+colnames(z) <- c("Business", 'Personal')
+
+results$Class <- factor(results$Class, levels = c("Business", "Economy", "Economy Plus"))# transforming to make multibel dummies on class
+
+q <- dummy_cols(results$Class, remove_selected_columns = TRUE)
+#<-dummy_cols(results$Class, remove_selected_columns = TRUE) 
+colnames(q) <- c("Business_Class", 'Economy_Class','Economy_Plus') #I may have fucked up the economy plus mode,think i fixed it
+
+s <- dummy_cols(results$Satisfaction, remove_selected_columns = TRUE)#Dummy variables for 
+colnames(s) <- c("Neutral or Dissatisfied", "Satisfied")
+
+
+dummy_results <- data.frame(ID=results$ID, x, y, z, q,s)
+
+#head(dummy_results) # Head of all the dummy variables
+#colnames(results) <- c("Gender", "Dummy_Female", 'Dummy_Male')
+#type_x <- typeof(x)
+#print(type_x)
+
+head(dummy_results)
+
+```
+
+### Data has been transformed into dummy variables with the chunk above, not it is time to merge the dummies back with the original dataframe
+
+
+#Im here, I have to make the new dataset to make the heatplot from, will have to remove nonnumeric data
+```{r merge data}
+# Assuming 'data_numeric' is your dataframe with numeric variables
+# and 'data_dummy' is your dataframe with dummy variables for non-numeric variables
+
+# Join the two dataframes based on the 'ID' column
+#flight_merged <- merge(flight_dummie, dummy_results, by = "ID") #irrelevant
+
+#Removing the variables that i have already converted to dummies in the row above
+#flight_merged <- flight_merged[, -c(2,4,5,6,24)]
+
+
+
+#Removing the ID so the table is more readable:
+flight_merged <- flight[, -c(1,2,4,5,6,24)]
+
+#Displaying the numeric database! 
+head(flight_merged)
+```
+
+### Removing the NA observations in the Arrival.Delay collum and replacing them with the mean, there are 129487 observations and out of those there are 393 observations that we replaced with the mean.
+
+```{r median implementation for arrival.Delay}
+
+flight_merged[ is.na(flight_merged$Arrival.Delay), ]$Arrival.Delay <- mean(flight_merged$Arrival.Delay, na.rm = TRUE)
+table(is.na(flight_merged$Arrival.Delay))
+
+```
+
+```{r make_corr_matrix}
+correlation_matrix <- cor(flight_merged)
+
+head(correlation_matrix)
+```
+
+
+### We see that arrival.delay always gives a N/A so I will remove it from the dataframe **Because** (this will be filled out later), UPDATE I used mean
+
+
+
+
+
+### Heatmap
+```{r heatmap, include=TRUE, error= TRUE}
+melted_correlation_matrix <- melt(correlation_matrix)
+
+ggplot(data = melted_correlation_matrix, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                       midpoint = 0, limit = c(-1, 1), space = "Lab",
+                       name="Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(colour = "darkslategray1", angle = 45, hjust = 1, size = 40),
+        axis.text.y = element_text(colour = "lightcoral", angle = 45, hjust = 1, size = 40), # Increase size for Y axis labels as well
+        axis.title = element_blank()) +
+  geom_text(aes(label = sprintf("%.2f", value)), size = 3, vjust = 1.5) +
+  geom_tile(data = subset(melted_correlation_matrix, abs(value) > 0.65),
+            color = "magenta", size = 1, fill = NA)
+
+# Use ggsave to save the plot to a file, specifying the dimensions
+ggsave("heatmap.png", width = 40, height = 30, dpi = 600)
+#I want to print a table with the correlations, I will update later
+#print(if(melted_correlation_matrix))
+```
+# Heatmap
+### We see that the dummy variabels corrilate negatively together, but also there is a stron corrilation on in flight wifi and ease of checkin
+
+**1.** ~Departure.Delay~ and ~Arrival.Delay~ correlation **0.97** \n>
+
+**2.** ~In.flight.Wifi.service~ and ~Ease.of.Online.Booking~ correaltion of **0.71**  
+
+**3.** ~Seat.Comfort~ and ~Cleanliness~ correaltion of **0.68**  
+
+**4.** ~Cleanliness~ and ~In.flight.Entertainment~ correaltion of **0.69**  
+
+**5.** ~Food.and.Drink~ and ~Cleanliness~ correaltion of a **0.66**  
+
+**6.** ~Economy_Class~ and ~Business_Class correaltion~ of **-0.86**  
+
+
+
+These are the 7 storngly correalted variables found by studying the heatmap, interesting to see that the correaltion between Business class and economy class is strongly negative but economy plus has no strong correaltions
+
+## **Plotting Correlated variables**
+
+### Lets look at correlation **1**
+
+
+
+
+
+```{r plot_corr_1}
+#We see that there are 393 NA observations in Arrival.Delay
+#Lets delete these variabels
+df_tmp <- flight_merged[, c("Arrival.Delay", "Departure.Delay")]
+head(df_tmp)
+
+ggplot(data = df_tmp, aes(x = Arrival.Delay, y = Departure.Delay)) + geom_point() +theme_minimal() +geom_smooth(method = "lm", color = "lightcoral") +
+    labs(title = "Delay's", x = "Arrival Delay", y = "Departure Delay") +
+    theme_minimal()
+remove(df_tmp)
+
+#ggplot(data=flight_merged, aes(x=Departure.Delay, y= c(1:5))+ geom_bar() +
+#xlab("Departure Delay") + ylab("Arrival Delay") + ylim(0,1600) + xlim(0,300)
+#Arrival.Delay has some N/A, will have to deal with further up and get fixed for this to work.
+```
+We see that there is a strong correaltion between the 2 variabels
+
+## check chapter 3 use summary and is.na to fix variables
+### Note to self, check if we are dealing with significant outliers in this dataset
+
+```{r plot_corr_2}
+#Works for a scatter, is not nice
+#ggplot(data = flight_merged, aes(x =In.flight.Entertainment , y = flight_merged$In.flight.Wifi.Service)) + geom_point()
+
+
+
+  ggplot(data = flight_merged, aes(x = factor(In.flight.Wifi.Service))) +
+  geom_bar(position = "dodge") +
+  xlab("In-flight WiFi Service") +
+  ylab("Count")
+
+#ggplot(data=flight_merged, aes(x=count(flight_merged$In.flight.Entertainment), y=count))+ geom_bar() +
+#xlab("In flight WIFI") + ylab("Ease of online booking")
+#Arrival.Delay has some N/A, will have to deal with further up and get fixed for this to work.
+```

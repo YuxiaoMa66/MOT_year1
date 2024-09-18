@@ -1,0 +1,73 @@
+"0","# 对于宽模型，我们直接使用数值特征"
+"0","# 对于深模型，我们使用嵌入层处理类别特征和数值特征的混合"
+"0",""
+"0","# 定义输入"
+"0","numeric_inputs <- lapply(names(train_data), function(name) layer_input(shape = 1, name = paste0(name, ""_input"")))"
+"2","2"
+"1","Traceback (most recent call last):
+  File ""D:\R-4.2.0\R_USER\.virtualenvs\r-tensorflow\lib\site-packages\tensorflow\python\pywrap_tensorflow.py"", line 24, in <module>
+    import ssl
+  File ""D:\R-4.2.0\library\reticulate\python\rpytools\loader.py"", line 119, in _find_and_load_hook
+    return _run_hook(name, _hook)
+  File ""D:\R-4.2.0\library\reticulate\python\rpytools\loader.py"", line 93, in _run_hook
+    module = hook()
+  File ""D:\R-4.2.0\library\reticulate\python\rpytools\loader.py"", line 117, in _ho"
+"2","024-03-28 16:38:40.796942: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+"
+"1","ok
+    return _find_and_load(name, import_)
+  File ""D:\Anaconda\lib\ssl.py"", line 98, in <module>
+    import _ssl             # if we can't import it, let the error propagate
+  File ""D:\R-4.2.0\library\reticulate\python\rpytools\loader.py"", line 119, in _find_and_load_hook
+    return _run_hook(name, _hook)
+  File ""D:\R-4.2.0\library\reticulate\python\rpytools\loader.py"", line 93, in _run_hook
+    module = hook()
+  File ""D:\R-4.2.0\library\reticulate\python\rpytools\loader.py"", line 117, in _hook
+  "
+"1","  return _find_and_load(name, import_)
+ImportError: DLL load failed while importing _ssl: 找不到指定的模块。
+
+
+Warning: Failed to load ssl module. Continuing without ssl support.
+"
+"2","WARNING:tensorflow:From D:\R-4.2.0\R_USER\.virtualenvs\r-tensorflow\lib\site-packages\keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+"
+"2","WARNING:tensorflow:From D:\R-4.2.0\R_USER\.virtualenvs\r-tensorflow\lib\site-packages\keras\src\backend.py:1398: The name tf.executing_eagerly_outside_functions is deprecated. Please use tf.compat.v1.executing_eagerly_outside_functions instead.
+
+"
+"0","all_inputs <- numeric_inputs"
+"0","all_inputs_list <- unlist(numeric_inputs)"
+"0",""
+"0","# 定义宽模型部分"
+"0","wide_features <- layer_concatenate(all_inputs_list) %>% "
+"0","  layer_dense(units = 1, activation = 'linear') "
+"2","2"
+"2","024-03-28 16:39:39.851198: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE SSE2 SSE3 SSE4.1 SSE4.2 AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+"
+"0","# 定义深模型部分"
+"0","deep_features <- layer_concatenate(all_inputs_list) %>% "
+"0","  layer_dense(units = 64, activation = 'relu') %>% "
+"0","  layer_dense(units = 64, activation = 'relu')"
+"0",""
+"0","# 合并宽模型和深模型的输出"
+"0","final_output <- layer_concatenate(list(wide_features, deep_features)) %>% "
+"0","  layer_dense(units = 1, activation = 'sigmoid')"
+"0",""
+"0","# 创建模型"
+"0","model <- keras_model(inputs = all_inputs_list, outputs = final_output)"
+"0",""
+"0","# 编译模型"
+"0","model %>% compile("
+"0","  loss = 'binary_crossentropy',"
+"0","  optimizer = 'adam',"
+"0","  metrics = c('accuracy')"
+"0",")"
+"2","WARNING:tensorflow:From D:\R-4.2.0\R_USER\.virtualenvs\r-tensorflow\lib\site-packages\keras\src\optimizers\__init__.py:309: The name tf.train.Optimizer is deprecated. Please use tf.compat.v1.train.Optimizer instead.
+
+"
+"0","# 将训练数据和测试数据转换为模型输入的格式"
+"0","train_list <- lapply(names(train_data), function(name) as.matrix(train_data[[name]]))"
+"0","test_list <- lapply(names(test_data), function(name) as.matrix(test_data[[name]]))"
+"0",""

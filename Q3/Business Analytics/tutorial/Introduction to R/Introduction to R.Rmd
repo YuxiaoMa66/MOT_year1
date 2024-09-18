@@ -1,0 +1,498 @@
+---
+title: 'Workshop: An introduction to working with R'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+## Working with this document
+
+### Setup of this file
+
+You just opened an R workbook in the R Markdown format. This format allows you to alternate between written text and (running) code (go to [this](http://rmarkdown.rstudio.com) page for more details on using R Markdown). Whereas text is displayed as expected when using an elementary text editor, the format utilises so-called 'chunks' to show and execute code. Below, you'll see an example of such a chunk:
+
+```{r example}
+print("Hello, World!")
+```
+
+On the upper right of each chunk, you see three options (position the cursor over each icon and wait a bit for the tooltip to show):
+
+-   'Modify Chunk Options'
+    -   This option allows you to control the appearance and behaviour of each chunk. For example, you can change its name or adjust its output options. In this tutorial series, there is **no** need to adjust these options.
+-   'Run All Chunks Above'
+    -   Clicking this option makes that R executes all previous code chunks, which makes it helpful if you made it halfway through a tutorial and need to stop and resume it later. **Because chunks tend to be cumulative (i.e. they could use output generated in previous ones), it's pivotal that you run all chunks before the point where you want to resume**.
+-   'Run Current Chunk'
+    -   Clicking this option executes a chunk's code. You can use this option as you proceed through the tutorial. Please try running the code chunk above now.
+
+In addition to the options for each chunk, you'll find the 'Run'-drop down menu. A useful command in this menu is 'Run Selected Line(s)'. This command allows you to run code in chunks on a line-by-line basis. It comes in handy when learning the basics, so we strongly recommend using this command (and its shortcut)! The 'Run'-drop down menu also contains other more sophisticated options. Explore them, and see if they offer additional value to the already discussed ones. Lastly, note the two buttons on the upper-left of this notebook: 'Source' and 'Visual'. 'Source' mode displays this workbook in its markup language. 'Visual' mode shows this workbook in the form that, more or less, results when you export ("knit") the document to an output format such as .html or .pdf. It is up to you to decide which mode you prefer.
+
+### R Workbooks versus R Scripts and a note on the working directory
+
+The current workbook is helpful when you want to write, e.g. a document in which you wish to integrate reporting and analysis components. This approach strongly resonates with the reproducible research philosophy that has emerged in recent years. Because of this, we ask you to write your final report in an R Workbook. When you work on developing specific parts of code, this workbook setup might distract or work counterproductive. If this applies to you, be advised that you can also maintain one or more R-scripts where you do the code work (go to 'File' --\> 'New File' --\> 'R Script'). However, you must transfer the developed code to a workbook to integrate it with your report.
+
+If you decide to do your coding work in separate scripts first, then it is necessary to set your working directory. You can do this with the `setwd()` command. This command tells R which folder to use for reading and writing data. The abbreviation `wd` stands for 'working directory'. It's comparable to, e.g. selecting the folder where a .docx-document is stored that you want to open when working in Word. Whereas in an R Workbook, this working directory is the directory from which it loads the workbook, it needs to be specified explicitly when not working from a workbook. If, for example, you have set 'Users' as a top-level folder, then the command would read `setwd("C:/Users")`. Regardless of the operating system you are working with, you **must always use forward slashes** ('/') when specifying the path name. Using a forward slash is the default on Mac systems but **not** Windows systems (which use '\\'). Also note that if you work on a Mac, we don't specify the hard drive in the working directory (so the `setwd()` command on a Mac would read as `setwd("/Users")`). Selecting which folder to use as your working directory depends on your preferences for organising your hard drive, so we won't dictate which folder to use.
+
+### Proceeding through the tutorial
+
+This tutorial consists of two main parts: (1) An introduction to the tutorial's objectives and (2) An introduction to working with R. Work your way through both parts. In this tutorial, we won't ask you to change the code yourself. In later tutorials, we will, and doing so is pivotal for all code to run. It is therefore strongly advised to try to make minor modifications to the code we provide to understand what it does. We will invite you to do so at several points throughout this tutorial. You can click the Knit button above once you have made it to the tutorial's end. Clicking this button generates an HTML document that includes this tutorial's content and the output of the code chunks.
+
+## Tutorial introduction: Objectives and some considerations
+
+### Objectives
+
+If you made it up to this point, you successfully installed R, RStudio and opened this workbook. Congratulations! This workbook aims to acquaint you with several fundamental R data operations. More specifically, after having followed this tutorial, you will be able to do the following using RStudio:
+
+-   Work with and explore vectors
+
+-   Work with and explore data frames
+
+-   Engage in several data-wrangling activities (i.e. creating, loading, combining and modifying data)
+
+-   Use functions available through base r
+
+### Some considerations before you begin
+
+Learning how to code can be intimidating, especially in an environment as unforgiving as R. Believe us, we've been there (if you are interested, ask us for the juicy details)! This workbook format offers a relatively friendly way to get acquainted with coding without becoming a full-fledged programmer. The main goal is to get acquainted with R. In the quiz that you will take based on this workbook, we therefore won't ask you to write or adjust code. In subsequent quizzes we will, but in the first quiz we will test your understanding of the different aspects covered in this workbook.
+
+In the end, we offer solutions to problems you are likely to encounter in the future. As such, the code in this workbook serves as a basic repertoire you can later re-use and adjust as you see fit. Once you are at that point, realise that for many tasks in R, there is more than one way to do it. Purists will say there are good and bad ways of doing things, but first, focus on achieving whatever you want to get done. Refinement and striving for perfection come later, if ever.
+
+Do try, however, to understand what is happening in each step. And: do **not** be afraid to break things (this is easy to do in R in any case). In fact: make it your goal to break things to see how they work! Playing around with the code will deepen your understanding of R. In that sense, adopting a 'frob, twiddle and tweak'-mindset can be helpful. According to Eric S. Raymond, software developer and author of [The New Hacker's Dictionary](https://www.gutenberg.org/files/3008/3008-h/3008-h.htm), these terms relate to different levels of manipulation of an unknown device to understand what it does. 'Frob' refers to aimless manipulation (moving parts very broadly to identify their functions/range, also known as destructive testing), "twiddle" refers to gross manipulation (moving parts in smaller ways, usually one at a time, to estimate likely settings), and "tweak" refers to fine-tuning (make fine adjustments, typically related to one another, to come to a final configuration). If you get stuck (and believe us, this will happen less often than you might think), you can always start anew with a clean notebook.
+
+We show how to code in base R in this tutorial. If you are familiar with working with R, you might wonder why we don't use the functionality offered by the packages bundled in the [tidyverse](https://www.tidyverse.org). Our answer to that question would be to exercise patience. The tidyverse is great, but let's first learn the basics. To use an (exaggerated) music analogy: learning base R is like practising scales when you learn how to play the keyboard. Starting with the tidyverse packages right away is like pressing the demo button on that keyboard and thinking that is all there is to it. At this point, however, it is too early to have this discussion. However, if you are interested in it, read more about it [here](https://github.com/matloff/TidyverseSkeptic).
+
+## Tutorial walkthrough
+
+### 1. Working with vectors
+
+#### Numeric vectors
+
+Let's start with creating a numeric vector (click "Run Current Chunk" in the below code chunk):
+
+```{r vector}
+c(1, 2, 3, 4)
+```
+
+In the above, we embed a four-number sequence in the `c()` function. This function concatenates (or combines, hence the c) the numbers we have fed to it. Using the `c()` function often is necessary (it is required above: try entering `1, 2, 3, 4` instead and see what happens). But: it never hurts to use it. We recommend using it whenever possible to avoid bugs in your code that are difficult to trace. Note that entering the vector does nothing more than printing it (see also the lower left part of RStudio, tab 'Console'). What we typically want to do instead is to assign this vector to a named object, for example, `x`:
+
+```{r vector assignment}
+x <- c(1, 2, 3, 4)
+```
+
+Now, R doesn't print anything to the console. In general, if we want to see what an object looks like, we can call it:
+
+```{r vector print}
+x
+```
+
+Alternatively, you could use the `print` command, so `print(x)`. Try this yourself by changing the code in the chunk above. In the subsequent code chunks, we often run code and explicitly call the result. This approach is not a default thing to do in R, but we do it here to show the outcome of an operation for educational purposes.
+
+Note that vector `x`, once created, becomes visible in the upper right part of RStudio (see tab 'Environment'). Creating a vector like this is easy when you have a few numbers, but this is a cumbersome approach when you want to make larger ones, for example, a sequence from 1 to 25. Indeed, manually entering each number one by one is different from what programming life should be (as a general rule, whenever you feel you are doing something very inefficient, you are right, and there is probably a better way to do it). In the case of creating a vector from 1 to 25, we can use the colon sign:
+
+```{r larger vector}
+x <- c(1:25)
+x
+```
+
+We assigned a new vector to an existing object, and R overwrote that object without warning. In the current example, this is okay, but you can imagine this sometimes is the case, so be mindful of this. A powerful feature distinguishing R from other languages is called 'vectorisation'. Vectorisation means that an operator or function will act on each vector element. Wait, what? An example says more than a thousand words here, so say we want to multiply each element of our vector `x` by 2. One way to do this is to write a loop:
+
+```{r for loop}
+for (i in seq(length(x))) {
+    x[i] <- x[i] * 2
+}
+x
+print(range(x))
+x <- c(1:25) # initialize x to its default values
+```
+
+The loop above iterates through each element (i) of x, multiplies it by two and overwrites it with the result of the multiplication (you can ignore the last line. We reset x to its starting state. Like printing objects, this is not a default thing to do in R but we do it here for the sake of explanation). Loops are generally convenient for understanding what happens in a particular step in your code. Loops, however, are also considered inefficient. Use them if you want, but be prepared. You will get criticised by "the puRists" (e.g. when asking for help on an online forum. Also, see Circle 3 of the [R Inferno](https://www.burns-stat.com/pages/Tutor/R_inferno.pdf)). This point in the tutorial may be a good moment to expand on our earlier statement: focus on achieving what you want to achieve, **but** keep your code simple. In the specific example above, vectorisation cancels the need for a loop. Instead of this loop, we can multiply x by 2:
+
+```{r not a for loop}
+x <- x * 2
+x
+x <- c(1:25) # initialize x to its default values
+```
+
+In this example, the multiplication operator (`*`) operates on each element of x at once. As said, this also holds for functions, for example, when we want to check the length of each element of `x`:
+
+```{r nchar x}
+nchar(x)
+# 计算x每个元素的字符数
+```
+
+Also, note that we use the `#`-sign in some chunks above. This sign tells R to ignore all text that comes after it and hence can be used to comment out specific lines of code (for example, when you are developing or debugging code) or to explain what a particular part in your code does. Our advice is to comment generously on your code. Commenting helps others to make sense of what happens. An important thing to realise here is that the future you (e.g. you in two or three weeks) also belongs to that group of others: it is natural (and we also believe it to be healthy) to forget about the specifics of a piece of code once you got it running, and then it is helpful to have a pointer about what it does should there be a need to go back to it the future (e.g. for unexpected debugging or further development).
+
+We conclude this explanation of working with numeric vectors with an example that shows you can use existing vectors to create new ones. In the example below, we add vector `x` to two times vector `x` and assign the result to a new object `y`.
+
+```{r vector calculation}
+y <- x + 2*x
+y
+```
+
+#### Character vectors
+
+So far, we have focused on numeric vectors. But vectors can also contain other data types, such as characters (e.g. words). Such a vector could look like this (note the quotation marks):
+
+```{r text vector}
+words <- c("R", "is", "awesome")
+words
+```
+
+Many functions that apply to numeric vectors can also work with character vectors, such as `length`:
+
+```{r length words}
+length(words)
+```
+
+An important thing to know is that vectors may only contain elements that belong to the same class (e.g. character or numeric). Let's see what happens if we add the number 4 to our words object:
+
+```{r combined words}
+words <- c("R", "is", "awesome", 4)
+words
+```
+
+As you see, R happily accepts the number but treats it as if it were a character (R displays the number between parentheses, just like the words). Indeed, if we want to multiply this fourth element by two (more about subsetting later), R throws an error:
+
+```{r error, error = TRUE}
+words[4] * 2
+```
+
+This point in the tutorial is an appropriate moment to say a thing or two about the anatomy of code chunks. Each chunk starts with text enclosed by curly braces (`{}`). This part allows you to exercise control over the output of each chunk. For example, we have set the chunk option `error = TRUE` in the chunk above. The default in RStudio is that mistakes in code chunks will halt R (i.e. `error = FALSE`, which R does not explicitly show because it is the default). If (for example, for educational purposes, like in this workbook) we want to show errors without halting R, we must change this default.
+
+Another setting that is not mandatory but comes in handy is the chunk label. This label is the text string that comes (and always should come) immediately after the name of the environment in which you want the code to be executed (which is always `r` in this tutorial, but in principle, nothing stops us from running code in other environments, for example, Python). Using chunk labels is handy as this allows us to refer to them in case of questions easily. Do note, however, that chunk names should be unique!
+
+Anyway, back to our character vector. When we check the class of the words object or the class of its fourth element, we see that it is a character:
+
+```{r class}
+class(words)
+class(words[4])
+```
+
+If you want to coerce the fourth element to a number, feed it to the `as.numeric()` function and multiply its results by two (see below). But typically, whenever you encounter a vector containing mixed data types (all coerced to the same, most basic data type such as `character` in the example we are currently looking at), you probably have some additional data cleaning work to do. It is helpful to know, however, that functions exist that can change the data type of objects or their constituents, such as `as.numeric()`:
+
+```{r as numeric}
+as.numeric(words[1])
+as.numeric(words[4]) * 2
+```
+
+#### Subsetting vectors
+
+Often, we want to subset vectors to extract specific values. For example, let's say we want to know what the 5th element is of x. We can do this by using square brackets:
+
+```{r subset}
+x[5]
+```
+
+In addition to looking at individual elements, we can select ranges, for example, the 5th until the 10th element of x. To do this, we use a vector, c(5:10), to subset another vector x:
+
+```{r subset range}
+x[ c(5:10) ]
+```
+
+In the example above, the spaces between the square brackets and their contents only enhance readability. We like our code to look spacious, but you are free to choose your style. In the supplementary materials to this tutorial, though, we will provide a link to a webpage that suggests some coding hygiene principles.
+
+Sub-setting data is also possible using logical constants. Again, one example says more than a thousand words. Let's say we only want to display those values in x that can be divided by four. We can use the %%-operator, which gives us the modulus (or: the remainder from division). Let's do this step-by-step, so you'll follow along. First, we calculate the result of x modulus 4:
+
+```{r modulus}
+x %% 4
+```
+
+The result is a vector alternating between the 1, 2, 3, 0 - sequence. Ten modulus four, for example, is two, as four goes into ten twice, and then the remaining difference two is left over. Let's now create a vector with logical constants that shows TRUE when the modulus equals zero and FALSE when the modulus does not:
+
+```{r logical}
+x %% 4 == 0
+```
+
+The result of this step is another vector that we use to subset our vector x:
+
+```{r subset x}
+x [ x %% 4 == 0 ]
+```
+
+Ta-da! You just subsetted a vector using the result of an evaluation of whether or not the output of an expression was 0. Most of the time, subsetting is done like this to make your code more robust: instead of hard-coding the elements (as in the c(5:10)-example), we filter based on whether or not a particular condition is satisfied.
+
+A last helpful trick to know is using the negative (`-`) sign when subsetting. With this sign, we indicate which elements we do **not** want to see instead of those we want. Sometimes, this makes your code easier to read. For example, if we wish to see all elements of x except the fifth one, we could do the following:
+
+```{r negative}
+x [ -5 ]
+```
+
+#### Concluding remarks on vectors
+
+To conclude this part on vectors, it is good to know that vectors are one of the fundamental building blocks for working with R. Not only do we use them to store data, but we also use them for, e.g. subsetting, or iterating through data. They are so omnipresent in R that it would be futile to devise a list of usage examples. This omnipresence also means that whenever you run into problems with your code, it is good to break the problem down to the vector level. Don't worry if you need some time to grasp the meaning of that statement. Your understanding will grow with experience.
+
+If vectors are one of the basic blocks, this also means there is more to it. In the next section, we'll look at how to combine multiple vectors into the data frame object. Whereas vectors are the building blocks, data frames are the working horses for working with data in R. If you are familiar with working in Excel, compare a data frame with a worksheet in Excel. As you understand some basics by now, this discussion will include more advanced code.
+
+### 2. Data frames and indexing
+
+In business analytics, we typically work with data sets containing information on multiple observation units (e.g. individuals) and attributes (e.g. age and length). Let's say, for example, we are avid fans of the Breaking Bad series and want to keep track of some features of our favourite characters:
+
+```{r breaking bad}
+breaking_bad <- data.frame(main_character = c("Walt", "Todd", "Skyler", "Gus", "Lydia", "Jimmy"),
+                           first_occurence = c("S01E01", "S05E03", "S01E01", "S02E11", "S05E02", "S92E11"),
+                           actors_yob = c(1956, 1988, 1968, 1958, 1975, 1962),
+                           sex = c(NA, 1, 0, 1, 0, 1))
+head(breaking_bad)
+```
+
+If you don't like these characters or Breaking Bad: feel free to change the code chunk above as you please (Wikipedia is a rich source of information! This could be a nice web scraping exercise but let's go there later). In the code chunk above, we assign a data frame to an object called `breaking_bad`. We create this data frame with the `data.frame` function, in which we assign four vectors: main_character, first_occurence, actors_yob (yob = year of birth) and sex. Whereas the first two vectors are characters, the second two are numeric vectors (with the last one being a special case containing dummy scores, but we leave that point for now). For reasons that will become clear later, we have assigned an `NA` value for Walt's sex. `NA` stands for "Not Available" and is used in R to denote missing values.
+
+In contrast to the rather sterile object names we used when discussing vectors, we now use labels that have substantive meaning. For the names of the vectors, this is useful because these names end up being the column names of the resulting data frame. For the name of that data frame, using a mnemonic label helps us remember its contents. Using such mnemonic labels for whatever object we create is generally good practice. Compared to labels such as `x`, `data_set` or `result_2a`, your code is easier to read and understand. Also, note the use of underscores (`_`). We strongly advise you to do this as well, as R fares most well when it can work with objects labelled with one uninterrupted string that does **not** contain spaces. It also might work with labels that contain spaces (e.g. `main characters` instead of `main_characters`). But believe us: you want to spend your energy and time on something other than the potential code-troubleshooting that stems from using spaces.
+
+The last command in the chunk above applies the `head` command to the `breaking_bad` data frame. By default, this command shows the first six rows of the data frame fed to it. In this specific example, the output shows the entire data frame because it only contains six rows, but this is a useful function when you want to get an idea of the content of larger data frames. The `head` command also includes an option specifying the number of rows to display. We do **not** demonstrate this in the chunk below. Instead, the chunk shows how to get help when you want to know more about a function's options: type a question mark (`?`) immediately followed by the function's name. You'll then see that the help file of that function shows in the lower right part of your console (tab 'Help'). Please read it, then try to modify the `head` function in the chunk above so that it only displays the first two rows of the data frame. R help files are notoriously cryptic, so sometimes it might work better if you look for a function using a search engine. As a first step, however, it could work.
+
+```{r help}
+?head
+```
+
+Although the `head` function is useful, its output gets messy when applied to a data frame with multiple columns and rows. Instead, we prefer using the `str()` function:
+
+```{r str}
+str(breaking_bad)
+```
+
+Not only does this provide insight into the contents of a data frame, but it also shows its dimensions (number of observations and variables) and the data type of each vector it contains. This information helps you to scan for things that need attention before working with the data frame. For example, R guesses the data type of each vector. It succeeds when the data type of a vector is unambiguous, but when you get unexpected results, there might be an issue with the data you want to address first. For example, we earlier sketched the situation where R recognises a numeric variable as a character. In such a case, it could be that one of the entries in the source vector might be non-numeric (e.g. "four" instead of "4"). This scenario could sound hypothetical to you. Still, we must emphasise the need to perform sanity checks (is whatever output I am looking at the output I expected?) whenever we can. The cool thing about computers is that they can do a lot of tasks much faster and more efficiently than human beings. The not-so-cool thing about computers is that they do what you ask them to do. They don't ask critical questions if you make mistakes in your question (i.e. your code) or the materials you provide (i.e. the data). So stay on top of it!
+
+Another useful function to check your data and get some insight into it is the `summary` function. R bases the output for each variable on its data type (i.e. character vs numeric):
+
+```{r summary}
+summary(breaking_bad)
+```
+
+From the above, you can deduce that the function provides little information for character variables. To tackle this, you can use the `table` function to generate an overview of such variables. This function only works well when you have a few unique categories, so use caution. We could, for example, check the frequencies of the first_occurence variable:
+
+```{r table}
+table(breaking_bad$first_occurence)
+```
+
+#### Subsetting data frames
+
+If we return to the output of the `str()` function above, note the dollar (`$`)-signs. Using this sign allows you to subset specific columns of a data frame. For example, we can run the following code if we want to see the names of the main characters:
+
+```{r selection}
+breaking_bad$main_character
+```
+
+For those that cannot surrender to their urge for structure and order, we could embed the command above in the `sort()` function so that R automatically sorts the output for you (in this case, in alphabetical order but also works for numbers):
+
+```{r select and sort}
+sort(breaking_bad$main_character)
+```
+
+And, of course, we can use the contents of a data frame in all types of calculations. For example, when determining actors' current or average age. Note that in the first line below, we embed the output of a function, `Sys.Date()`, in another function, `format`, of which the output, in turn, is embedded in yet another function. In the second line, we even go further! Nesting functions often is possible, but with an eye on the readability of your code, this is **not** a good idea by default. We leave it up to you to develop your style in this regard:
+
+```{r data frame calculation}
+as.numeric(format(Sys.Date(), "%Y")) - breaking_bad$actors_yob
+mean(as.numeric(format(Sys.Date(), "%Y")) - breaking_bad$actors_yob)
+```
+
+We could also subset the data frame using the squared brackets approach discussed earlier for vectors. Because we are dealing with multiple vectors simultaneously, we need to indicate the row *and* column dimensions we want to subset using this format: `[row, column]`. So if we want to know what the contents are of row 4, column 3 (as a sanity check: verify yourself this is the cell that contains the year of birth of the actor that plays Gus: 1958), we would do the following:
+
+```{r subset data frame}
+breaking_bad[4, 3]
+```
+
+And like vectors, we can also apply ranges (using vectors for the row and column dimensions):
+
+```{r subset data frame ranges}
+breaking_bad[ c(4:6), c(1, 3:4) ]
+```
+
+Using numeric indices to subset data frames is problematic for both columns and rows. It is, therefore, rare to see the approach to subsetting a data frame as sketched in the code chunk above, where rows and columns are subsetted in one go. For columns, subsetting is easier when you use variable names. So, although both lines of code in the chunk below yield the same output, the first one is easier to understand.
+
+```{r subset data frame column}
+breaking_bad$main_character
+breaking_bad[, 1]
+breaking_bad['main_character']
+```
+
+Another reason using numeric indices to subset columns in data frames is problematic is that sometimes the location of columns in a data frame might change after applying a function. Hence, using a `$`-sign instead of a numeric index is always advisable. Subsetting rows using numeric indices is problematic because we often need to know the specific rows of the value(s) of interest. The fact of the matter is that often subsetting aims to locate rows! So, in line with the example provided in the logical chunk, we now follow the approach we followed when we discussed subsetting vectors using logical constants. Let's say we want to get those rows in the data frame where the sex of the actor is male. Following standard practice in dummy coding, this means filtering for a value of 1 because the m (of male) occurs after the f (of female) in the alphabet. Below, you'll find one standard way to do this:
+
+```{r subset data frame row}
+breaking_bad[ breaking_bad$sex == 1, ]
+```
+
+Regarding using square brackets, nothing has changed. But, instead of using numbers, we have created a logical vector that gives either TRUE or FALSE based on the condition `breaking_bad$sex == 1` (try running this code fragment and see what it yields). This vector, indeed, gives us all male characters. But something is off: we also see a row that only contains NAs. This row occurs because of the missing value for Walt's sex. We could remedy this by embedding the result of our subset in the `na.omit()`-function:
+
+```{r na omit}
+na.omit(breaking_bad[ breaking_bad$sex == 1, ])
+```
+
+Using `na.omit` works. But, it is annoying to remedy an issue caused by the quirks of a specific function. With the second half of the statement, 'focus on getting done whatever it is you want to get done **but** try to keep your code simple', let's see if there is an alternative way. There is:
+
+```{r in operator}
+breaking_bad[ which(breaking_bad$sex %in% 1), ]
+```
+
+Instead of `==`, which tests if two elements are exactly equal, we use `%in%`, which looks for matches. You won't notice any difference when working with complete data (i.e. data that does *not* contain missing values). But once NAs get involved, you will find `%in%` to give the desired result immediately.
+
+Lastly, the `order` function is helpful to work with within the context of subsetting. You can use this function to sort a data frame, for example, if we want to sort the characters in the data frame based on the `yob`-variable. When we apply the `order` function to this variable, R generates a vector that indicates the location of the lowest number, the second lowest number, etc. (see the first line in the chunk below). If we embed that result between square brackets, as we do when subsetting, the data frame will be reordered automatically (see the second line):
+
+```{r order}
+order(breaking_bad$actors_yob)
+breaking_bad[ order(breaking_bad$actors_yob), ]
+```
+
+#### Concluding remarks on data frames
+
+Next to vectors, you now know data frames and some useful functions and operations. There are many other data objects one can encounter in R, such as matrices (similar to data frames in that they are multidimensional, but different in that a matrix can only hold data of one type, just as vectors) and lists (similar to a data frame in that it can contain data of different types, but different in that lists also can contain data vectors of various sizes. A data frame in R is a particular case of a list, but for now, this is not important). In our experience, however, once you understand the basics of vectors and data frames, you'll manage to deal with the larger part of data objects that R might spit out.
+
+We conclude this first tutorial with a small demo of what we can do in R. Not only will we learn how to import data from a .csv-file, but we'll also see how to combine variables, join data frames, make simple and more advanced calculations and heck, we'll even run a naive regression model and plot it. Don't feel too intimidated by all of this. It is a demo, and the goal is that in the end, when you run into an issue somewhere along the way, you might remember that this tutorial contains a code snippet that you can use directly or after some tweaks to fix that issue. Ah, and before we forget, let's change Walt's gender from NA to 1 (see if you can make sense of what happens in the snippet below. You'll see a similar operation later on):
+
+```{r walt}
+breaking_bad[ which(breaking_bad$main_character %in% "Walt"), ]$sex <- 1
+```
+
+### 3. Basic data-wrangling activities
+
+#### Workspace management
+
+Before starting our demo, let's look at the objects accumulated in our workspace. We can see this in the upper right of this console (tab 'Environment'), but we could also get an overview by running the following command:
+
+```{r ls}
+ls()
+```
+
+The `ls()` function lists all objects currently living in the R environment. By now, the `breaking_bad` object does not need further introduction. We created the other objects while explaining vectors and can safely remove them with the `remove` function:
+
+```{r remove}
+remove(i, words, x, y)
+```
+
+#### Load external data
+
+Typically, we don't get data into R by manually entering it, as we have done so far. Instead, we get our data from external sources. Say, for example, that we want to expand the information in our breaking_bad data frame and include data on the episodes. We included a file named `breaking_bad.csv` in the module on Brightspace. *Ensure this file is in the same folder from where you loaded this workbook*, and let's load this data. R can open various data file formats (e.g. .txt, .xls, .xlsx, .sav, etc.). For some of these formats, you need to install additional packages (e.g. the `rio`-package), but here we use the built-in `read.csv` command. We assign the loaded data to an object called `episodes` in the code chunk below.
+
+```{r episodes}
+episodes <- read.csv("breaking_bad.csv")
+```
+
+You can get more information about this file from [Kaggle](https://www.kaggle.com/datasets/varpit94/breaking-bad-tv-show-all-seasons-episodes-data?resource=download), where we downloaded it. Let's explore the structure of this newly created object:
+
+```{r structure episodes}
+str(episodes)
+```
+
+Earlier, we introduced the `head` function for exploring data and explained that this function would only sometimes yield an insightful output. See if you agree with us by applying it to the `episodes` data in the chunk above!
+
+#### Combining data - preparation
+
+Let's say we want to add data available in the `episodes` data frame to our breaking_bad data frame. For this to work, we need to have one or more overlapping variables to link both frames. Luckily, these are present in the form of the season and episode data (we use the `cbind` function to combine ("bind") columns (hence the c). Specifying column names is optional but advisable):
+
+```{r season and episode}
+breaking_bad$first_occurence
+head(cbind(Season = episodes$Season, Episode = episodes$Episode))
+```
+
+Before proceeding, however, we need to do some harmonisation work. Whereas in the `breaking_bad` data frame, one variable (`first_occurence`) captures the season/episode information, the `episodes` data frame neatly displays them in two columns. We need to change the variable(s) in one of the data frames so that the resulting format matches the variable(s) format in the other. The attractive way is to manually do this for the breaking_bad data frame, as it only contains six observations. But it could be more scalable: what if we had a table with the entire cast of 400+ individuals? So: good idea, but no. Instead, let's see what functionality R offers to do this programmatically. One way would be combining the `paste` function and the `sprintf` function available in R and applying them to the episodes data frame. The `paste` function puts whatever it gets fed (e.g. the contents of a vector) into one character vector:
+
+```{r paste}
+paste("R", "is", "awesome", sep = " ")
+```
+
+The `sprintf` function does something similar but allows for a bit more formatting. In the example below, we want to generate a number sequence that consists of at least two digits:
+
+```{r sprintf}
+sprintf("%02d", c(1, 10, 100))
+```
+
+If we combine both, we get the below. Note comments, indentation and the use of multiple lines to maintain readability:
+
+```{r season episode}
+episodes$season_episode <- paste("S", # first letter denotes season
+                                 sprintf("%02d", as.numeric(episodes$Season)), # season no.
+                                 "E", # second letter denotes episode
+                                 sprintf("%02d", as.numeric(episodes$Episode)), # episode no.
+                                 sep = "") # do not separated components
+```
+
+In the function call above, we create a new variable `season_episode` and add it to the `episodes` data frame on the fly: another perk of working with the dollar sign! So now we got what we want. Again, this is one way to do it. It is possible to criticise this approach because we create a 'non-tidy' variable, i.e. one variable that contains multiple information components (both season and episode information). So a better way would be to split the `first_occurence`-variable in the `breaking_bad` data frame using functions that, instead of combining two variables, split one variable into two. If that resonates with you, challenge your lecturer the next time you see him and ask for a live demo of how to do this during the lecture. The end justifies the means for now, and we proceed with what we have created.
+
+#### Combining data - the actual merge
+
+Now we are ready to combine both data frames. If you work with databases, you know that there are multiple ways of merging data frames. Let's say `breaking_bad` is left, and `episodes` is right. We then can define the following merges:
+
+-   Left join: retain all rows in `breaking_bad` and add information from `episodes` for those elements (i.e. season/episode combinations) present in both data frames;
+
+-   Right join retain all rows in `episodes` and add information from `breaking_bad` for those elements present in both data frames;
+
+-   Full join: combine and retain all information;
+
+-   Inner join: combine and retain information from `breaking_bad` and `episodes` for those elements present in both data frames.
+
+We want to add data available in the `episodes` data frame to the `breaking_bad` data frame, so we want to perform a left join. We do this in R as follows:
+
+```{r merge}
+merge(breaking_bad, episodes, 
+      by.x = "first_occurence", # x is left (breaking_bad)
+      by.y = "season_episode", # y is right (episodes)
+      all.x = TRUE) # all.y = right join, all = full join, leave out for inner join
+```
+
+And there it is! Did we say earlier that some functions might change the order of columns? The `merge` function is one of them: the column in the 'left' data frame used to combine both data frames is now the first. Another point for the dollar sign team!
+
+But wait, what's with all the NA values in the last row? We made a data entry error when adding the episode information for Jimmy in the data frame: we mistook a 9 for a 0, resulting in S92E11 instead of S02E11. Once again: perform sanity checks by inspecting your data whenever you can. As in life, making mistakes is okay, but not solving them when you see them is not. So, let's correct that error. We then also merge the data frames again and overwrite the breaking_bad data frame:
+
+```{r jimmy}
+breaking_bad[ which(breaking_bad$main_character %in% "Jimmy"), ]$first_occurence <- "S02E11"
+breaking_bad <- merge(breaking_bad, episodes, 
+      by.x = "first_occurence",
+      by.y = "season_episode",
+      all.x = TRUE)
+```
+
+Now that we have our expanded data frame let's explore it. What is, for example, the average IMDB rating of an episode if we differentiate by sex? We can use the `aggregate` function for this:
+
+```{r aggregate}
+aggregate(breaking_bad$Rating_IMDB,
+          by = list("sex" = breaking_bad$sex),
+          FUN = mean)
+```
+
+The input to the aggregate function looks messy. It takes a variable (the first line in the code above) and groups it by another variable (the second line above). For some reason, this function only takes lists as input, making the code look a bit bombastic here). Then, it applies a function to both subsets of the data (`mean` in this example, but the options are legion).
+
+Lastly, let's estimate a regression model and map this model to the data. As a general rule, one should *never* even flirt with the idea of applying a regression model to a data set with only six observations (and don't even get us started about the multi-level structure we introduced when we merged data on characters with data on episodes) but for the sake of example, let's see what happens if we predict episode duration with the age of an actor. Could older actors have less stamina, resulting in shorter episode durations when featuring in an episode? Let's create the age variable and run the model:
+
+```{r regression}
+breaking_bad$age <- (as.numeric(format(Sys.Date(), "%Y")) - breaking_bad$actors_yob) # create the age variable
+lm <- lm(breaking_bad$Duration_mins ~ breaking_bad$age) # estimating the linear (regression) model (lm)
+summary(lm) # look at the model results
+```
+
+The part in the table above that we are especially interested in is the information about `breaking_bad$age`: its coefficient (0.1386) is *not* significant (Pr(\>\|t\|) is a factor ten larger than the typical academic threshold of 0.05), so we reject the alternative hypothesis (a negative relationship exists between the age of an actor and episode duration). We retain the null hypothesis (**no** association exists between the age of an actor and episode duration). Let's visualise this model, nevertheless, to see how we could embed the results of the `lm()` function in a plotting command. To achieve this, we first build a plot (see the `plot()` function) and then add the regression model (see the `abline` function):
+
+```{r plot}
+plot(breaking_bad$age, breaking_bad$Duration_mins,
+     xlab = "Actors age",
+     ylab = "Episode duration",
+     pch = 4) # different plot character (value can range between 0 and 25)
+
+abline(lm, # adding the regression line
+       lty = 6, # specifying line type (ranges from 0 to 6)
+       lwd = 2, # specifying line width (default = 1)
+       col = "blue")
+```
+
+Although the line above suggests a relation (actually one opposite to the hypothesis we formulated), please don't get fooled by it. R truncated both axes, which is especially problematic for the y-axis: this axis does **not** start at 0 but at 47. We can learn from the graph above that R's graphing capabilities are flexible. They are so extensive we could easily dedicate a separate workbook to them! For now, however, we want you to see how you can do this, so you are already acquainted with it when you see this happening in future workbooks.
+
+### Concluding remarks
+
+You have reached the end of this workbook. We hope you enjoyed it! The contents we covered should be enough to get you started. If you want to convert this file to a .html-file, click the 'Knit'- button above. You need to knit your document into a PDF or Word document for the assignment. Note that RStudio does **not** build these documents from scratch. Instead, you will need to have a Latex distribution installed on your machine to make PDFs (e.g. (MiKTeX)[<https://miktex.org>]) (when using Windows) or (MacTeX)[<https://tug.org/mactex/>] (when using MacOS) or Word to make Word files. LaTeX distributions, however, are relatively sizeable. An alternative strategy could be to Knit your document to Word and print it to pdf from there. The benefit of this approach is that, following that strategy, you can also do some in-between editing work, perform a spelling and grammar check, and change the layout to your taste (not everyone likes the standard, 'LaTeX'-y look and touch, which we fully understand). In the end, how to approach this is up to you. If you want to quit R and close RStudio, type `quit()` in the console below.
+
+### Further reading
+
+If you developed an appetite for more, below are some references we think are valuable (our comments in brackets after each suggestion).
+
+#### Books
+
+-   Cotton, R. (2013). Learning R. Sebastopol, CA: O'Reilly Media, Inc. (the basic building blocks)
+-   Kabacoff, R. I. (2011). R in Action - Data analysis and graphics with R. Shelter Island, NY: Manning Publications Co. (application-driven basics)
+-   Wickham, H., & Grolemund, G. (2017). R for Data Science. Sebastopol, CA: O'Reilly Media, Inc. (tidy-verse based, written by the master himself. Focuses on the analytics workflow)
+
+#### Websites
+
+-   <https://www.statmethods.net> (complements the Kabacoff-book)
+-   <https://www.r-bloggers.com> (compiles how-to's in R submitted by enthusiasts)
+-   <https://stats.stackexchange.com> (forum, focus on statistics)
+-   <https://stackoverflow.com> (forum, focus on programming)
+-   <http://adv-r.had.co.nz/Style.html> (coding style suggestions)

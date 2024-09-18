@@ -1,0 +1,1 @@
+"0","barplot(imp_gain_ratio, main = ""Importance of the Variables (Gain Ratio)"", col = ""lightgreen"")"

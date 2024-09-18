@@ -1,0 +1,195 @@
+---
+author: "Stefan Bras"
+Date: "10-03-2024"
+---
+
+```{r install packages}
+install.packages("ggplot2")
+```
+
+
+# 2 different ways to explore data:
+# 1. Distinguish between numeric and non-numeric data
+# 2. Distinguish between univariate and multivariate data exploration
+  
+```{r start with an empty work space}
+remove(list = ls())
+```
+
+```{r load data file}
+df <- read.csv("airline_passenger_satisfaction.csv")
+```
+
+```{r explore the data file}
+str(df)
+```
+To start our data exploration phase, we first need to determine which variables entail numeric data and which contain non-numeric data. We can extract the non-numerical variables from our data set with the simplify apply (sapply) function:
+
+```{r Make the difference between numerical and non-numerical variables}
+#Determine the number of numerical and non-numerical names
+numerical_columns <- table(sapply(df,is.numeric))
+rownames(numerical_columns) <- c("Non-Numerical","Numerical")
+print(numerical_columns)
+```
+
+It appears that we have 5 non-numerical (character) variables and 19 numerical variables. Now we proceed with exploring these two types of data.
+
+# Non-numeric data
+
+```{r non-numerical columns}
+# Determine which columns are non-numeric
+non_numerical_columns <- sapply(df, function(x) !is.numeric(x))
+
+#Display non-numeric variable names
+for(column in names(df)[non_numerical_columns]) {
+  print(column) #satisfaction is the predictive variable, hence we don't want this in our dataframe
+}
+```
+To gain further insights in the non-numeric variables, we will plot each of those in a barplot.
+
+```{r create barplots for the non-numeric variables in our data frame}
+non_numeric_variables <- df[, non_numerical_columns]
+
+# barplot for the non-numerical variable 'Gender'
+bp_Gender <- barplot(table(non_numeric_variables$Gender), names.arg = names(non_numeric_variables$Gender), main="Gender")
+text(x=bp_Gender, y=table(non_numeric_variables$Gender),labels=table(non_numeric_variables$Gender), pos=3, offset=0.5, xpd=TRUE)
+
+# barplot for the non-numerical variable 'Customer Type'
+bp_CustomerType <- barplot(table(non_numeric_variables$Customer.Type), names.arg = names(non_numeric_variables$Customer.Type), main="Customer Type")
+text(x=bp_CustomerType, y=table(non_numeric_variables$Customer.Type),labels=table(non_numeric_variables$Customer.Type), pos=3, offset=0.5, xpd=TRUE)
+
+# barplot for the non-numerical variable 'Type of Travel'
+bp_TypeOfTravel <- barplot(table(non_numeric_variables$Type.of.Travel), names.arg = names(non_numeric_variables$Type.of.Travel), main="Type of Travel")
+text(x=bp_TypeOfTravel, y=table(non_numeric_variables$Type.of.Travel),labels=table(non_numeric_variables$Type.of.Travel), pos=3, offset=0.5, xpd=TRUE)
+
+# barplot for the non-numeric variable 'Class' 
+bp_Class <- barplot(table(non_numeric_variables$Class), names.arg = names(non_numeric_variables$Class), main="Class")
+text(x=bp_Class, y=table(non_numeric_variables$Class),labels=table(non_numeric_variables$Class), pos=3, offset=0.5, xpd=TRUE)
+
+# barplot for the non-numeric variable 'Satisfaction'
+bp_Satisfaction <- barplot(table(non_numeric_variables$Satisfaction), names.arg = names(non_numeric_variables$Satisfaction), main="Satisfaction")
+text(x=bp_Satisfaction, y=table(non_numeric_variables$Satisfaction),labels=table(non_numeric_variables$Satisfaction), pos=3, offset=0.5, xpd=TRUE)
+```
+
+If we look closely to the output of the above code chunk, we notice that the variable "Satisfaction" is the variable we want to predict. Hence, this is our Predictive Variable (PV). Therefore, we will leave out this variable for now and carry on with the data frame *non_numeric_df* without this variable. 
+
+```{r remove predictive variable (PV)}
+non_numeric_df <- df[, non_numerical_columns] #creates a data frame that contains only non-numeric variables
+non_numeric_df <- non_numeric_df[ ,c(1:4)] # leave out 'satisfaction' as this is the predictive variable
+```
+
+# Numeric data
+
+To gain insights on the numeric variables within the data frame, we make R distinguish the numeric variables from the non-numeric variables. This can be done by the function simplify apply (sapply) and it's output is shown in a table:
+
+``` {r numerical columns}
+#Names of the numerical columns
+numeric_vars <- names(df)[sapply(df, is.numeric)] 
+numeric_vars
+```
+We can see that we indeed have 19 numeric variables. Now we want to prepare these variables for further data analysis. Therefore, it's important to clean any skewed data or investigate whether variables contain outliers or missing data. Outliers are important since many models are sensitive to them. Missing data could result in misleading result (depending on the size of missing data), which we want to avoid. The first step is to plot these numeric variables in boxplots and histograms, since these plots allow us to find out which variables contain outliers and which variables have data points which are not symmetrical or evenly distributed around the mean (possibly as a result of outliers, but not necessarily). 
+
+```{r make plots for all numeric variables}
+# Loop through variables and make boxplots
+par(mfrow = c(1,2))
+
+for(i in numeric_vars) {
+  boxplot(df[[i]])
+  hist(df[[i]], xlab = "score", main = i)
+}
+```
+From the boxplots and histograms, we can already see that some variables have outliers. For example, the boxplot of the variable Departure.Delay shows many points outside of the upper whisker (which has a max length of 1.5 times the interquartile range), which typically indicate outliers. This view is supported by its histogram, since the majority of observations are captured on the left side of the graph. The same is true for Arrival.Delay and Flight.Distance. 
+
+For numerical data, there are other tools to determine whether outliers are present or not. This can be deviated via several statistical means:
+1. Big differences between mean and median? -> one or more outliers exist.
+2. Standard deviation > mean? -> one or more outliers exist.
+3. Does the maximum observations stand out compared to the scale of other indicators? -> one or more outliers exist.
+
+The following code chunk will calculate the most important statistical aspects: standard deviation, mean, median, min-range, and max-range.
+
+``` {r calculate the standard deviation, mean, median, and min-max range for each variable (column)}
+for(column in numeric_vars) {
+  sd_value <- sd(df[[column]]) 
+  cat("standard deviation for", column, ":", sd_value, "\n")
+  mean_value <- mean(df[[column]])
+  cat("mean value for", column, ":", mean_value, "\n")
+  median_value <- median(df[[column]])
+  cat("median value for", column, ":", median_value, "\n")
+  min_range <- min(df[[column]])
+  cat("minimum value for", column, ":", min_range, "\n")
+  max_range <- max(df[[column]])
+  cat("maximum value for", column, ":", max_range, "\n")
+}  
+```
+The first thing that draws our attention is the 'NA' values given in the Arrival.Delay variable. Apparently there are missing values in this variable. Let us check this:
+
+```{r check missing values}
+summary(is.na(df)) # 393 observations in the column Arrival.Delay
+missing_values <- df[which(df$Arrival.Delay %in% NA), ]  
+print(missing_values)
+```
+The output of the above code chunk shows that the variable Arrival.Delay has 393 NA values (hence: missing values) and the rows where these NA values exist. This number is negligible compared to the total amount of 129880 observations, therefore we decided to omit these with the function na.omit(). This function removes the rows in our data set which contain at least 1 NA element.
+############################################
+```{r omit the NA values in the Arrival.Delay variable}
+numeric_vars <- na.omit(numeric_vars)
+
+for(column in numeric_vars) {
+  sd_value <- sd(df[[column]]) 
+  cat("standard deviation for", column, ":", sd_value, "\n")
+  mean_value <- mean(df[[column]])
+  cat("mean value for", column, ":", mean_value, "\n")
+  median_value <- median(df[[column]])
+  cat("median value for", column, ":", median_value, "\n")
+  min_range <- min(df[[column]])
+  cat("minimum value for", column, ":", min_range, "\n")
+  max_range <- max(df[[column]])
+  cat("maximum value for", column, ":", max_range, "\n")
+} 
+```
+
+
+
+
+# Associations between variables
+```{r associations between variables EaseOfOnlineBooking and InFlightWifiService}
+# variables with high correlation are chosen from the heatmap
+cor(df$In.flight.Wifi.Service,df$Ease.of.Online.Booking, use = "complete.obs") 
+
+#univariate plots
+par(mfrow=c(2,2)) 
+boxplot(df$Ease.of.Online.Booking, main = "Ease of Online booking")
+boxplot(df$In.flight.Wifi.Service, main = "In Flight WiFi Service")
+hist(df$Ease.of.Online.Booking, main = "Ease of Online booking")
+hist(df$In.flight.Wifi.Service, main = "In Flight WiFi Service")
+
+# multi variable plots
+library(ggplot2)
+ggplot(data = df, aes(x = df$In.flight.Wifi.Service, y = df$Ease.of.Online.Booking)) + geom_point()
+```
+```{r associations between variables Class and Flight Distance}
+# Reclassify the variable Class
+Class_reclassified <- ifelse(df$Class == "Business", 1, 
+                                ifelse(df$Class == "Economy", 2,
+                                       ifelse(df$Class == "Economy Plus", 3, NA)))
+
+cor(Class_reclassified,df$Flight.Distance, use = "complete.obs") 
+
+# univariate plots
+# for "Class", see the non-numeric section
+par(mfrow = c(1,2))
+hist(df$Flight.Distance, xlab = "Flight Distance", main = "Flight Distance")
+boxplot(df$Flight.Distance, main = "Flight Distance")
+
+# multivariate plot
+par(mfrow = c(1,1))
+boxplot(Flight.Distance ~ Class,  
+        data = df, ylab = "Flight Distance", 
+        las = 1)
+
+```
+
+
+
+```{r import data dictionary}
+Data_dictionary <- read.csv("data_dictionary.csv")
+```

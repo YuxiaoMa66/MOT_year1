@@ -1,0 +1,4 @@
+"0","plot(imp_gain_ratio, main = ""Gain Ratio"")"
+"2","Error in plot(imp_gain_ratio, main = ""Gain Ratio"") : 
+  object 'imp_gain_ratio' not found
+"

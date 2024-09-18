@@ -1,0 +1,2 @@
+"0","dta$bcFD <- (dta$bcFD - min(dta$bcFD)) / (max(dta$bcFD) - min(dta$bcFD))"
+"0","pbox(dta, ""bcFD"")"

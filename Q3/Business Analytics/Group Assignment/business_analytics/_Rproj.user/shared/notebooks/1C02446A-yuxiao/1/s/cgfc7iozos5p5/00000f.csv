@@ -1,0 +1,17 @@
+"0","# implement the function"
+"0","# try 8 different values of lambda from 1e-6 to 1e2 and "
+"0","acc_lam <- c()"
+"0","for (i in 1:8) {"
+"0","  lambda <- 10^(i - 6)"
+"0","  cat(""Lambda:"", lambda, ""\n"")"
+"0","  acc_lam[i] <- train_and_predict_logistic_regression(train_data_new, test_data_new, ""Satisfaction_dummy"", lambda)"
+"0","}"
+"1","Lambda:"
+"1"," "
+"1","1e-05"
+"1"," "
+"1","
+"
+"2","Error in train_and_predict_logistic_regression(train_data_new, test_data_new,  : 
+  Both train_data and test_data must be data frames.
+"

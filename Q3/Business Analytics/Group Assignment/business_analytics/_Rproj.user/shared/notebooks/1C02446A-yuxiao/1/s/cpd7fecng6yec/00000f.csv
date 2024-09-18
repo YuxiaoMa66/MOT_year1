@@ -1,0 +1,28 @@
+"0","for (i in names_chr) {"
+"0","  print(pplotpie(dta, i))"
+"0","}"
+"2","Warning in geom_text(aes(label = scales::percent(..count../sum(..count..))),  :"
+"2","
+ "
+"2"," [38;5;232mIgnoring unknown parameters: `format`[39m
+"
+"2","Warning in geom_text(aes(label = scales::percent(..count../sum(..count..))),  :"
+"2","
+ "
+"2"," [38;5;232mIgnoring unknown parameters: `format`[39m
+"
+"2","Warning in geom_text(aes(label = scales::percent(..count../sum(..count..))),  :"
+"2","
+ "
+"2"," [38;5;232mIgnoring unknown parameters: `format`[39m
+"
+"2","Warning in geom_text(aes(label = scales::percent(..count../sum(..count..))),  :"
+"2","
+ "
+"2"," [38;5;232mIgnoring unknown parameters: `format`[39m
+"
+"2","Warning in geom_text(aes(label = scales::percent(..count../sum(..count..))),  :"
+"2","
+ "
+"2"," [38;5;232mIgnoring unknown parameters: `format`[39m
+"

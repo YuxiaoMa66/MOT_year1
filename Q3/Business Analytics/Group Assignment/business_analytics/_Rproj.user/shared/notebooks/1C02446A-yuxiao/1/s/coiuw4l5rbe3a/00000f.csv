@@ -1,0 +1,13 @@
+"0","for (i in names_chr) {"
+"0","  print(pplotpie(dta, i))"
+"0","}"
+"1","[1m[33mError[39m in `parse_expr()`:[22m
+[38;5;232m[33m![38;5;232m `x` must contain exactly 1 expression, not 0.[39m
+Backtrace:
+[90m 1. [39m[1mbase[22m::print(pplotpie(dta, i))
+[90m 2. [39m[1mglobal[22m pplotpie(dta, i)
+[90m 5. [39mggplot2::aes_string("""", fill = col)
+[90m 6. [39m[1mbase[22m::lapply(...)
+[90m 7. [39mggplot2 (local) FUN(X[[i]], ...)
+[90m 8. [39m[1m[94mrlang::parse_expr([39m[22mx[1m[94m)[39m[22m
+"

@@ -1,0 +1,29 @@
+"0","# using ggplot to visualize the distribution of the non-numeric variables as barplot"
+"0","pplotbar <- function(df, col) {"
+"0","  ggplot(df, aes_string(col)) +"
+"0","    geom_bar(stat=""count"") +"
+"0","    geom_text(stat=""count"", aes(label=after_stat(count)), vjust=1.6, color=""white"") +"
+"0","    labs(title = paste(""Distribution of"", col"
+"0","                          ), x = col, y = ""Frequency"")"
+"0","}"
+"0",""
+"0","# using ggplot to visualize the distribution of the non-numeric variables as pie chart"
+"0","pplotpie <- function(df, col) {"
+"0","  ggplot(df, aes_string(x = factor(1), fill = col)) +"
+"0","    geom_text(aes(label = scales::percent(..prop..)),"
+"0","              stat = ""count"", "
+"0","              position = position_stack(vjust = 0.5)) +"
+"0","    coord_polar(theta = ""y"") +"
+"0","    labs(x = NULL, y = NULL, fill = col, title = paste(""Distribution of"", col)) +"
+"0","    theme_void() +"
+"0","    theme(legend.position = ""right"")"
+"2","Error: Incomplete expression: pplotpie <- function(df, col) {
+  ggplot(df, aes_string(x = factor(1), fill = col)) +
+    geom_text(aes(label = scales::percent(..prop..)),
+              stat = ""count"", 
+              position = position_stack(vjust = 0.5)) +
+    coord_polar(theta = ""y"") +
+    labs(x = NULL, y = NULL, fill = col, title = paste(""Distribution of"", col)) +
+    theme_void() +
+    theme(legend.position = ""right"")
+"

@@ -1,0 +1,7 @@
+"0","# compute the importance of the variables"
+"0","# in this case, we only use the dummy variables to see the importance according to the DV, "
+"0","# which means only compute the IV2"
+"0","imp_IV2 <- compute_importance(dta2, IV2, DV)"
+"2","Error in .subset2(x, i, exact = exact) : 
+  recursive indexing failed at level 2
+"

@@ -1,0 +1,7 @@
+"0","dta4 <- dta"
+"0",""
+"0","# create a new dataframe with the selected variables"
+"0","dta4 <- dta4[,c(IV1, IV2, IV3, DV)]"
+"0",""
+"0","# scale the categorical variables to 0-1"
+"0","dta4[,IV3] <- dta4[,IV3] / 5"

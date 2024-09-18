@@ -1,0 +1,5 @@
+"0","# implement the function"
+"0","train_data_new <- add_leaf_mean(train_data, train_data_list)"
+"2","Error in test_data$leaf_mean[test_data[[variable]] == value] <- mean_value : 
+  replacement has length zero
+"

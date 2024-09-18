@@ -1,0 +1,27 @@
+"0","library(ggplot2)"
+"0","library(dplyr)"
+"2","Warning:"
+"2"," 程辑包‘dplyr’是用R版本4.2.3 来建造的
+"
+"2","
+载入程辑包：‘dplyr’
+
+"
+"2","The following object is masked from ‘package:MASS’:
+
+    select
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+"
+"0","services_columns <- colnames(data)[10:(ncol(data)-1)]"
+"2","Error in 10:(ncol(data) - 1) : argument of length 0
+"

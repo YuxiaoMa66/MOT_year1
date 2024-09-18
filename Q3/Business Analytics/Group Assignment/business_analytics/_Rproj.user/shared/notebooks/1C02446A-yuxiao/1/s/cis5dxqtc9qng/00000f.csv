@@ -1,0 +1,6 @@
+"0","# Function to compute the mean of the observations in each leaf node"
+"0","compute_mean <- function(data) {"
+"0","  mean_value <- mean(data[[DV]], na.rm = TRUE)"
+"0","  return(mean_value)"
+"0","}"
+"0",""

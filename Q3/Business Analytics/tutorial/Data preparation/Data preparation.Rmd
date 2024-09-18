@@ -1,0 +1,717 @@
+---
+title: 'Workshop: Data exploration & preparation and Dimension reduction'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+## Working with this document
+
+### Before you begin
+
+Before you start working through this tutorial, please ensure you have followed the tutorial 'An introduction to working with R', as it contains crucial information about how to work with an R Markdown document. In addition, this tutorial builds upon some of the basics explained in that introductory tutorial.
+
+### Note on installing packages
+
+In this tutorial, we will use three packages. These are bundles of functions that extend base R functionality in numerous ways. The packages used are `lattice`, `ggplot2` (both for data visualization ), and `stringr` (for working with text strings). If you have not installed these packages on your machine, uncomment the code in the chunk below, run it once and then comment it out again. If you get the question "Do you want to install from sources the packages which need compilation? (Yes/no/cancel)", type `no`. This will install the packages on your machine, which are available to you in the current and future R sessions.
+
+```{r install_packages}
+# install.packages(c("ggplot2", "lattice", "stringr"), dependencies = TRUE)
+```
+
+Let us know if the above poses any problems! In the upcoming code, you will notice that sometimes we call functions from a package using the `::` prefix, for example `, stringr::str_replace()`. This is a good practice if you want to avoid namespace conflicts that arise from using multiple packages that overlap the function names they use, and in case we use these packages only minimally, like in this tutorial. Alternatively, you could load all package functionality using the `library()` command, for example `library(stringr)`.
+
+### Proceeding through the tutorial
+
+After it introduces you to three common plotting systems in R, this tutorial consists of three main parts: (1) Data exploration (both univariate and multivariate), (2) Data preparation and cleaning, and (3) Principal Component Analysis (PCA). Together, these parts provide you with the basic code and the mindset you'll need to explore and prepare a data set before proceeding to the modelling stage. Regarding the mindset we want you to develop in this tutorial, please note that not everything we address will be relevant for every data set, especially regarding data preparation and cleaning. Thus, you will have to decide which
+variables require preprocessing (and for each of these variables, what this preprocessing should entail) based on the outcomes of the data exploration stage. In addition, even though we strive to be as complete as possible, anticipating every possible scenario is impossible. For example, there are many different approaches to rescale a variable, and which approach(es) will (are) needed depends on the distribution of the variable under consideration. Meticulously leading you through every possible scenario probably is not a text you want to read and to be honest, it also is not a text we want to write. Rest assured, though, that we will cover common scenarios and approaches so you are equipped with the skills to tackle a wide range of problems. So, consider this tutorial a helpful resource for preparing a data set for the modelling stage, but also an invitation to further delve into the topics discussed should the data set you work with require that.
+
+## Tutorial introduction: Objectives and some considerations
+
+Welcome to this tutorial on data preparation and dimension reduction using R! This workbook aims to provide you with the knowledge and skills to explore and prepare a data set for further analysis. Performing these steps is crucial to ensure the quality and reliability of your analysis outcomes. As such, this tutorial is helpful when engaging in a machine learning project but also when you want to prepare your data for a quantitative analysis in an academic context (e.g. when writing your master thesis). More specifically, after having followed this tutorial, you will be able to do the following using RStudio:
+
+-   Work with the three main plotting systems R offers
+
+-   Explore both numeric and non-numeric variables and explore associations between numeric and non-numeric variable combinations
+
+-   Perform key data preparation and cleaning steps
+
+-   Reduce the dimensionality of a data set using Principal Component Analysis
+
+Work through all parts, and note that, similar to the first tutorial, we won't ask you to change much. Hence, the second quiz will also test your knowledge and understanding of the different aspects covered in this workbook. Like the first tutorial, however, growing into that understanding is easiest when you modify the code provided to see what happens. Remember, if you break things, taking a moment to understand why something didn't work as expected can be an invaluable learning experience. If you get stuck, you can always start anew!
+
+## The data
+
+The data we will work with in this tutorial is taken from the [Inside Airbnb](http://insideairbnb.com) website. This site reports scraped Airbnb data for numerous cities and countries worldwide. We selected detailed listings data regarding Copenhagen (scraped on 27 December 2023). This is a very interesting dataset for this tutorial as it contains numerous non-simulated variables, including both quantitative and qualitative data. This mix of data types and the rich variable set presents a unique opportunity to practice cleaning and preparing data for analysis, from handling missing values to encoding categorical variables. Beyond the purposes of this tutorial, data from this website is also interesting because it provides quarterly data (allowing for exploring temporal patterns) for many cities (so if this data catches your fancy, you can always download data for a city you are interested in and explore it). We will also work with data derived from this website in the tutorial on text mining. Let's first load the data by running the code chunk below.
+
+```{r load_data}
+dta <- read.csv("listings.csv")
+```
+
+## Tutorial walkthrough
+
+### 1. A note on plotting systems in R
+
+Often, one picture says more than a thousand words. Therefore, creating a wide range of visualizations, from simple histograms to complex multi-panel figures, is crucial in data analysis. Base R comes with various functions you can use for plotting. You already encountered the `plot()` function in the first tutorial. In addition to this functionality, two other commonly used plotting packages are worth mentioning: `ggplot2` and `lattice`. We'll discuss these three plotting systems below.
+
+#### Plotting with base R
+
+With the base plotting system, you start with a blank canvas and build your plot step by step using the `plot()` function as the main workhorse and complementary functions for additional elements. It is relatively intuitive and can quickly generate plots with minimal code. Let's use a data set in base R, `iris`, to see how this works. This data contains multiple measurements on three distinct iris plant species for 150 observations. It aims to quantify the morphological variation of the iris flower in its three species (note that we use this data set for illustrating the philosophy behind the three different plotting systems in R. Other than that, it does not play a role in this tutorial). Let's use base R to plot the sepal width of the observed plants against the sepal length by running the code chunk below (all measurements are given in centimetres):
+
+```{r plot_base_r_example_1}
+plot(x = iris$Sepal.Width,
+     y = iris$Sepal.Length)
+```
+
+As you can see, the `plot()` function yields a rather rudimentary graph. Any additional feature we want needs to be coded in the plot function. For example, let's add proper labels to the x and y-axis of the plot:
+
+```{r plot_base_r_example_2}
+plot(x = iris$Sepal.Width,
+     y = iris$Sepal.Length,
+     xlab = "Sepal width",
+     ylab = "Sepal length")
+```
+
+In a similar vein, we can adjust other features of the plot. In addition to adding axis labels, the code below adds a title to the plot, colour-codes the data points by species, changes the appearance of data points into dots, adjusts the scales of both axes and adds a legend. Note that many other options exist that we don't touch upon to retain narrative flow. Type `?plot` and press enter in the R-console below if you are interested in them.
+
+```{r plot_base_r_example_3}
+plot(x = iris$Sepal.Width,
+     y = iris$Sepal.Length,
+     xlab = "Sepal width",
+     ylab = "Sepal length",
+     main = "Sepal width vs. Sepal length", # add title
+     col = iris$Species, # color code by species
+     pch = 19, # change shape of plotting points
+     xlim = c(0, max(iris$Sepal.Width) + 0.5), # change x axis scale
+     ylim = c(0, max(iris$Sepal.Length) + 0.5)) # change y axis scale
+legend("topright", legend = unique(iris$Species), 
+       col = 1:length(levels(iris$Species)), pch = 19)
+```
+
+Compared to the default plot, this is already quite an improvement! As you can see in the last code chunk, we use a separate `legend` function after we make a call to the `plot` function. We saw a similar approach at the end of the 'An introduction to working with R' tutorial, where we used the `abline` function to add a regression line to a scatter plot. This makes the base R plotting system very versatile. In addition, although the system uses default values for every aspect of the plot, everything you see can be customized (e.g., the location of the legend or the font type used in the plot). A drawback of the base R system is that its syntax can become wordy, making it challenging to transfer to others. In addition, once you have added a feature to your plot, it cannot be undone. This sometimes makes plotting in base R a somewhat rigid exercise.
+
+#### Plotting with lattice
+
+`lattice` is a package in R tailored towards creating so-called "trellis" or "conditioning" plots. These are graphs that visualise data across multiple variables and groups. The code chunk below shows how we can create such a graph for the `iris` data. Instead of plotting Sepal width and length for all species in one plot, we now create three distinct plots, one for each species. Note that instead of using the `library()` function to access `lattice` functionality, we utilise the prefix `lattice::` to call functions from this package directly. As indicated earlier, both approaches only work once you have installed the `lattice` package on your machine (see the "Before you begin" section at the start of this tutorial).
+
+```{r plot_lattice_example}
+lattice::xyplot(Sepal.Length ~ Sepal.Width | Species,
+                data = iris,
+                layout = c(3, 1), # arrange the panels in 3 columns and 1 row
+                type = c("p"), # 'p' for points
+                xlab = "Sepal Width",
+                ylab = "Sepal Length",
+                main = "Sepal width vs. Sepal length by Species")
+```
+
+The plot above clarifies what we mean by 'visualizing data across multiple variables and groups': it shows how the association between Sepal width and Sepal length (multiple variables) depends on species type (groups). Contrary to the base plotting systems, `lattice` employs different functions for different plots. From the above, it is clear what the `xyplot` function yields, but it is also possible to create box-and-whisker plots (`bwplot`), histograms (`histogram`) and density plots (`densityplot`), to name a few. Type ?lattice in the console below and press enter to get a list of possible plots. Another difference with the base plotting system is that `lattice` creates plots with one function call. Afterwards, no more changes are possible. This means you need to engineer your code in such a way that it immediately yields what you are after, which sometimes makes working with `lattice` less intuitive and straightforward compared to other plotting systems in R, especially if you are used to the more declarative syntax of base R graphic or `ggplot2`. However, its focus on creating trellis plots makes `lattice` a versatile tool for data exploration if you are not concerned too much with publishing these plots, as it does a lot of the data preparation work needed to create such plots for you. To get an idea of how you can adjust the code provided earlier, run the code snippet below.
+
+```{r plot_lattice_demo}
+lattice::xyplot(Sepal.Length ~ Sepal.Width | Species,
+                data = iris,
+                groups = Species, # color points by species
+                layout = c(3, 1),
+                xlab = "Sepal Width",
+                ylab = "Sepal Length",
+                main = "Sepal width vs. Sepal length by Species",
+                auto.key = FALSE, # add a legend yes or no
+                par.settings = list(
+                    strip.background = list(col = "lightblue"), # set strip background color
+                    superpose.symbol = list(col = c("red", "green", "blue"), # color points by species
+                                            pch = c(16, 17, 18)) # use different shapes for each species
+                ),
+                panel = function(x, y, ...) {
+                    lattice::panel.superpose(x, y, ..., 
+                                             panel.groups = function(x, y, col, ...) {
+                                                 lattice::panel.xyplot(x, y, col = col, ...)
+                                             })
+                    lattice::panel.grid(h = -1, v = -1, col = "gray")
+                })
+```
+
+The resulting plot does not adhere to basic principles for compelling visualizations but demonstrates what is possible. Note that although we want you to know what `lattice` is particularly useful for, we won't ask questions about its syntax in the quiz.
+
+#### Plotting with ggplot2
+
+The `ggplot2` package adopts a layered approach to plotting in R. Contrary to plotting in base R and `lattice`, it allows you to store plots as an object. This will enable you to add and remove features from the plot as you please. Whereas the package, by default, makes many choices for you, you can still customize it to your heart's desire. In addition, plots are built according to the ['Grammar of Graphics'](https://www.tandfonline.com/doi/pdf/10.1198/jcgs.2009.07098) (accessibility might depend on whether or not you access this link from the university network) which, in short, offers a structured way of thinking about how a plot is structured. Especially when you have gotten used to its syntax, `ggplot2` is an intuitive, versatile and powerful package of which the boundaries of your imagination define the limits. Let's see how it works by running the code chunk below.
+
+```{r plot_ggplot2_empty_plot}
+p <- ggplot2::ggplot(data = iris, ggplot2::aes(x = Sepal.Width, y = Sepal.Length))
+p
+```
+
+In the above code, we call the `ggplot()` function and assign the output to an object called `p`. After calling this object, an empty grid occurs in the 'Output' pane. This is a plot object without any elements or layers added to it. Also, note in the above that the syntax of `ggplot2` is designed to involve calling many functions that are available in the package. This makes writing and reading code using the `::` approach for calling functions in the `ggplot2` package (as described in the 'Before you begin' section of this tutorial) cumbersome. We, therefore, start the subsequent code chunk with the `library(ggplot2)` command to make the code easier to follow. Let's now add a layer to the object we just created:
+
+```{r plot_ggplot2_add_first_layer}
+library(ggplot2)
+p <- p + ggplot2::geom_point()
+p
+```
+
+In the above code chunk, we added a scatterplot through the `geom_point` function available in `ggplot2`. 'geom' is short for 'geometric object'. Many different geometric objects are available in `ggplot2` (click ['here'](https://ggplot2.tidyverse.org/reference/#geoms) for an overview). A `geom_` function is a typical function to use when you want to create a layer in your plot. 
+
+An important distinction to make when working with `ggplot2` is the distinction between global and local mappings. Global mappings affect all layers of a plot and are defined in the `ggplot()` function. In the code chunk *r plot_ggplot2_empty_plot*, you can see that `Sepal.Width` is mapped to the x-axis of the plot and `Sepal.Length` to the y-axis. This mapping is wrapped in the `aes()` function. This is short for 'Aesthetic', which refers to the visual properties or attributes of the objects in a plot that represent data. In said code chunk, this translates to mapping the `Sepal.Width` and `Sepal.Length` attributes of the dataset to the x and y positions of points in the plot. Because this mapping is embedded in the `ggplot()` function, it will be applied to all layers we specify afterwards. That is why, in the code chunk above, we don't have to specify which data points should be mapped when calling the `geom_point()` function. Let's first add another layer to our graph to understand local mappings. The code chunk below adds a regression line to our scatter plot by calling the `geom_smooth` function. As a side-note: compare this approach with showing a regression line with the approach we followed at the end of the 'An introduction to working with R' tutorial: contrary to estimating the model upfront with the `lm`-function, `ggplot2` conveniently did that work for us!
+
+```{r plot_ggplot2_add_second_layer}
+p <- p + geom_smooth(method = "lm")
+p
+```
+
+Whereas global mappings affect all layers in a graph and are defined in the `ggplot()` function, local mappings are specific to a geom layer and can override global mappings. For example, in the code chunk below, we change the colour for the `geom_point` so that data points reflect iris species. Note that we changed the coding approach so that the graph is no longer assigned to an object. Choose a strategy (assigning the plot to an object or not) that fits your needs.
+
+```{r plot_ggplot2_change_geom_point_color_one}
+ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length)) +
+    geom_point(aes(color = Species)) +
+    geom_smooth(method = "lm")
+```
+
+Instead of changing the data points, we could tell `ggplot2` to differentiate the regression model based on `Species`. The code below accomplishes that:
+
+```{r plot_ggplot2_change_geom_point_color_two}
+ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length)) +
+    geom_point() +
+    geom_smooth(aes(color = Species), method = "lm", se = FALSE)
+```
+
+We could even give a more pronounced example of how changing mappings of a specific layer might pan out. In the code chunk below, we'll map the results of a regression analysis using `Petal.Width` and `Petal.Length` (instead of `Sepal.Width` and `Sepal.Length`) to the graph:
+
+```{r plot_ggplot2_change_geom_smooth_data}
+ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length)) +
+    geom_point() +
+    geom_smooth(mapping = aes(x = Petal.Width, y = Petal.Length), method = "lm")
+```
+
+Although the graph above does not make much scientific sense for the `iris` dataset (it mixes different dimensions), it serves well for illustrating the power of `ggplot2`: the combination of applying global mappings that you, in turn, can adjust on a layer-by-layer basis if you need makes this a very versatile graphing tool.
+
+#### Concluding remarks on plotting systems in R
+
+In the above, we explored three commonly encountered plotting systems in R. Whereas base R straightforwardly creates simple plots, `ggplot2` offers more control and is widely used in many communities because of, for example, its suitability to create more complex visualizations. In addition, `ggplot2` has a very active and vibrant developmental community that continuously develops additional features, extensions and integrations to enhance its functionality and applicability. The `ggmap` package, for example, allows for the easy retrieval and plotting of geospatial data, whereas the `gganimate` package allows for transforming static `ggplot2` plots into dynamic visualizations over time. `lattice` excels in creating multi-panel conditional plots.
+
+From the above, it probably clearly transpires that `ggplot2` is our preferred package for visualizing data in R. You are free to make your own choice in this respect. It might be helpful to start making plots in base R and move to `ggplot2` when you need to produce more sophisticated visualizations. `lattice` can be used when you have specific needs around multi-panel plotting. In this tutorial, we will mainly create plots using either base R or ggplot. At the end of the tutorial, we'll provide resources for developing and further honing your data visualization skills in R.
+
+### 2. Data exploration 
+
+The significance of data exploration and preparation is not often stressed in discussions that emphasize the virtues of data science. This oversight might be best explained through an analogy: many of us cherish a beautiful smile, yet few consider visits to the dentist among their favourite experiences. Much like dental care, data preparation is frequently viewed as a tedious, unrewarding process. However, keeping the principle of 'garbage in, garbage out' in mind, it becomes clear that meticulous exploration and data preparation are indispensable steps before proceeding to the modelling phase. The perceived drudgery of data preparation, akin to dental check-ups and flossing, is, in fact, a critical step for ensuring the development of high-quality models that yield actionable insights. Just as regular dental hygiene is essential for long-term oral health, thorough data cleaning and careful feature selection are foundational to the success of any data science project.
+
+In this section, we'll delve into different ways one can explore data in R. Two distinct aspects that apply to any data exploration step should be highlighted upfront. First, we should distinguish between numerical and non-numerical data. Whereas numerical data captures features that can be easily expressed using numbers (e.g. turnover, age, size), non-numerical data captures qualitative features (e.g. colour, industry sector, or city). It is important to realize that both data types provide valuable information that can be usefully woven into a data analytics pipeline. Qualitative data, however, often needs to be converted to a numeric format before a machine learning algorithm can process it. In the section on data preparation, we will show some techniques to accomplish that transformation. Second, we should distinguish between univariate and multivariate data exploration. With univariate, we refer to exploring individual variables (e.g., by examining a variable's mean or standard deviation). This provides helpful insights, for example, into potential issues a specific variable might cause in the model one has in mind. With multivariate, we refer to exploring associations between two variables (e.g. examining a correlation between two variables). Insights in such associations are helpful because they inform the selection of which variables should be used as the input of a model in the first place.
+
+Bearing both distinctions (numeric vs. non-numeric and univariate vs. multivariate) in mind, we'll now go through some examples using the Airbnb data on Copenhagen listings. For now, we focus on diagnosing. In section 3, we'll address some of the issues we have found and talk about feature engineering. As a last remark upfront: even though data exploration and the subsequent data preparation step might give the impression of a rather quantitative activity, one often has to make many qualitative judgments. This is an integral element of this stage in the data analysis process. Should you feel uncomfortable making such qualitative judgments, please note that you can always explore different scenarios to see if and how they affect model outcomes. Also, we want to stress the importance of maintaining a log book in which you note the insights you obtain as you work your way through the exploration stage.
+
+#### Exploring numerical data
+
+In the tutorial 'An introduction to working with R' that precedes this tutorial, we already introduced the `str()` and `summary()` commands to get an idea about a data frame's overall content. Although using the `summary()` command can be useful for exploring a full data set at once, this is often impossible because the function works particularly well for numeric variables, but not for non-numeric ones. Seeing that both data types are often combined in one data set, we choose the approach of exploring individual variables in this tutorial. Of course, hybrid approaches are possible (e.g. running the `summary()` command for those variables that are numeric), but this would distract too much for our purposes. Ultimately, you should explore *every variable* in your data set.
+
+##### Descriptive statistics for numerical variables
+
+For numerical variables, we typically want to know the following aspects:
+
+- Measures for the *center* of a variable:
+    - The arithmetic mean
+    - The median (i.e. the middle value of a variable after putting the observations in ascending order)
+
+- Measures for the *spread* of a variable:
+    - The standard deviation
+    - The range (i.e. both the minimum and maximum observation)
+
+These measures give us an idea about potential issues a variable might suffer from. Let's look at these descriptives for one of the numeric variables in the data set, `number_of_reviews`. The `summary()` function in base R yields most of the measures mentioned, except for the standard deviation. We therefore, run a distinct `sd()` command:
+
+```{r descriptives_numerical_reviews}
+summary(dta$number_of_reviews)
+sd(dta$number_of_reviews)
+```
+
+Note that because we are in the data exploration stage, we do not care how the results are presented. The first aspect we look at is how the mean value of a variable compares to its median. Because the median is based only on the middle observation of an ordered variable, it is robust to outliers. The mean considers all observations in a variable and is sensitive to outliers. So when the mean and median deviate from each other, as in the output of the code chunk above, we know that a variable has one or more outliers. The reported standard deviation also indicates this: when a standard deviation is larger than the mean, outliers loom. We can further corroborate this by looking at the range. The maximum observation of 1531 stands out, especially compared to the scale of the other indicators. The conclusion, thus, is that outliers exist in this variable, which we need to address. Run the code below and compare the results with the previous chunk to see a variable that suffers less from this problem.
+
+```{r descriptives_numerical_accommodates}
+summary(dta$accommodates)
+sd(dta$accommodates)
+```
+
+Why do we care so much about outliers? The answer is that many models are sensitive to them. Regression models are a good example. In the chunk below, we create two identical data sets, with the difference that one contains an outlier (you can focus on the plot rather than the code). This one outlier makes the regression coefficient for that variable become significant, and typically, we don't want one single observation to influence the results of an analysis, with which we usually want to say something about all data points.
+
+```{r regression_outliers}
+set.seed(123)
+
+# Generate data
+df <- data.frame(x = rep(1:30, 2), 
+                 y = c(rnorm(30, mean = 50, sd = 20), rnorm(30, mean = 50, sd = 20)), 
+                 condition = c(rep("Without outlier", 30), rep("With outlier", 30)))
+# Add outlier
+df$y[60] <- 20000
+
+# Plot
+ggplot(df, aes(x = x, y = y, color = condition)) + 
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) +
+    scale_color_manual(values = c("Without outlier" = "blue", "With outlier" = "red"))
+```
+
+##### Plots for numerical variables
+
+Although the descriptive statistics described above often give sufficient information regarding the distribution of a variable, it might also be helpful to plot variables. Consider, for example, the histogram for the `accomodates` variable:
+
+```{r histogram_reviews_accomodates}
+hist(dta$accommodates)
+```
+
+A histogram provides a closer look into the distribution of a data set, as it provides frequencies for the different variable ranges (these ranges are defined by the `hist()` function by default but can be adjusted). The problem, however, is that when we have outliers, the other observations tend to be binned into relatively few categories, leading to rather uninformative graphs. For example, change the variable in the code chunk above in the `number_of_reviews` variable and see what happens.
+
+Another graph that helps get insight into a variable is the box plot. In the code chunk below, such a plot is created for the `accomodates` variable. A nice feature of the box plot is that it provides insight into several features of a variable's distribution. The box in the plot below shows the middle 50% of observations, called the interquartile range (IQR). The horizontal line that divides the box is the median. The whiskers have a maximum length of 1.5 times the IQR above and below the box. Any observations beyond this area are displayed as single points and are typically considered outliers. Together, the whiskers and possible outliers indicate the range of the variable. Like the histogram, a box plot doesn't work well if large outliers exist. Again, change the variable in the code below to the `number_of_reviews` variable, and you will see what we mean.
+
+```{r boxplot_reviews_accomodates}
+boxplot(dta$accommodates)
+```
+
+##### Exploring non-numerical (categorical) variables
+
+We don't have metrics about the centre or distribution of a variable at our disposal for exploring non-numerical data. Instead, we rely on the `table()` function, which we briefly touched upon in the 'An introduction to working with R' tutorial, to get an insight into label counts. Consider, for example, the code chunk below, in which we generate a table that provides information on the frequency of each room type in the data.
+
+```{r table}
+table(dta$room_type)
+```
+
+With relatively few categories, the output of the table command is easy to comprehend. It can become messy when we have many categories (try, for example, running the command on the `neighbourhood` variable). We, therefore, have made it a habit to wrap the `table()` command in the `cbind()` command, so the table is always displayed more intuitively (the `cbind()` command turns the output of the `table()` command into a matrix):
+
+```{r cbind_table}
+cbind(table(dta$room_type))
+```
+
+Inspecting categorical variables comes down to looking for so-called "sparse" categories. These are categories that have relatively little observations. If you think back at the `iris` data, for example, you might remember that there were sufficient observations for each `Species` category (50 for each, to be exact). This makes it possible to create the type of plots that resulted from the *r plot_ggplot2_change_geom_point_color* code chunk, where a distinct regression model is estimated for each `Species` category. Seeing the results for the `room_type` variable in the Airbnb data set (see the code chunk above), you can imagine a similar approach would be less meaningful. Out of the 18,545 observations, only six have the "Hotel room" label assigned. Even though we could estimate a regression model for the six corresponding data points (e.g. `price` vs `number_of_reviews`), this would be a highly underpowered statistical test, and generalizing based on these six observations would be highly inappropriate. The problem of having sparse categories alludes to the "Curse of dimensionality". In this case, this curse refers to the fact that sparse categories effectively increase the feature space's dimensionality without proportionally increasing the informative value of the data. This makes it harder to model the data effectively without significantly more observations. The latter often is not feasible, so we circumvent this issue by using models less sensitive to sparse categories (e.g. tree-based models, see tutorial 4) or by lumping sparse categories to mitigate this curse.
+
+##### Plots for non-numerical (categorical) variables
+
+We can create a plot of the output of the table-command. For categorical data, we use the `barplot()` command and make sure that the input to this command is the output of the `table` command, like in the chunk below (note that `las` is short for label alignment specification, i.e. the orientation of the labels on the x-axis):
+
+```{r barplot_non_numerical_data}
+barplot(table(dta$neighbourhood_cleansed),
+        las = 2)
+```
+
+A visually more appealing way of displaying the frequencies would be to order the observations from large to small in the graph. This can be achieved by wrapping the `table()` output in the `sort` function, with the `decreasing` parameter set to TRUE. The result is then fed to the `barplot()` command:
+
+```{r barplot_non_numerical_data_table}
+barplot(sort(table(dta$neighbourhood_cleansed), decreasing = TRUE),
+        las = 2)
+```
+
+So, for each neighbourhood in Copenhagen, the above barplot shows how many listings are offered on Airbnb.
+
+#### Exploring associations between variables
+
+Now that we have a basic understanding of how to explore both numeric and non-numeric univariate variables let's look at exploring multivariate associations between variables. Three combinations are possible: numeric vs numeric, numeric vs. non-numeric, and non-numeric vs. non-numeric. We will discuss each of these combinations below.
+
+##### Two numerical variables
+
+You might know that for exploring associations between numeric variables, approaches (such as generating a correlation matrix) exist that allow for exploring the association between more than two variables at once. However, such a structured approach might be too early in the data exploration stage. One could even say that finding associations between variables should be the outcome of the modelling stage instead. In exploring associations between variables, however, we could always focus on relationships we think are theoretically interesting or relevant to our business case to get some preliminary insight into these associations. For example, could it be that the more accommodates a listing can house, the fewer reviews that listing receives? A way to get insight into that association is by calculating the correlation between the two variables:
+
+```{r explore_association_two_numerical_correlation}
+cor(dta$accommodates, dta$number_of_reviews, use = "complete.obs")
+```
+
+The found correlation is close to zero, meaning there is *no* association between the two variables. But maybe the association is dependent on the neighbourhood. This could be an excellent moment to demonstrate the value of the `lattice` package! The code below illustrates how to generate such a plot:
+
+```{r explore_associations_two_numerical_trellis}
+lattice::xyplot(number_of_reviews ~ accommodates | neighbourhood_cleansed,
+                data = dta,
+                layout = c(4, 3), # arrange the panels in 3 columns and 1 row
+                type = c("p", "r"), # 'p' for points, "r" for regression lines
+                xlab = "Accommodates",
+                ylab = "Number of reviews",
+                main = "Accommodates vs. Number of reviews")
+```
+
+Although the generated plot hints at various association levels between neighbourhoods, it also reminds us of the earlier found outlier in the `number_of_reviews` variable. It even suggests the existence of a multivariate outlier, as there appears to be a listing in the Bispebjerg neighbourhood that can house 12 accommodates and has received close to 1,000 reviews (with a mean review score of seven, as we established earlier). That is a nice example of an outlier we would have missed if we had only focused on univariate statistics!
+
+With 36 numerical variables in the listings data, you can imagine there is much further to explore in this data set. We leave it up to you to further delve into this. Also, we can imagine the approach we sketch here feels undirected. The trick, we believe, is in the mindset you adopt. As said before, we are not yet in the modelling stage but are exploring the data. If you find something, like the multivariate outlier above, make a note of it. If you don't find anything, that is also fine. The goal is to get to know your data.
+
+##### One numerical and one non-numerical variable
+
+We can resort to the boxplot discussed earlier to explore the association between one numerical and one non-numerical variable. Building on the example above, where we differentiated between different neighbourhoods in Copenhagen, we could, for instance, create boxplots for the `accommodates` variable per neighbourhood. This can be achieved with the code below. The tilde (~) that we use in the function is a typical approach in R if we want to define relationships between variables. The code below says that accommodations should be plotted in relation to the different neighbourhood values. We gather from the plot below that different data distributions exist for the number of accommodates if we compare neighbourhoods. The meaning of this is intuitive: some neighbourhoods might be characterized by larger houses than others. For analytical purposes, it does indicate that neighbourhood seems to be an important predictor to include in our model.
+
+```{r explore_association_one_numerical_one_non_numerical}
+boxplot(accommodates ~ neighbourhood_cleansed,
+        data = dta,
+        las = 2)
+```
+
+##### Two non-numerical variables
+
+To explore the association between two non-numerical variables, we can resort to a function we discussed earlier: the `table()` function allows for plotting multiple categorical variables. Below, we do this for the `neighbourhood_cleansed` and `room_type` variables:
+
+```{r explore_association_two_non_numerical}
+table(dta$neighbourhood_cleansed, dta$room_type)
+```
+
+The resulting table is sometimes called a crosstable or contingency table. Again, our curiosity has yielded a new insight: the six "Hotel room" observations we saw earlier in our 'Curse of dimensionality' discussion all appear to be located in the city centre ("Indre By").
+
+##### Concluding remarks on data exploration
+
+We started this section with the observation that the significance of data exploration and preparation is not often addressed in discussions that emphasize the virtues of data science. In this section we have introduced you to some techniques that help you to transition from looking at your data to looking into your data. The outcome of this step lays the foundation for the next step, where you will clean and prepare your data for the subsequent modelling step. Note that even though we have organized this tutorial around several distinct steps, in reality this process has a more iterative (i.e. going back and forth between for example data exploration, and data cleaning and preparation) nature, both within and between steps, even when we move further into the data pipeline (i.e. the actual modelling stage). 
+
+### 3. Data cleaning and preparation
+
+#### Data integration
+
+A common situation in a data analytics project is merging two or more data sets. The challenge here does not lie in the function we use to perform such a merge: in the 'An introduction to working with R' tutorial, we already outlined the different merge types and demonstrated the `merge()` function in R. The focus of this tutorial is on making sure that we are in control of the merge process. As you might recall from the introductory tutorial, we need one or more overlapping variables to link the data frames we want to combine. We call such variables keys, and it is a helpful question to ask if both data frames contain the same key values. Let's first introduce a data set that we can use to merge with our listings data. We downloaded another file from the Inside Airbnb website containing detailed review data for the Copenhagen listings. This data is loaded in the code chunk below.
+
+```{r load_review_data}
+reviews <- read.csv("reviews.csv")
+```
+
+Let's first determine how many unique listing IDs are present in both data frames. We can achieve this by embedding the results of the `unique()` function in R in the `length()` function we encountered in the previous tutorial. Note that the `id` variable refers to the listing ID in the listings data, whereas the `listing_id` variable refers to the listing ID in the reviews data frame.
+
+```{r unique_ids}
+length(unique(dta$id))
+length(unique(reviews$listing_id))
+```
+
+From the above, we can deduce that 18,545 unique listings are reported in the listings data set. This corresponds to the number of rows in the `dta` data frame (see the description of the variable in the Environment tab to your right), which means that each listing occurs once in that data frame. The `reviews` data frame contains 16,144 unique listings. From this, we learn two things: first, fewer listings are reported in the `reviews` data frame compared to the `dta` data frame. Second, listings occur multiple times in the `reviews` data frame, as the number of 16,144 is about a factor of 20 smaller compared to the number of rows (332,015) in the `reviews` data frame.
+
+A subsequent question we want to answer is if the 16,144 unique IDs available in the `reviews` data frame fully overlap with those available in the `dta` data frame. We can check that with the function below. The `which()` function in the code chunk below returns the indices of TRUE values where there is a match. If we wrap that vector with indices in the `length()` command and the result is 16,144, we know there is complete overlap.
+
+```{r key_overlap}
+length(which(unique(reviews$listing_id) %in% unique(dta$id)))
+```
+
+Indeed, a complete listing overlap between both data sets exists. We can now confidently say that if we perform an inner join with both data sets, the resulting data frame would have the same number of rows as the `reviews` data frame. Indeed, if we check the dimensionality of the data frame that results from the merge, we'll find that it contains 332,015 rows.
+
+```{r merge}
+dim(merge(dta, reviews, 
+          by.x = "id",
+          by.y = "listing_id"))
+```
+
+One could wonder why we should dedicate so much effort to understanding the number of unique IDs and their overlap between two data sets before merging them. We want to do this to explain why data might be lost in this process and determine whether this is a problem. For example, the insight that fewer listings are present in the `reviews` data might prompt us to explore why that is the case. It could be that some listings that are present in the `dta` data frame are relatively new, so no reviews have been given yet. Another reason could be a mismatch between the moment the data was scraped for the listings and the moment the data was scraped for the reviews. Gathering insight into such reasons means obtaining a deeper insight into our data and what we can and cannot do.
+
+#### Data cleaning
+
+##### Handling duplicate observations
+
+It might sometimes happen that duplicate observations occur in the data you are handed, or that duplicate observations might be created during data preprocessing. Regarding the latter, say we have a data frame that contains listing information (e.g. location, accommodates, number of rooms) and multiple reviews per listing. If the review data does not fit the purpose we have with our analysis, we could remove that column. The remaining data, however, then would contain duplicate observations, which we typically want to remove. To achieve this, we can use the `duplicated()` function in R, as follows.
+
+```{r duplicate_values}
+dta <- rbind(dta, dta)
+dim(dta)
+dta <- dta[ !duplicated(dta), ]
+dim(dta)
+```
+
+In the above chunk, we first introduce duplicate observations by adding the rows of the `dta` object to itself for illustrative purposes. The `duplicated()` function returns TRUE for duplicated rows and FALSE for unduplicated rows. Since the latter are the rows we would like to retain, we negate the output of the `duplicated()` function and use the resulting vector to select the non-duplicated rows in the `dta` data frame. Note that we now use the function for the entire dataset, but it can also be directed to specific columns.
+
+##### Dealing with inconsistent variable formats
+
+Inconsistent variable formats are a typical problem, and because of the unexpected behaviour they result in, they have led many data analysts to the borders of utter frustration. Take, for example, the `price` variable in the Airbnb dataset. It is natural to expect this variable to be numeric, but if we calculate the mean listing price, an error message shows.
+
+```{r price_mean_error, error = TRUE}
+mean(dta$price, na.omit = TRUE)
+```
+
+A trained eye will deduce from this error message that the variable format might play a role here. Indeed, if we explore the structure of the variable, we see that it is stored as a character. In addition, inspection of the first values reveals the culprits: each price is preceded with a dollar sign, which R recognizes as a character. In addition, commas are used, which are not valid decimal separators in R. These are also recognized as characters by R. Remember from the first tutorial that R coerces values to the most basic data type, which in this case is the `character` type.
+
+```{r structure_price}
+str(dta$price)
+```
+
+To fix this, we first remove the dollar signs and commas. The most convenient way to do this is to use the `str_replace` function from the `stringr` package:
+
+```{r remove_dollar_and comma_signs}
+dta$price <- stringr::str_replace(dta$price, "\\$", "")
+dta$price <- stringr::str_replace(dta$price, ",", "")
+str(dta$price)
+```
+
+The `str_replace` function takes a variable as its input and then replaces the provided string (given in the second argument of the function. This could be anything, ranging from an individual character to a full-text fragment) with a new string (in this case an empty string, expressed by the `""` in the last argument of the function). Notice that the `$` sign is preceded by two backslashes in the first function call above. These are called escape characters. The `stringr` package heavily relies on using so-called "regular expressions", which, in short, are sequences of patterns that match patterns in text. We will say a little bit more about these expressions later in this tutorial, but for now, note that in the syntax of regular expressions, the `$` sign has a special meaning (i.e., we want to match the end of a string). If we want to undo that special meaning, as in our example, where we want to replace the `$` sign, we can escape it using the backslash. The backslash also has a special function in the syntax of regular expression, so we must escape that function and use two backslashes. Again, a little more about regular expressions follows later in this tutorial.
+
+The last step we need to take is to convert the type of the `price` variable to numeric. This is done using the `as.numeric` function, which we already saw in the first tutorial. We now have converted the variable and can calculate its mean. Note that even though we removed the dollar sign, making a note somewhere that `price` is expressed in dollars is essential so we don't lose track of that. One way to do this is to change the variable's name, as we do in the second step in the below chunk.
+
+```{r change_variable_name}
+dta$price <- as.numeric(dta$price)
+names(dta)[names(dta) == "price"] <- "price_dollars"
+mean(dta$price_dollars, na.rm = TRUE)
+```
+
+##### Dealing with missing values
+
+Missing values are another pervasive problem in data analytics projects. This is probably why it is the topic of heated debate, where no real convergence occurs. It is important to realise upfront that missing values, in the end, are a fundamental data problem that can only be addressed structurally by avoiding them or by *not* using the data set at all. Hence, any strategy you might devise is ultimately *not* a fundamental solution. Missing values, however, are an inescapable reality. For example, people will not always fill out all fields in a survey (and drop out entirely if you force them to), or power failures happen, so we do not capture all sensor data. In addition, most machine learning algorithms will *not* process records with missing values. We, therefore, have to address them, and below, we will explain three different strategies: omission, mean imputation and imputation using regression.
+
+Omission means we will leave out those records in a data set with missing values on one or more variables. Building forth on the `price_dollars` variable, you might have noticed in the previous step that it contains `NA` values, which, as you might recall from the previous tutorial, stands for "Not Available" and is used in R to denote missing values. To get an idea of the number of missing values, we can utilise the `is.na()` function in R. This function gives a `TRUE` or `FALSE` for each record, so if we wrap its output in a `table()` command we'll get the count for both `TRUE` and `FALSE`.
+
+```{r price_missing_values}
+table(is.na(dta$price_dollars))
+```
+
+So, a price value is missing for about one out of three listings. This might be a moment to consider if the `price_dollars` variable should be included in the analysis, as the proportion of missing values is high. Alternatively, you could conduct some exploratory data analysis, especially considering the association of this variable with other variables in the data set, to see if, for example, missing values tend to cluster around specific neighbourhoods, listing types, or both, or are time-dependent. Should that be the case, you could continue to work with that subset of the data for which the missing value problem is less pronounced. A non-differentiated approach to creating such a subset is to run the command in the chunk below. Obviously, a more nuanced approach is in place, and remember that entirely eliminating missing values is not a goal.
+
+```{r price_subset_non_missing_values}
+dta_subset <- dta[ !is.na(dta$price_dollars), ]
+```
+
+The second approach we discuss in this tutorial is that of mean imputation. Here, we replace the missing values with the best estimate for them, which is the average value of the `price_dollars` variable. The code in the chunk below accomplishes that. In subsequent steps, we need the original `price_dollars`, so we create a temporary data frame for this example. This is not required should you adopt this approach in your data pipeline.
+
+```{r mean_imputation}
+dta_tmp <- dta
+dta_tmp[ is.na(dta_tmp$price_dollars), ]$price_dollars <- mean(dta_tmp$price_dollars, na.rm = TRUE)
+table(is.na(dta_tmp$price_dollars))
+remove(dta_tmp)
+```
+
+We now have taken care of all missing values in one shot. Earlier, we saw that the mean can be sensitive to outliers, so an alternative approach could be to use median imputation. Try adjusting the above code chunk and see if you can make that work. 
+
+Like removing all observations that have a missing value on the `price_dollars` variable, mean imputation is a non-differentiated approach, especially if we have many missing values. A more differentiated approach would be imputation through regression. One way to look at regression models is to say that they try to predict the mean value of a dependent variable for a record using multiple predictors. Hence, imputation through regression is an advanced approach to mean imputation, where we try to predict the missing value for a record using scores on other variables. Let's consider a simple regression model where we predict `price_dollars` using `accommodates`, `neighbourhood_cleansed` and `room_type` as predictors. We store this model in the `model` object and then inspect the results using the `summary()` function.
+
+```{r regression_based_imputation_model}
+model <- lm(price_dollars ~ accommodates + neighbourhood_cleansed + room_type, data = dta[ !is.na(dta$price_dollars), ])
+summary(model)
+```
+
+Regression models will be discussed in one of the lectures of this course, so we will not dive deeply into the results. For now, it suffices to say that the chosen predictors, for the most part, significantly predict the `price_dollars` variable, which means we can use this model to predict missing values. This can be achieved as follows.
+
+```{r regression_based_imputation_predictions}
+dta_sel <- dta[is.na(dta$price_dollars), c("accommodates", "neighbourhood_cleansed", "room_type")]
+predictions <- predict(model, newdata = dta_sel)
+dta[ is.na(dta$price_dollars), ]$price_dollars <- predictions
+remove(dta_sel, predictions)
+table(is.na(dta$price_dollars))
+```
+
+In the code chunk above, we first create a new data frame, `dta_sel`, that only contains the independent variables for those records that have a missing observation on `price_dollars`. We then use this data frame to generate the `predictions` vector, which contains predicted values of `price_dollars` for the missing observations. Then, we assign the values of this vector to the missing `price_dollars` values in the `dta` data frame. We then cleaned up our act and checked if all missing values had been addressed.
+
+Once again, we want to avoid missing values as much as possible, but at the same time, they form an omnipresent reality. The approaches we offer above are nothing more than a patch. Other methods are also available, and we advise always trying multiple approaches to see how they affect the outcomes of the analysis. This does not fix the issue of missing values, but at least gives you insight into the sensitivity of your results using different approaches for dealing with missing values. Lastly, we present a function that allows us to simultaneously assess missing values for each variable in a data set.
+
+```{r identify_missing_values}
+summary(is.na(dta))
+```
+
+##### Dealing with outliers and skewed distributions
+
+Earlier, we indicated that detecting outliers is essential because many models are sensitive to them. We illustrated this by showing how the results of a regression model might be influenced by the existence of one outlier in the data. The `number_of_reviews` variable was revealed to have an outlier to the right of the distribution. Such a distribution is an example of a distribution that is skewed to the right. Note that even without outliers, data can be skewed, and rescaling is an approach that addresses such skewed data by transforming it to a different scale while preserving the shape of its distribution. It doesn't necessarily make the data normally distributed but makes it more manageable or interpretable. Standard rescaling methods include logarithmic scaling, square root, and reciprocal transformations. For right-skewed data, for example, the log transformation is often used. This can be done in R as follows.
+
+```{r log-transformation}
+dta$number_of_reviews_log <- log(1 + dta$number_of_reviews)
+summary(dta$number_of_reviews)
+summary(dta$number_of_reviews_log)
+```
+
+We added 1 to the `number_of_reviews` variable in the `log()` function above because the source variable `number_of_reviews` contains zeros, and log(0) is not defined. We often encounter right-skewed data, and alternative transformations to address such data are taking the square root (`srt()`) or reciprocal (e.g., 1 / `dta$number_of_reviews`), or we apply a Box-Cox transformation (see the `boxcox` function from the `MASS` package). Many of these transformations have the added benefit of stabilising the variance across a variable's range, which is often an underlying model assumption (e.g., linear regression). Left-skewed data is rarer. We then typically square or cube the variable. 
+
+If you feel uncomfortable rescaling variables, remember that most scales are somewhat arbitrary in business analytics, so rescaling a scale does not fundamentally change its interpretation. In addition, scores on some variables (e.g. distance or income) have a different interpretation in any case, depending on where you are on that scale. For example, an increase in distance from 1 to 10 kilometres has a different interpretation (in terms of, for example, knowledge exchange) compared to the rise in distance from 1001 to 1010 kilometres. A log transformation on such a variable, which affects larger values stronger than smaller ones, doesn't change its interpretation much.
+
+#### Feature Engineering
+
+##### Variable normalization and variable scaling
+
+Many datasets contain variables that are measured on different scales. In our example data, for example, we have variables measured in dollars (e.g., `price`), counts (e.g., `number_of_reviews`) and days (e.g., `availability_30`), to name a few. Some algorithms are sensitive to these different scales, where variables with larger magnitudes influence the results more than those with smaller magnitudes. This means, for example, that a variable expressing weight in microgram influences modelling outcomes more than a variable expressing that same weight in kilogram. Data normalization and scaling are techniques that address this problem.
+
+Data normalization involves rescaling the range of features to a scale of [0, 1] or [-1, 1]. Normalizing data brings all the values into a standard scale without distorting their ranges. Following the common min-max scaling approach, the code below does this for the `beds` variable. In this approach, you subtract the minimum value from each observed value and divide the result by the range of that variable:
+
+```{r normalize_variable}
+dta$beds_scaled <- (dta$beds - min(dta$beds, na.rm = TRUE)) / (max(dta$beds, na.rm = TRUE) - min(dta$beds, na.rm = TRUE))
+summary(dta$beds_scaled)
+```
+
+Data normalization is useful when working with algorithms sensitive to feature scaling (such as k-nearest neighbours or neural networks). Normalizing will make these algorithms converge faster. Normalization is also useful when features have different units or scales or when you need values in a bounded interval such as [0, 1] or another specific range.
+
+Data standardization transforms variables to have a mean of zero and a standard deviation of one. This process involves subtracting the mean value of each feature and then dividing it by the standard deviation. The approach is often referred to as Z-score normalization. It is useful when your data has varying scales and your algorithm makes assumptions about your data having a Gaussian distribution. Data standardization can be done in R using the `scale()` function with both parameters (i.e. `center` and `scale`) set to TRUE:
+
+```{r standardize_variable}
+dta$beds_standardized <- scale(dta$beds, center = TRUE, scale = TRUE)
+summary(dta$beds_standardized)
+sd(dta$beds_standardized, na.rm = TRUE)
+```
+
+Data standardisation is useful when you work with algorithms that assume your data is normally distributed, such as linear regression. It is also less sensitive to outliers than normalisation. Lastly, standardisation is an appropriate choice if your features are already roughly on the same scale, but you want to transform them into more Gaussian-like.
+
+Note that the above considerations are guidelines. In practice, the choice between normalisation and standardisation is not always clear-cut and may require some experimentation to determine which method works best for your dataset and model. It, therefore, is practical to try both methods and compare the performance of your models with each. The choice can be empirical based on the results you obtain.
+
+Both methods do not fundamentally change the shape of a variable's distribution. This is a crucial difference compared to the earlier rescaling approaches, such as the log transformation. While normalisation and standardisation are often employed to meet the assumptions of various algorithms, rescaling methods aim to make data more suitable for linear models, reducing skewness or stabilising variance. Sometimes, a combination of these methods is used. For example, one might log-transform the data to reduce skewness and then apply standardisation to scale the transformed data for a particular algorithm.
+
+##### Encoding non-numeric variables
+
+When discussing regression-based imputation earlier, we could use the categorical `neighbourhood_cleansed` variable as a predictor directly in the `lm` function. This is because the `lm` function is written so that it automatically translates textual categories into numeric representations. Not all functions have this capability, however. It is helpful to know how to prepare categorical variables to be suitable for any modelling algorithm. We can do this by creating dummies.
+
+A dummy is a numerical code that represents a category. Let's say we have a product that comes in black and white colours. A colour dummy that captures that categorization could contain 0 for black and 1 for white. Say we want to estimate a simple linear regression model that predicts product sales using this product colour dummy as a predictor, and the coefficient for this dummy would be positive and significant, which tells us that sales for products that have code 1 (white) are significantly higher compared to sales for products that have code 0. So, a dummy allows us to compare groups and uses the zero-coded group as the basis of comparison.
+
+Take, for example, the `instant_bookable` variable in the Airbnb data. This variable contains two values, `t` for true and `f` for false. Using this variable, we can create a new variable, `instant_bookabe_dummy`, that contains 0 for false and 1 for true (if there is no specific group we are especially interested in, we typically assign 0s and 1s alphabetically). This variable is created as follows.
+
+```{r dummy_instant_bookable}
+dta$instant_bookabe_dummy <- ifelse(dta$instant_bookable %in% "f", 0, 1)
+```
+
+In the chunk above, we introduced a new function on the fly. The `ifelse` function yields an output based on whether or not a specific condition is satisfied. In the above function, we check for each record in the `dta` data frame for the condition of a value equal to `f`. If that is the case, we assign a 0 to the `instant_bookable` variable, and in all other cases (a value equal to `t`), we assign a 1.
+
+We can easily extend the approach of creating dummies to variables containing categories with more than two distinct values. Generally, if we have *n* categories, we need *n-1* dummies. Take, for example, the earlier constructed `room_type`` variable. This variable contains four categories, meaning we need three dummies to represent each category. This is done in the code chunk below. With "Entire home/apt" being the reference category, we assign a 1 to each respective dummy for one of the other room types. Now, the reference category is represented by a value of 0 on all three dummies, and the other categories are represented by a value of 1 on their respective dummy variable.
+
+```{r create_room_type_dummy}
+dta$room_type_dummy_01 <- ifelse(dta$room_type %in% "Hotel room", 1, 0)
+dta$room_type_dummy_02 <- ifelse(dta$room_type %in% "Private room", 1, 0)
+dta$room_type_dummy_03 <- ifelse(dta$room_type %in% "Shared room", 1, 0)
+```
+
+##### Cleaning non-numeric variables
+
+Sometimes, distilling a numeric variable from a character variable is relatively straightforward. Note that we are not talking about fixing inconsistent variable formats (such as the `price` example we covered) but about primary textual variables. The `bathrooms_text` is a nice example. Let's explore the unique values in that variable.
+
+```{r bathrooms_text}
+unique(dta$bathrooms_text)
+```
+
+It is important to note that the numbers listed are classifications rather than exact quantification. For example, the interpretation of half a bath is a bathroom containing a toilet but no bathing facility. Nevertheless, ignoring the question of sharing or not sharing a bathroom, we could convert the numbers in this variable to a numeric variable expressing sanitary comfort. In the code below, we first assign numbers to the two values that do not contain a number. Then, we use a regular expression to extract the numbers from all values and write this to the `bathroom` variable, which in this data only contains NA (check this yourself). Lastly, we convert `bathroom` to a numeric data type and run a summary command to explore this newly created variable.
+
+```{r encoding_categorical}
+dta[ which(dta$bathrooms_text %in% "Shared half-bath"), ]$bathrooms_text <- 0.5
+dta[ which(dta$bathrooms_text %in% "Half-bath"), ]$bathrooms_text <- 0.5
+dta$bathrooms <- stringr::str_extract(dta$bathrooms_text, "\\d+(\\.\\d+)?")
+dta$bathrooms <- as.numeric(dta$bathrooms)
+summary(dta$bathrooms)
+```
+
+As said earlier, a regular expression is a sequence of patterns matching text patterns. Here's a breakdown of the components of the regular expression used in the above code chunk:
+
+- The `\\d+` part matches one or more digits. The double backslash `\\` is used to escape the backslash character itself, so `\\d` is the way to represent `\d`. This matches any digit (instead of the letter d, that is why it is escaped). The `+` quantifier means "one or more" of the preceding element, so `\\d+` matches one or more digits.
+- `(\\.\\d+)?`: This part is composed of multiple components:
+- The parentheses `()` enclose a group, allowing us to apply quantifiers to the whole group.
+- `\\.` matches a literal dot (`.`). Usually, a dot in a regex pattern matches any character, but here, it is escaped (`\\.`) to match a literal dot, which is used as the decimal separator in numeric patterns.
+- `\\d+` inside the parentheses matches one or more digits, as explained above.
+- The `?` quantifier after the parentheses makes the entire group optional. This means that the part of the pattern inside the parentheses may appear once or not at all.
+
+So, the regex matches a sequence of one or more digits, optionally followed by a decimal point and another sequence of one or more digits. This pattern can match integer numbers like 123 and decimal numbers like 123.456. However, it won't match numbers with a leading decimal point, such as .456, without the leading digits because the first part (`\\d+`) requires at least one digit before the optional decimal part.
+
+Regular expressions offer a very versatile framework for extracting information from text data. As you might deduce from the above, they require a way of thinking one needs to get used to and even then, it can take some time to get them suitable for your purposes. In that context, the joke is sometimes made that if you want to use a regular expression for a problem you want to solve, you just created a second problem. In this course, using regular expressions is optional (we provide a resource at the end of this tutorial), and no questions will be asked about them in the quiz.
+
+##### Deriving a new variable
+
+Sometimes, a new variable can be derived from existing variables in the data. For example, we could calculate a new variable, `costs_per_person`, using the earlier created `price_dollars` variable and the `accommodates` variable.
+
+```{r costs_per_person}
+dta$costs_per_person <- dta$price_dollars / dta$accommodates
+summary(dta$costs_per_person)
+```
+
+If the above mean score for the `costs_per_person` variable seems a bit pricy to you, remember that some listings have the condition that the listing should be rented for a minimum number of nights. If we use the `minimum_nights` variable to calculate another new variable,  `costs_per_person_per_night`, and explore that variable, the outlook of renting an affordable place via Airbnb looks brighter (although now the minimum score raises questions. We leave it up to you to explore that further).
+
+```{r costs_per_person_per_night}
+dta$costs_per_person_per_night <- dta$costs_per_person / dta$minimum_nights
+summary(dta$costs_per_person_per_night)
+```
+
+In the context of deriving new variables, creating dummies is also helpful if we want to address issues with unevenly distributed data sets. We could, for example, address the uneven distribution of the `dta$price_dollars` variable by creating a dummy that gives a 0 if the price is below the median of that variable and 1 if it is above the median (note that we will now create a new variable by creating a dummy to deal with outliers. This shows that the strategies we discuss in this section can and should be combined as you see fit). This can be done as follows.
+
+```{r create_price_dummy}
+dta$price_dollars_dummy <- ifelse(dta$price_dollars <= median(na.omit(dta$price_dollars)), 0, 1)
+```
+
+Of course, the above approach leads to significant information loss, but sometimes it is our best option. Also, we can create more sophisticated rules, for example, by creating two dummies, where 00 represents `low` (e.g. prices below the first quartile), 01 represents `average` (e.g. prices being in the interquartile range) and 10 represents 'expensive' (e.g. prices being in the fourth quartile). Using the code provided in the above chunks, we leave it up to you to try to create such a dummy.
+
+##### Lumping (sparse) categories
+
+In the section on exploring non-numerical (categorical) variables, we talked about the "Curse of dimensionality" in the context of having sparse categories. We considered the `room_type` variable, which contains many observations for the `Entire home/apt` category and relatively few observations for the other categories (`Hotel room`, `Private room`, and `Shared room`). It makes sense to lump these categories, and this can be easily achieved by selecting those observations that contain values of the categories we want to change and replacing these values with a new category, which we will call `Other` in the example. The code that can be used to do this looks as follows:
+
+```{r lumping_sparse_catgories}
+dta[ which(dta$room_type %in% c("Hotel room", "Private room", "Shared room")), ]$room_type <- "Other"
+
+cbind(table(dta$room_type))
+```
+
+Like previous examples, we use the `which()` function in combination with the `%in%` operator to select the rows for which the `room_type` variable contains the values we want to change. The output of this function is used to subset the `dta` data frame, and we, in turn, select the `room_type` variable of this data frame, after which we assign the `Other` value to this variable. The subsequent `table` command then shows that this operation was successful. 
+
+Another scenario might be that, even though we have sufficient observations per category, we have too many categories. In the Airbnb data, we explored the `neighbourhood_cleansed` variable before and noticed it contained 11 distinct values. Especially in analyses where the neighbourhood is not a pivotal variable, having 11 distinct categories might be too much. We could reduce the number of classes in an informed way, for example, by changing them into wind directions. Following [this](https://upload.wikimedia.org/wikipedia/commons/6/62/Districts_of_Copenhagen_urban_area.png) map, we could, for instance, assign wind directions following the same approach as in the previous chunk:
+
+```{r lumping_categories}
+dta['wind_direction'] <- NA # initialize new variable
+
+dta[ which(dta$neighbourhood_cleansed %in% c("Nrrebro", "sterbro", "Bispebjerg")), ]$wind_direction <- "north"
+dta[ which(dta$neighbourhood_cleansed %in% c("Amager st")), ]$wind_direction <- "east"
+dta[ which(dta$neighbourhood_cleansed %in% c("Vesterbro-Kongens Enghave", "Amager Vest", "Valby")), ]$wind_direction <- "south"
+dta[ which(dta$neighbourhood_cleansed %in% c("Brnshj-Husum", "Vanlse")), ]$wind_direction <- "west"
+dta[ which(dta$neighbourhood_cleansed %in% c("Indre By", "Frederiksberg")), ]$wind_direction <- "center"
+
+cbind(table(dta$wind_direction))
+```
+
+#### Concluding remarks on data cleaning and preparation
+
+In this section, we have gone through numerous scenarios one might encounter when preparing a data set for modelling. We did not cover every scenario, but we believe the above should give you the repertoire to deal with deviant situations as they present themselves. Like in the concluding section on the part on data exploration, we want to stress again that steps are iterative. You might, for example, have noticed that even in the cleaning and preparation step, we still did some exploratory analysis. Also, the distinct steps presented in this section can be combined. A good example can be found in the section on creating new variables, where, at one point, we constructed a new variable by creating a dummy to deal with outliers. As a last point, although we offer many different scenarios, we did not delve deeply into when these scenarios are relevant. This is because this often depends on the exact nature of the variable and the modelling approach you have in mind. Hence, data cleaning and preparation should always be contextualized along those two dimensions. Even then, you will find that multiple strategies often exist to follow. Devising different scenarios to see how they impact modelling outcomes is the way to go, as it gives insight into the robustness of your results. Before proceeding to the following and last sections, let's clean the working space to start with a clean slate in the next section.
+
+```{r clean_environment}
+remove(list = ls())
+```
+
+### 4. Principal Component Analysis (PCA)
+
+In the data exploration section, we referred to a specific instance of the "Curse of dimensionality". This curse captures various phenomena that arise when we analyze and organize data in high-dimensional spaces, often with many variables that do not occur in lower-dimensional settings. This section will cover an approach to reduce the number of variables in a data set: Principal Component Analysis (PCA). Having many variables can have various reasons. For example, when researching individuals in a business context, we are often interested in psychological concepts such as motivation or satisfaction. To make sure each respondent has the same understanding of such concepts, we devise sets of questions (scales) that meticulously capture different aspects of these concepts. Lin (2007), for example, proposed a scale for motivation that consists of 16 questions. This translates to 16 variables in the resulting data set. However, this need for an accurate measurement does not harmonize with the innate human need to simplify and categorize the world around us: using all 16 variables as a predictor for, say, job satisfaction in a regression model would give far too detailed results. In addition, adding variables to a model is not free, as each variable requires a minimum number of observations to maintain statistical power. This would mean that for our motivation model only, we would need 200 observations, and then we did not even include alternative explanations for job satisfaction and control variables. Especially in social-scientific research, obtaining such large sample sizes is often unrealistic. Hence, data reduction, for example, through performing a PCA, is critical to deal with this instance of the curse of dimensionality.
+
+The data in this tutorial is taken from [this website](https://web.archive.org/web/20210417051205/http://groupware.les.inf.puc-rio.br/har). It contains various measurements of six participants, who carried accelerometers on the belt, forearm, arm, and dumbbell and were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More specifically, participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: precisely according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). The background of this study is that many sports enthusiasts nowadays use wearables to take measurements about themselves regularly to improve their health or find patterns in their behaviour (Veloso et al., 2013). Although people often quantify how much of a particular activity they do, they rarely quantify how well they do it. This offers new modelling opportunities that allow sports trackers to report on activity metrics and how one could improve performing that activity. We reference the study at the end of this tutorial if you want to read more. For this tutorial, we will now read and explore the data.
+
+```{r load_data_second}
+dta <- read.csv("barbell_lifts.csv")
+str(dta)
+```
+
+From the above overview, we can deduce that each of the four accelerometers has captured 13 aspects, leading to measurements on a total of 52 variables. The 53rd variable contains the movement class, coded according to the earlier outlined specifications. We will ignore this variable in this tutorial, as we aim not to predict this but to reduce the set of predictors. Without going too much into the physiology behind it, one can imagine that these measurements correlate. For example, the chunk below demonstrates a negative correlation of -.92 between gyros arm_x and gyros_arm_y. We wouldn't lose too much information if we could find a way to combine these measures, and that is what PCA is all about.
+
+```{r correlation_gyroscope}
+cor(dta$gyros_arm_x, dta$gyros_arm_y)
+```
+
+Principal component analysis aims to create new variables, called "Principal Components", that are linear combinations of the original variables. These combinations are uncorrelated (so there is no information overlap), and only a few contain most of the original information expressed in terms of variance. The final product of PCA is a smaller set of numerical variables that contain most of the information. We refer to the lecture and book for a more detailed discussion focusing on performing a PCA and interpreting the results in this tutorial.
+
+First, PCA is sensitive to measurement scales, with variables used on a bigger scale having more weight in the found solution. From the data exploration step above, you can see that different scales are used in this data set, leading to values in the order of decimals (e.g. gyros_dumbbell_y) to values in the order of hundreds (e.g. magnet_forearm_y). The latter will lead to more significant variances and weigh more in the final PCA solution. Seeing that these measurements all relate to the same activity, this is something we would want to avoid, so our first step is to standardize the variables. This is done in the below chunk, where we create a new variable called `dta_standardized`.
+
+```{r standardize}
+dta_standardized <- scale(dta[, !names(dta) %in% "classe" ], center = TRUE, scale = TRUE)
+```
+
+We can now perform the actual PCA using the `dta_standardized` data. Again, we refer to the lecture and book for a more detailed discussion about what is happening behind the scenes. We use the `prcomp()` function, available in base R, for performing the PCA and write its results to the `results` object. Then, we explore this object.
+
+```{r pca}
+results <- prcomp(dta_standardized)
+summary(results)
+```
+
+The results of a PCA always yield the same number of Principal Components as there are variables in the input data set. In our case, this is 52. Obviously, using all these 52 Principal Components would not reduce the set of variables, so we want to select a number of Principal Components that retains as much variance as possible. Deciding on the exact threshold is somewhat arbitrary and depends on your exact purposes, but a typical value we use is 90%. If you inspect the 'Cumulative Proportion' in the above output, you will conclude that 19 Principal Components capture about 90% of the variance in the source data of 52 variables. Before we explore these 19 Principal Components a bit more by calling the `rotation` table stored in the `results` object, let's first look at the first five rows for the first two Principal Components of this table to understand its structure.
+
+```{r rotation_unmasked}
+results$rotation[ c(1:5), c(1:2) ]
+```
+
+What you see in the above table (which, again, is only a cross-section of a full table containing 52 rows (the original variables) and 52 columns (the resulting Principal Components)) are the loadings per variable on the different Principal Component. With "loading", we mean how much a variable adds to the variance contained in a Principal Component. We are especially interested in the absolute values of these variances. For example, the `roll_belt` variable adds more to the variance of PC1 than the variance of PC2. The opposite is true for the `pitch_belt` variable.
+
+Loadings of variables across Principal Components offer levers for interpreting Principal Components. Considering that we are not interested in small loadings and the entire table is considerably larger, we explore variable loadings for the first PC only below. As a threshold, we are interested in loadings with an absolute value larger than or equal to 0.20. In addition, we only select the first Principal Component.
+
+```{r rotation_masked}
+loadings <- data.frame(results$rotation)
+threshold <- 0.20
+indices <- abs(loadings$PC1) >= threshold
+data.frame(variable = rownames(loadings)[indices], 
+           loading = loadings$PC1[indices])
+```
+
+Given the study context, PC1 seems to capture a contrast between horizontal (roll and yaw) and vertical movements (acceleration in the z and y directions), as well as the stability (total acceleration) during the exercise. The negative loadings could represent aspects of the exercise technique that involve more significant body adjustment or compensation, while the positive loadings highlight the intended vertical movement patterns. Again, we are not physiological experts, but this interpretation shows how PCA leads to new variables that can be explained in terms of the joint composition of the contributing variables. In conclusion, we can say that the outcome of the above PCA is that instead of using 52 predictors, we can now use 19 predictors to predict scores on the `classe` variable.
+
+#### Concluding remarks on PCA
+
+Given the omnipresence of the "Curse of dimensionality", dimension reduction techniques such as PCA are omnipresent and one of the fundamental tools in a data scientist's toolbox. PCA is just one technique, and alternative techniques exist, such as t-SNE or UMAP. Instead of capturing the most variance in a data set, like PCA, t-SNE focuses on revealing local clusters or patterns by grouping similar data points.
+
+### Concluding remarks tutorial
+
+You have reached the end of this workbook. We hope you enjoyed it! This workshop has guided you through data preparation and analysis essentials using R, focusing on practical skills for real-world data challenges. Remember that practice is key. Like the other workbooks, the contents we covered should be enough to get you started. If you want to convert this file to a .html file, click the 'Knit'- button above.
+
+### Further reading
+
+If you developed an appetite for more, below are some references we think are valuable.
+
+#### Articles
+
+- Lin, H.F. 2007. Effects of Extrinsic and Intrinsic Motivation on Employee Knowledge Sharing Intentions. Journal of Information Science, 33(2), 135–149. 
+- Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+#### Books
+
+- Erickson, B. H., & Nosanchuk, T. A. (1977). Understanding Data. Toronto, McGraw-Hill Ryerson Limited.
+- Tabachnick, B. G., & Fidell, L. S. (2013). Using Multivariate Statistics. Boston, Pearson Education. 
+
+#### Websites
+
+- https://regex101.com
+- https://r-graph-gallery.com

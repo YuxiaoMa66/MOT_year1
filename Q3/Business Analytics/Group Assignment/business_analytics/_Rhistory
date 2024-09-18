@@ -1,0 +1,512 @@
+Build_tree(train_data, IV2, DV, 4)
+# Implement the function
+Build_tree(train_data, IV2, DV, 0)
+# Selection Algorithm of Variables function
+select_var <- function(data, IV, DV) {
+# compute the importance of the variables
+imp_info_gain <- sapply(IV, function(x) compute_importance(data, x, DV)$info_gain)
+imp_gain_ratio <- sapply(IV, function(x) compute_importance(data, x, DV)$gain_ratio)
+imp_gini_index <- sapply(IV, function(x) compute_importance(data, x, DV)$gini_index)
+# scale the importance to 0-1
+imp_info_gain <- (imp_info_gain - min(imp_info_gain)) / (max(imp_info_gain) - min(imp_info_gain))
+imp_gain_ratio <- (imp_gain_ratio - min(imp_gain_ratio)) / (max(imp_gain_ratio) - min(imp_gain_ratio))
+imp_gini_index <- (imp_gini_index - min(imp_gini_index)) / (max(imp_gini_index) - min(imp_gini_index))
+# take the average of the 3 results
+imp_avg <- (imp_info_gain + imp_gain_ratio + imp_gini_index) / 3
+# pick the biggest result as the selection critera for this node
+selected_var <- IV[which.max(imp_avg)]
+return(selected_var)
+}
+# Implement the function
+Build_tree <- function(data, IV, DV, depth) {
+variables <- IV
+if (depth == 0) return()
+# select the variable if there are more than 1 variable left
+if (length(variables) > 1)
+selected_var <- select_var(data, variables, DV)
+else
+selected_var <- variables[1]
+# split the data
+left_data <- data[data[[selected_var]] == 0,]
+right_data <- data[data[[selected_var]] == 1,]
+# print the selected variable
+print(paste("Selected Variable:", selected_var))
+# drop the selected variable from the list of variables
+variables <- variables[!variables %in% selected_var]
+# # print the importance of the selected variable
+# print(paste("Importance of the Selected Variable:", compute_importance(data, selected_var, DV)))
+# print the number of observations in the left and right nodes
+print(paste("This is level:", 4-depth+1))
+print("variables left:")
+print(variables)
+print(paste("Number of Observations in the Left Node:", nrow(left_data)))
+print(paste("Number of Observations in the Right Node:", nrow(right_data)))
+# repeat the process for the left and right nodes
+Build_tree(left_data, variables, DV, depth - 1)
+Build_tree(right_data, variables, DV, depth - 1)
+}
+# Implement the function
+Build_tree(train_data, IV2, DV, 4)
+View(dta2)
+View(test_data)
+View(train_data)
+# Implement the function
+Build_tree(train_data, IV_temp, DV, 4)
+# Recursive function to build the decision tree and prune it. Store the leaf nodes in a list and return it.
+Build_tree_prune <- function(data, IV, DV, depth, min_obs) {
+leaves <- list()
+recursive_build <- function(data, IV, DV, depth, min_obs, path = list()) {
+if (nrow(data) < min_obs || depth == 0 || length(IV) == 0) {
+return(list(data = data, path = path))
+}
+if (length(IV) > 1) {
+selected_var <- select_var(data, IV, DV)
+} else {
+selected_var <- IV[1]
+}
+left_data <- data[data[[selected_var]] == 0, ]
+right_data <- data[data[[selected_var]] == 1, ]
+if (nrow(left_data) < min_obs || nrow(right_data) < min_obs) {
+return(list(data = data, path = path))
+}
+new_path_left <- c(path, paste(selected_var, "= 0"))
+new_path_right <- c(path, paste(selected_var, "= 1"))
+left_leaves <- if (nrow(left_data) > 0) recursive_build(left_data, IV[!IV %in% selected_var], DV, depth - 1, min_obs, new_path_left) else NULL
+right_leaves <- if (nrow(right_data) > 0) recursive_build(right_data, IV[!IV %in% selected_var], DV, depth - 1, min_obs, new_path_right) else NULL
+return(c(left_leaves, right_leaves))
+}
+leaves <- recursive_build(data, IV, DV, depth, min_obs)
+return(leaves)
+}
+# Implement the function
+leaves_data <- Build_tree_prune(train_data, IV_temp, DV, 4, 1000)
+# print the leaf nodes, dropping the NULL values
+leaves_data <- leaves_data[!sapply(leaves_data, is.null)]
+leaves_data
+# get train_data_list from leaves_data, which is a list of dataframes and is the odd elements of leaves_data
+train_data_list <- leaves_data[sapply(seq(leaves_data), function(x) x %% 2 == 1)]
+# compute the mean of the observations in each leaf node and store each mean in the data's new column named "leaf_mean"
+for (i in seq(length(train_data_list))) {
+train_data_list[[i]]$leaf_mean <- compute_mean(train_data_list[[i]])
+}
+# Selection Algorithm of Variables function
+select_var <- function(data, IV, DV) {
+# compute the importance of the variables
+imp_info_gain <- sapply(IV, function(x) compute_importance(data, x, DV)$info_gain)
+imp_gain_ratio <- sapply(IV, function(x) compute_importance(data, x, DV)$gain_ratio)
+imp_gini_index <- sapply(IV, function(x) compute_importance(data, x, DV)$gini_index)
+# scale the importance to 0-1
+imp_info_gain <- (imp_info_gain - min(imp_info_gain)) / (max(imp_info_gain) - min(imp_info_gain))
+imp_gain_ratio <- (imp_gain_ratio - min(imp_gain_ratio)) / (max(imp_gain_ratio) - min(imp_gain_ratio))
+imp_gini_index <- (imp_gini_index - min(imp_gini_index)) / (max(imp_gini_index) - min(imp_gini_index))
+# take the average of the 3 results
+imp_avg <- (imp_info_gain + imp_gain_ratio + imp_gini_index) / 3
+# pick the biggest result as the selection critera for this node
+selected_var <- IV[which.max(imp_avg)]
+return(selected_var)
+}
+# Implement the function
+Build_tree <- function(data, IV, DV, depth) {
+variables <- IV
+if (depth == 0) return()
+# select the variable if there are more than 1 variable left
+if (length(variables) > 1)
+selected_var <- select_var(data, variables, DV)
+else
+selected_var <- variables[1]
+# split the data
+left_data <- data[data[[selected_var]] == 0,]
+right_data <- data[data[[selected_var]] == 1,]
+# print the selected variable
+print(paste("Selected Variable:", selected_var))
+# drop the selected variable from the list of variables
+variables <- variables[!variables %in% selected_var]
+# # print the importance of the selected variable
+# print(paste("Importance of the Selected Variable:", compute_importance(data, selected_var, DV)))
+# print the number of observations in the left and right nodes
+print(paste("This is level:", 4-depth+1))
+print("variables left:")
+print(variables)
+print(paste("Number of Observations in the Left Node:", nrow(left_data)))
+print(paste("Number of Observations in the Right Node:", nrow(right_data)))
+# repeat the process for the left and right nodes
+Build_tree(left_data, variables, DV, depth - 1)
+Build_tree(right_data, variables, DV, depth - 1)
+}
+# Function to compute the mean of the observations in each leaf node
+compute_mean <- function(data) {
+mean_value <- mean(data[[DV]], na.rm = TRUE)
+return(mean_value)
+}
+# Implement the function
+leaves_data <- Build_tree_prune(train_data, IV_temp, DV, 4, 1000)
+# print the leaf nodes, dropping the NULL values
+leaves_data <- leaves_data[!sapply(leaves_data, is.null)]
+leaves_data
+# get train_data_list from leaves_data, which is a list of dataframes and is the odd elements of leaves_data
+train_data_list <- leaves_data[sapply(seq(leaves_data), function(x) x %% 2 == 1)]
+# compute the mean of the observations in each leaf node and store each mean in the data's new column named "leaf_mean"
+for (i in seq(length(train_data_list))) {
+train_data_list[[i]]$leaf_mean <- compute_mean(train_data_list[[i]])
+}
+# implement the function
+train_data_new <- add_leaf_mean(train_data, train_data_list)
+# Function to add the new variable "leaf_mean" to the testing data's dataframe column by using the mean_value from the training data's leaf node
+# which means for the same path, we use the same mean_value for the testing data in the column "leaf_mean"
+add_leaf_mean <- function(test_data, train_data_list) {
+test_data$leaf_mean <- NA
+for (i in seq(length(train_data_list))) {
+conditions <- leaves_data[2*i]$path
+mean_value <- train_data_list[[i]]$leaf_mean
+for (condition in conditions) {
+parts <- strsplit(condition, " = ")[[1]]
+variable <- parts[1]
+value <- as.numeric(parts[2])
+test_data$leaf_mean[test_data[[variable]] == value] <- mean_value
+}
+}
+return(test_data)
+}
+# implement the function
+train_data_new <- add_leaf_mean(train_data, train_data_list)
+test_data_new <- add_leaf_mean(test_data, train_data_list)
+# drop the IV2 from the training and testing data
+train_data_new <- train_data_new[, !names(train_data_new) %in% IV2]
+test_data_new <- test_data_new[, !names(test_data_new) %in% IV2]
+# drop the IV2 from the training and testing data
+train_data_new <- train_data_new[, !names(train_data_new) %in% IV_temp]
+test_data_new <- test_data_new[, !names(test_data_new) %in% IV_temp]
+# Function to adjust the path for the testing data
+split_test_data <- function(test_data, leaves_data) {
+split_datasets <- list()
+len <- length(leaves_data)
+for (i in seq(len/2)) {
+current_subset <- test_data
+conditions <- leaves_data[2*i]$path
+# print(conditions)
+for (condition in conditions) {
+parts <- strsplit(condition, " = ")[[1]]
+variable <- parts[1]
+value <- as.numeric(parts[2])
+current_subset <- current_subset[current_subset[[variable]] == value, ]
+}
+split_datasets[[i]] <- current_subset
+}
+return(split_datasets)
+}
+# implement the function
+train_data_list_new <- split_test_data(train_data, leaves_data)
+test_data_list_new <- split_test_data(test_data, leaves_data)
+# Function to build the logistic regression model
+library(glmnet)
+library(ggplot2)
+train_and_predict_logistic_regression <- function(train_data, test_data, predictor_col) {
+y_train <- train_data[[predictor_col]]
+x_train <- as.matrix(train_data[, setdiff(names(train_data), predictor_col)])
+y_test <- test_data[[predictor_col]]
+x_test <- as.matrix(test_data[, setdiff(names(test_data), predictor_col)])
+cv_results <- list()
+alpha_values <- seq(0, 1, by = 0.1)
+for (alpha in alpha_values) {
+print(alpha)
+cv_fit <- cv.glmnet(x_train, y_train, family = "binomial", alpha = alpha)
+cv_results[[as.character(alpha)]] <- cv_fit
+}
+best_cvm <- Inf
+best_alpha <- NA
+best_lambda <- NA
+for (alpha in names(cv_results)) {
+print(alpha)
+cv_fit <- cv_results[[alpha]]
+if (min(cv_fit$cvm) < best_cvm) {
+best_cvm <- min(cv_fit$cvm)
+best_alpha <- as.numeric(alpha)
+best_lambda <- cv_fit$lambda.min
+}
+}
+final_model <- glmnet(x_train, y_train, family = "binomial", alpha = best_alpha, lambda = best_lambda)
+predictions <- predict(final_model, newx = x_test, type = "class", s = best_lambda)
+accuracy <- mean(predictions == y_test)
+return(list(accuracy = accuracy, best_alpha = best_alpha, best_lambda = best_lambda))
+}
+# implement the function
+accuracy0 <- train_and_predict_logistic_regression(train_data, test_data, "Satisfaction_dummy")
+accuracy0
+# Function to build the logistic regression model for each leaf node
+library(glmnet)
+train_and_evaluate_models <- function(train_data_list, test_data_list, target_column_name) {
+alpha_values <- seq(0, 1, by = 0.1)
+accuracy_list <- numeric(length(train_data_list))
+best_parameters <- list()
+for (i in seq_along(train_data_list)) {
+print(i)
+train_data <- train_data_list[[i]]
+test_data <- test_data_list[[i]]
+y_train <- train_data[[target_column_name]]
+x_train <- as.matrix(train_data[, setdiff(names(train_data), target_column_name)])
+y_test <- test_data[[target_column_name]]
+x_test <- as.matrix(test_data[, setdiff(names(test_data), target_column_name)])
+best_acc <- 0
+best_alpha <- NA
+best_lambda <- NA
+for (alpha in alpha_values) {
+cv_model <- cv.glmnet(x_train, y_train, family = "binomial", alpha = alpha)
+lambda <- cv_model$lambda.min
+predictions <- predict(cv_model, s = lambda, newx = x_test, type = "class")
+accuracy <- mean(predictions == y_test)
+if (accuracy > best_acc) {
+best_acc <- accuracy
+best_alpha <- alpha
+best_lambda <- lambda
+}
+}
+accuracy_list[i] <- best_acc
+best_parameters[[i]] <- list(alpha = best_alpha, lambda = best_lambda)
+cat("Best alpha for dataset", i, ":", best_alpha, "\n")
+cat("Best lambda for dataset", i, ":", best_lambda, "\n")
+cat("Accuracy for dataset", i, ":", best_acc, "\n\n")
+}
+overall_accuracy <- mean(accuracy_list)
+cat("Overall accuracy:", overall_accuracy, "\n")
+return(list(overall_accuracy = overall_accuracy, best_parameters = best_parameters))
+}
+# implement the function
+accuracy1 <- train_and_evaluate_models(train_data_list_new, test_data_list_new, "Satisfaction_dummy")
+# logistic regression model for the training dataset IV3
+train_data_list_new3 <- list()
+test_data_list_new3 <- list()
+# for the training dataset
+for (i in seq(length(train_data_list_new))) {
+model <- glm(Satisfaction_dummy ~ ., data = train_data_list_new[[i]], family = "binomial")
+train_data_list_new3[[i]] <- train_data_list_new[[i]]
+train_data_list_new3[[i]]$IV3_predict <- predict(model, newdata = train_data_list_new[[i]], type = "response")
+# for the testing dataset
+test_data_list_new3[[i]] <- test_data_list_new[[i]]
+test_data_list_new3[[i]]$IV3_predict <- predict(model, newdata = test_data_list_new[[i]], type = "response")
+}
+# drop the IV3 from the training and testing data
+train_data_list_new3 <- lapply(train_data_list_new3, function(x) x[, !names(x) %in% IV3])
+test_data_list_new3 <- lapply(test_data_list_new3, function(x) x[, !names(x) %in% IV3])
+# implement the function
+accuracy2 <- train_and_evaluate_models(train_data_list_new3, test_data_list_new3, "Satisfaction_dummy")
+View(train_data_list_new3)
+# Install the packages used in this tutorial:
+packages <- c("C50", "ggplot2", "gmodels", "Hmisc", "randomForest", "rsample")
+for (i in packages) {
+if(!require(i, character.only = TRUE)) {
+install.packages(i, dependencies = TRUE)
+}
+}
+# Load necessary libraries
+packages <- c("caret", "e1071", "pROC")
+for (pkg in packages) {
+if (!require(pkg, character.only = TRUE)) {
+install.packages(pkg, dependencies = TRUE)
+library(pkg, character.only = TRUE)
+}
+}
+# Ensure the target variable is treated as a categorical variable (for classification)
+train_data$Satisfaction_dummy <- as.factor(train_data$Satisfaction_dummy)
+test_data$Satisfaction_dummy <- as.factor(test_data$Satisfaction_dummy)
+# Build the random forest model
+pmodel.forest <- randomForest(Satisfaction_dummy ~ .,
+data = train_data,
+ntree = 50,   # Number of trees to grow
+mtry = 2,     # Number of variables sampled at each split
+replace = TRUE) # Sampling with replacement
+# Predict the response on the test dataset
+pred.test <- predict(pmodel.forest, newdata = test_data)
+# Generate the confusion matrix
+conf_matrix <- table(Actual = test_data$Satisfaction_dummy, Predicted = pred.test)
+print("Confusion matrix:")
+print(conf_matrix)
+# Use CrossTable to generate a detailed confusion matrix if needed
+conf_matrix <- CrossTable(x = test_data$Satisfaction_dummy, y = pred.test,
+prop.chisq = FALSE,
+prop.c = FALSE,
+prop.r = FALSE,
+prop.t = FALSE,
+dnn = c("Actual satisfaction", "Predicted satisfaction"))
+conf_matrix
+accuracy3 <- sum(diag(conf_matrix$t)) / sum(conf_matrix$t)
+print(paste("Accuracy:", accuracy3))
+# Calculate precision, recall, and F1-score
+precision <- posPredValue(pred.test, test_data$Satisfaction_dummy, positive = "1")
+recall <- sensitivity(pred.test, test_data$Satisfaction_dummy, positive = "1")
+f1_score <- (2 * precision * recall) / (precision + recall)
+print(paste("Precision:", round(precision, 4)))
+print(paste("Recall:", round(recall, 4)))
+print(paste("F1-Score:", round(f1_score, 4)))
+# Calculate AUC
+roc_obj <- roc(test_data$Satisfaction_dummy, as.numeric(pred.test))
+auc_value <- auc(roc_obj)
+print(paste("AUC:", round(auc_value, 4)))
+dta4 <- dta
+# create a new dataframe with the selected variables
+dta4 <- dta4[,c(IV1, IV2, IV3, DV)]
+if(!require(tensorflow)) install.packages("tensorflow")
+library(tensorflow)
+library(tidyverse)
+library(tensorflow)
+library(keras)
+library(dplyr)
+# Partitioning the data:
+set.seed(46)
+train_indices <- sample(seq_len(nrow(dta4)), size = floor(0.8 * nrow(dta4)))
+train_data <- dta4[train_indices, ]
+test_data <- dta4[-train_indices, ]
+# Labeling the data
+train_labels <- train_data$Satisfaction_dummy
+test_labels <- test_data$Satisfaction_dummy
+train_data <- dplyr::select(train_data, -Satisfaction_dummy)
+test_data <- dplyr::select(test_data, -Satisfaction_dummy)
+# For wide models, we use numerical features directly
+# For deep models, we use embedding layers to handle a mixture of categorical features and numerical features
+# define input
+numeric_inputs <- lapply(names(train_data), function(name) layer_input(shape = 1, name = paste0(name, "_input")))
+all_inputs <- numeric_inputs
+all_inputs_list <- unlist(numeric_inputs)
+# Define wide model section
+wide_features <- layer_concatenate(all_inputs_list) %>%
+layer_dense(units = 1, activation = 'linear')
+# Define deep model part
+deep_features <- layer_concatenate(all_inputs_list) %>%
+layer_dense(units = 64, activation = 'relu') %>%
+layer_batch_normalization() %>%
+layer_dropout(rate = 0.5) %>%
+layer_dense(units = 128, activation = 'relu') %>%
+layer_batch_normalization() %>%
+layer_dropout(rate = 0.5)
+# Optionally adding Residual Connections
+# First dense layer
+residual_input <- deep_features
+residual_output <- layer_dense(units = 64, activation = 'relu')(residual_input) %>%
+layer_batch_normalization()
+# Second dense layer (repeat structure if needed and then add the residual)
+residual_output <- layer_dense(units = 128, activation = 'relu')(residual_output) %>%
+layer_batch_normalization()
+# Adding the residual connection
+residual_output <- layer_add(list(residual_input, residual_output)) %>%
+layer_activation('relu') %>%
+layer_dropout(rate = 0.5)
+# Use the output from the residual block as the final deep feature representation
+deep_features <- residual_output
+# Combine the output of wide and deep models
+final_output <- layer_concatenate(list(wide_features, deep_features)) %>%
+layer_dense(units = 1, activation = 'sigmoid')
+#Create model
+model <- keras_model(inputs = all_inputs_list, outputs = final_output)
+# Compile model
+model %>% compile(
+loss = 'binary_crossentropy',
+optimizer = 'adam',
+metrics = c('accuracy')
+)
+# Convert training data and test data to the format of model input
+train_list <- lapply(names(train_data), function(name) as.matrix(train_data[[name]]))
+test_list <- lapply(names(test_data), function(name) as.matrix(test_data[[name]]))
+# Train the model.
+history <- model %>% fit(
+x = train_list,
+y = train_labels,
+batch_size = 32,
+epochs = 10,
+validation_split = 0.2
+)
+# Evaluate the model on unseen data.
+model %>% evaluate(test_list, test_labels)
+packages <- c("caret", "e1071", "pROC","gmodels")
+for (pkg in packages) {
+if (!require(pkg, character.only = TRUE)) {
+install.packages(pkg, dependencies = TRUE)
+library(pkg, character.only = TRUE)
+}
+}
+# Predict probabilities for the test set
+predictions_prob <- model %>% predict(test_list)
+predictions <- ifelse(predictions_prob > 0.5, 1, 0)
+# Convert predictions and test_labels to factors if they are not already
+# This ensures that CrossTable handles the data correctly
+predictions_factor <- factor(predictions, levels = c(0, 1))
+test_labels_factor <- factor(test_labels, levels = c(0, 1))
+# Use CrossTable to generate a detailed confusion matrix
+conf_matrix <- CrossTable(x = test_labels_factor, y = predictions_factor,
+prop.chisq = FALSE,  # Turn off chi-squared test p-value calculation
+prop.c = FALSE,      # Do not show column percentages
+prop.r = FALSE,      # Do not show row percentages
+prop.t = FALSE,      # Do not show table percentages
+dnn = c("Actual satisfaction", "Predicted satisfaction"),
+format = "SPSS")  # This format is akin to what SPSS outputs, very detailed
+# Print the detailed confusion matrix
+print("Detailed Confusion Matrix:")
+print(conf_matrix)
+# Calculate Precision, Recall, and F1-Score
+predictions_factor <- factor(predictions, levels = c(0, 1))
+test_labels_factor <- factor(test_labels, levels = c(0, 1))
+# Calculate confusion matrix and extract metrics
+conf_matrix <- confusionMatrix(predictions_factor, test_labels_factor)
+precision <- conf_matrix$byClass['Pos Pred Value']
+recall <- conf_matrix$byClass['Sensitivity']
+f1_score <- 2 * precision * recall / (precision + recall)
+print(paste("Precision:", round(precision, 4)))
+print(paste("Recall:", round(recall, 4)))
+print(paste("F1-Score:", round(f1_score, 4)))
+# For wide models, we use numerical features directly
+# For deep models, we use embedding layers to handle a mixture of categorical features and numerical features
+# define input
+numeric_inputs <- lapply(names(train_data), function(name) layer_input(shape = 1, name = paste0(name, "_input")))
+all_inputs <- numeric_inputs
+all_inputs_list <- unlist(numeric_inputs)
+# Define wide model section
+wide_features <- layer_concatenate(all_inputs_list) %>%
+layer_dense(units = 1, activation = 'linear')
+# Define deep model part
+deep_features <- layer_concatenate(all_inputs_list) %>%
+layer_dense(units = 64, activation = 'relu') %>%
+layer_batch_normalization() %>%
+layer_dropout(rate = 0.5) %>%
+layer_dense(units = 128, activation = 'relu') %>%
+layer_batch_normalization() %>%
+layer_dropout(rate = 0.5)
+# Optionally adding Residual Connections
+# First dense layer
+residual_input <- deep_features
+residual_output <- layer_dense(units = 64, activation = 'relu')(residual_input) %>%
+layer_batch_normalization()
+# Second dense layer (repeat structure if needed and then add the residual)
+residual_output <- layer_dense(units = 128, activation = 'relu')(residual_output) %>%
+layer_batch_normalization()
+# Adding the residual connection
+residual_output <- layer_add(list(residual_input, residual_output)) %>%
+layer_activation('relu') %>%
+layer_dropout(rate = 0.5)
+# Use the output from the residual block as the final deep feature representation
+deep_features <- residual_output
+# Combine the output of wide and deep models
+final_output <- layer_concatenate(list(wide_features, deep_features)) %>%
+layer_dense(units = 1, activation = 'sigmoid')
+#Create model
+model <- keras_model(inputs = all_inputs_list, outputs = final_output)
+# Compile model
+model %>% compile(
+loss = 'binary_crossentropy',
+optimizer = 'adam',
+metrics = c('accuracy')
+)
+# Convert training data and test data to the format of model input
+train_list <- lapply(names(train_data), function(name) as.matrix(train_data[[name]]))
+test_list <- lapply(names(test_data), function(name) as.matrix(test_data[[name]]))
+library(tidyverse)
+library(tensorflow)
+library(keras)
+library(dplyr)
+# Partitioning the data:
+set.seed(46)
+train_indices <- sample(seq_len(nrow(dta4)), size = floor(0.8 * nrow(dta4)))
+train_data <- dta4[train_indices, ]
+test_data <- dta4[-train_indices, ]
+# Labeling the data
+train_labels <- train_data$Satisfaction_dummy
+test_labels <- test_data$Satisfaction_dummy
+train_data <- dplyr::select(train_data, -Satisfaction_dummy)
+test_data <- dplyr::select(test_data, -Satisfaction_dummy)

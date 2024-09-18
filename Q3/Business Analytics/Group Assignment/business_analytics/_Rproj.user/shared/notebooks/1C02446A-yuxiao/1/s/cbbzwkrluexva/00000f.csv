@@ -1,0 +1,3 @@
+"0","library(""MASS"")"
+"0","library(""factoextra"")# This library is needed to run it "
+"0","fviz_eig(dta_loading, addlables= TRUE, ylim= c(0, 70))# Graph showing proportion of variance"

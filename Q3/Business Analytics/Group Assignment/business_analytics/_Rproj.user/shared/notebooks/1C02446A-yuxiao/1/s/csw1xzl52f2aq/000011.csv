@@ -1,0 +1,37 @@
+"0","library(ggplot2)"
+"0","library(dplyr)"
+"0","library(patchwork)"
+"2","Warning:"
+"2"," 程辑包‘patchwork’是用R版本4.2.3 来建造的
+"
+"2","
+载入程辑包：‘patchwork’
+
+"
+"2","The following object is masked from ‘package:MASS’:
+
+    area
+
+"
+"0","services_columns <- colnames(dta)[10:(ncol(dta)-3)] # 调整列范围以适应你的数据"
+"0",""
+"0","# 创建一个空的plot列表来存储各个服务列的图"
+"0","plots <- list()"
+"0",""
+"0","# 循环遍历每个服务列，为每个创建一个ggplot对象，并添加到列表中"
+"0","for (col in services_columns) {"
+"0","  p <- dta %>%"
+"0","    ggplot(aes_string(x = col)) +"
+"0","    geom_bar(stat = ""count"", fill = ""blue"") +"
+"0","    geom_text(stat = 'count', aes(label = ..count..), vjust = -0.5) +"
+"0","    labs(title = col, x = NULL, y = NULL) +"
+"0","    theme_minimal() +"
+"0","    theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+"0","  plots[[col]] <- p"
+"0","}"
+"0",""
+"0","# 使用patchwork来整合所有图形，并定义布局为3行5列"
+"0","plot_layout <- reduce(plots, `+`) + "
+"0","  plot_layout(ncol = 5, nrow = 3)"
+"2","Error in reduce(plots, `+`) : could not find function ""reduce""
+"

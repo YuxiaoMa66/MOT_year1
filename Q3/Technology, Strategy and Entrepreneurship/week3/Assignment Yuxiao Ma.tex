@@ -1,0 +1,163 @@
+% \special{dvipdfmx:config z 0}
+\documentclass[UTF8,a4paper,AutoFakeBold,AutoFakeSlant]{article}
+\usepackage[a4paper,left=2.8cm,right=2.6cm,top=3.7cm,bottom=3.5cm]{geometry}
+\usepackage{ctex}
+% \usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\usepackage[mathscr]{eucal}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{capt-of} 
+\usepackage{hyperref} 
+\usepackage{abstract}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{amsfonts} 
+\usepackage{CJK,CJKnumb}
+\usepackage{float}
+% \usepackage{gbt7714}
+\usepackage{framed}
+\usepackage{multirow}
+\usepackage{animate}
+\usepackage[framemethod=tikz]{mdframed}
+
+\newcommand{\tnewroman}{\fontspec{Times New Roman}}
+\newcommand{\song}{\CJKfamily{song}}    % 宋体   (Windows自带simsun.ttf)
+\newcommand{\fs}{\CJKfamily{fs}}        % 仿宋体 (Windows自带simfs.ttf)
+\newcommand{\kai}{\CJKfamily{kai}}      % 楷体   (Windows自带simkai.ttf)
+\newcommand{\hei}{\CJKfamily{hei}}      % 黑体   (Windows自带simhei.ttf)
+\newcommand{\li}{\CJKfamily{li}}        % 隶书   (Windows自带simli.ttf) 
+\newcommand{\ssong}{\CJKfamily{STSong}}
+% \newfontfamily{\heiti}{SimHei}
+
+\xeCJKsetup{SlantFactor = 0.3}
+% \xeCJKsetup{SlantFactor = -0.7}
+\setCJKmainfont[BoldFont=SimHei, SlantedFont=KaiTi]{SimSun}
+
+
+
+\usepackage{xcolor}  	%高亮使用的颜色
+\definecolor{commentcolor}{RGB}{85,139,78}
+\definecolor{stringcolor}{RGB}{206,145,108}
+\definecolor{keywordcolor}{RGB}{34,34,250}
+\definecolor{backcolor}{RGB}{220,220,220}
+
+\usepackage{accsupp}	
+\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+
+
+
+
+
+\title{\textbf{\textsf{{\textsf{Assignment: Teaching case Chapter 2 \& 6}}}}} 
+\author{\tnewroman Yuxiao Ma}
+\date{}
+
+% 去掉红框
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+
+\begin{document}
+
+
+
+\maketitle
+
+
+\section{Chapter 2 - The Rise of “Clean Meat”}
+
+\subsection{What were the potential advantages of developing clean meat? What were the challenges of developing it and bringing it to market?}
+
+\begin{itemize}
+    \item Advantages:
+\end{itemize}
+The development of clean meat offers a solution to the environmental and ethical issues posed by traditional animal agriculture. It aims to meet the world's growing demand for meat through a more sustainable process that requires less resources such as water and land and produces fewer greenhouse gas emissions. This innovative approach also addresses health concerns by eliminating the need for antibiotics and steroids in meat production, potentially making meat consumption safer and healthier.
+
+
+\begin{itemize}
+    \item Challenges:
+\end{itemize}
+However, the process of bringing clean meat to market faces several obstacles. Early efforts encountered challenges in obtaining funding and scaling production to commercial levels. Additionally, there are doubts about consumer acceptance, with concerns that people might view clean meat as unnatural, despite its benefits. Additionally, reducing high production costs to make clean meat price competitive with conventional meat remains difficult. 
+
+
+\subsection{What kinds of organizations were involved in developing clean meat? What were the different resources that each kind of organization brought to the innovation?}
+
+The development of clean meat involves nonprofits, governments, universities, and commercial companies. Nonprofits like New Harvest sponsor research efforts, and the government funds scientific research. Universities conduct basic scientific research, and commercial entities, including startups and large agribusinesses, work to commercialize the technology. This collaborative approach combines preliminary research and funding, scientific innovation and commercial expertise to advance clean meat from concept to potential market reality.
+
+
+\subsection{Do you think people will be willing to eat clean meat? Can you think of other products or services that faced similar adoption challenges?}
+
+Whether people are willing to eat clean meat depends largely on a variety of factors, including taste, price, safety and cultural acceptance. Because clean meat promises environmental benefits, reduced animal suffering, and health advantages, it may appeal to consumers who prioritize these issues. With the market in Phuket, I think more people will accept it.
+
+Other example: Electric Vehicles (EVs), Plant-based Alternatives.
+
+
+
+\section{Chapter 6 - Tesla, Inc.}
+
+\subsection{What were Musk’s and Eberhard’s goals in founding Tesla?}
+
+Martin Eberhard aimed to create an environmentally friendly sports car to address global warming and U.S. oil dependency, focusing on electric vehicles for high efficiency and performance. Elon Musk, sharing the vision for electric vehicles' potential in energy independence, supported Eberhard's initiative, contributing funding and becoming Tesla's chairman.
+
+
+\subsection{How would you characterize competition in the auto industry?}
+
+The auto industry is highly competitive, with companies competing on price, quality, performance, and innovation. The industry is also subject to government regulations and consumer preferences, and companies must adapt to changing market conditions and technological advancements. The industry is also characterized by high capital requirements, economies of scale, and significant barriers to entry, making it difficult for new companies to compete with established players.
+
+
+\subsection{What do you think are Tesla’s core competencies? Does it have any sources of sustainable competitive advantage?}
+
+Tesla's core competencies include its innovative technology in electric vehicles, battery storage, and renewable energy, as well as its expertise in integrating these technologies with effective market strategies and infrastructure management. These strengths are hard for competitors to imitate, making them a sustainable competitive advantage. 
+
+
+\subsection{What is your assessment of Tesla’s moves into (a) mass-market cars, (b) batteries (car batteries and Powerwall), (c) solar panels? Please consider both the motivation for the moves, and the opportunities and challenges for Tesla to compete in these businesses.}
+
+\subsubsection{Mass-market Cars (Model 3)}
+
+\begin{itemize}
+\item \textbf{Motivation:} To significantly impact fossil fuel use, Tesla needed to produce a vehicle accessible to a wider audience. This led to the development of the Model 3, an all-electric sedan with a reasonable price point.
+\item \textbf{Opportunities:} The Model 3 allows Tesla to tap into a larger market segment, driving adoption of electric vehicles (EVs) and advancing the company's mission.
+\item \textbf{Challenges:} Achieving the production scale required for mass-market penetration has proven challenging, with production initially falling behind Musk's ambitious targets. This highlighted operational and scalability challenges within Tesla.
+\end{itemize}
+
+\subsubsection{Batteries (Gigafactory, Powerwall, Powerpack)}
+
+\begin{itemize}
+\item \textbf{Motivation:} Tesla opened Gigafactory 1 to reduce battery production costs and support its automotive and energy storage products, including the Powerwall for residential use and the Powerpack for industrial applications.
+\item \textbf{Opportunities:} The vertical integration of battery production enables Tesla to control costs, improve product margins, and offer competitive pricing. It also positions Tesla as a key player in the renewable energy storage market.
+\item \textbf{Challenges:} The ambitious scale of the Gigafactory's operations requires substantial investment and presents risks related to market demand for energy storage solutions and Tesla's ability to maintain technological leadership.
+\end{itemize}
+
+\subsubsection{Solar Panels (SolarCity Acquisition, Solar Roofs)}
+
+\begin{itemize}
+\item \textbf{Motivation:} Acquiring SolarCity and launching solar roof products were moves aimed at creating a vertically integrated sustainable energy company, providing consumers with end-to-end energy solutions.
+\item \textbf{Opportunities:} These initiatives give Tesla a foothold in the solar energy market, complementing its electric vehicle and energy storage offerings. The innovative solar roof product differentiates Tesla in the renewable energy sector.
+\item \textbf{Challenges:} Integrating SolarCity and scaling up solar roof production involve significant operational, financial, and technological hurdles. The solar energy market is highly competitive, with challenges related to cost competitiveness and technological innovation.
+\end{itemize}
+
+
+\subsection{Do you think Tesla will be profitable in all of these businesses? Why or why not?}
+
+Tesla's profitability in these businesses depends on its ability to address operational challenges, manage costs, and maintain technological leadership. The company's success in mass-market cars, batteries, and solar panels will be influenced by market demand, competition, and regulatory factors. While Tesla has demonstrated innovation and growth potential, it faces risks related to production scalability, cost management, and market dynamics. Therefore, profitability in all these businesses is not guaranteed, and Tesla must navigate various challenges to achieve sustainable success.
+
+
+\subsection{What do you think Tesla’s (or Elon Musk’s) strategic intent is?}
+
+Tesla's strategic intent is to accelerate the world's transition to sustainable energy by vertically integrating the clean energy value chain and becoming a leader in electric vehicles, battery production, and solar energy.
+
+
+% \bibliographystyle{gbt7714-numerical}
+% % \bibliographystyle{7714-author-year}
+% \bibliographystyle{ieeetr}
+% \bibliography{bibl}
+
+\end{document}

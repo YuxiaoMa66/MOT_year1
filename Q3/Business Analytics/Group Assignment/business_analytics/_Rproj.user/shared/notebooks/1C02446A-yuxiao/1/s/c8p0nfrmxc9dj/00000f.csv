@@ -1,0 +1,15 @@
+"0","# draw scatter plot with regression line"
+"0","ggplot(dta, aes(x = adjDD, y = adjAD)) + "
+"0","  geom_point() + "
+"0","  geom_smooth(method = ""lm"") +"
+"0","    labs(title = ""Scatter Plot of adjDD and adjAD"", x = ""adjDD"", y = ""adjAD"") +"
+"0","    theme_minimal()"
+"1","[38;5;232m`geom_smooth()` using formula = 'y ~ x'[39m
+"
+"2","Warning:"
+"2"," [38;5;232mRemoved 393 rows containing non-finite outside the scale range (`stat_smooth()`).[39m
+"
+"2","Warning:"
+"2"," [38;5;232mRemoved 393 rows containing missing values or values outside the scale range
+(`geom_point()`).[39m
+"

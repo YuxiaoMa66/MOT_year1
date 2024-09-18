@@ -1,0 +1,7 @@
+"0","cor(dta$adjAD, dta$adjDD)"
+"1","[1]"
+"1"," NA"
+"1","
+"
+"0","# check why na"
+"0","dta[is.na(dta$adjAD), c(""adjAD"", ""adjDD"")]"

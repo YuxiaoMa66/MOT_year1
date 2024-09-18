@@ -1,0 +1,201 @@
+\documentclass[a4paper,8pt,UTF8]{scrartcl}
+\usepackage{xltxtra}
+\usepackage[]{xkeyval,polyglossia}
+% \setmainlanguage[spelling=new]{german}
+\usepackage[b5paper,top=2cm, bottom=2cm, left = 2.5cm, right=2cm]{geometry}
+\usepackage[]{csquotes}
+\usepackage[]{titlesec}
+\usepackage[]{url}
+\usepackage[]{paralist}
+\usepackage[absolute]{textpos}
+\usepackage[]{rotating}
+\usepackage[]{scrpage2}
+\usepackage[]{blindtext}
+\usepackage{ctex}
+\usepackage{graphicx}
+\usepackage{hyperref} 
+% \usepackage{abstract}
+% \setlength{\baselineskip}{10pt}
+\usepackage{indentfirst}
+\usepackage{enumerate}
+\usepackage{fontspec}
+
+
+% \usepackage[a4paper,left=2.8cm,right=2.8cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\usepackage[mathscr]{eucal}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{capt-of} 
+\usepackage{hyperref} 
+\usepackage{abstract}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{amsfonts} 
+\usepackage{float}
+
+
+\pagestyle{scrheadings}
+\setheadsepline[\textwidth]{0.25pt}{}
+\ohead{\headmark}
+\ofoot[\pagemark]{\pagemark}
+\cfoot{}
+\chead{}
+
+\ihead{Music Industry \& Market Strategy}
+
+
+\usepackage{xcolor}
+\definecolor{msdarkblue}{RGB}{54,95,145}
+\definecolor{msblue}{RGB}{79,129,189}
+%\titleformat{\section}[form]{layout}{labellayout}{abstand}{davorcode}[danachcode]
+\titleformat{\abstract}[hang]{\color{msdarkblue}\Large\sffamily\bfseries}{}{0pt}{\vspace*{-6pt}}
+\titleformat{\section}[hang]{\color{msdarkblue}\Large\sffamily\bfseries}{}{0pt}{\vspace*{-6pt}}
+\titleformat{\subsection}[hang]{\color{msblue}\normalsize\sffamily\bfseries}{}{0pt}{\vspace*{-6pt}}
+\titleformat{\subsubsection}[hang]{\color{msblue}\small\sffamily\bfseries}{}{0pt}{\vspace*{-9pt}}
+\setsansfont[ItalicFont={Cambria Italic},BoldFont={Cambria Bold},BoldItalicFont={Cambria Bold Italic}]{Cambria}
+% \setmainfont[ItalicFont={Calibri Italic},BoldFont={Calibri Bold},BoldItalicFont={Calibri Bold Italic}]{Calibri}
+\setmonofont[ItalicFont={Consolas Italic},BoldFont={Consolas Bold},BoldItalicFont={Consolas Bold Italic}]{Consolas}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7em}
+\usepackage{unicode-math}
+\setmathfont{Cambria Math}
+% \setlength{\parindent}{1em} 
+
+% \setCJKmainfont{Microsoft YaHei}  % 微软雅黑
+\newcommand{\tnewroman}{\fontspec{Times New Roman}}
+
+
+
+\begin{document}
+\setlength{\TPHorizModule}{1mm}
+\setlength{\TPVertModule}{1mm}
+\begin{titlepage}
+~
+\begin{textblock}{80}(-10,-10)
+\begin{color}{msdarkblue}
+\rule{3cm}{30cm}
+\end{color}
+\end{textblock}
+% Logo white
+\begin{textblock}{130}(30,30)
+%\rule{2cm}{2cm}\\[2em]
+
+{\noindent\Huge\tnewroman\textbf{Assignment 3}}\\
+
+
+
+% include all 5 members names and student numbers here
+{\noindent\Large\bfseries By: Group 21 (Sorted by first name) }
+\newline
+{\noindent\Large\bfseries\tnewroman Casper Timmermans ~5383196}
+\newline
+{\noindent\Large\bfseries\tnewroman Darin Pavlov ~~~~~~~~~~~~~~6105750}
+\newline
+{\noindent\Large\bfseries\tnewroman Magda Lamprinidou ~4781309}
+\newline
+{\noindent\Large\bfseries\tnewroman Oscar Maloncy ~~~~~~~~~~4488156}
+\newline
+{\noindent\Large\bfseries\tnewroman Yuxiao Ma ~~~~~~~~~~~~~~~~~~5916305}
+
+\end{textblock}
+\begin{textblock}{20}(12,200)
+\begin{rotate}{90}
+{\huge\bfseries \textcolor{white}{Emerging and Breakthrough Technologies}}
+\end{rotate}
+\end{textblock}
+\end{titlepage}
+% \tableofcontents
+% \clearpage
+
+\begin{center}
+
+  \tnewroman{\textbf{\huge{Ticketing for (live) music events}}}
+  
+\end{center}
+
+% \section{{\LARGE{Ticketing for (live) music events}}}
+
+
+
+Worldwide, \$30 billion in concert tickets are sold, with the resale market being 
+worth \$8 billion globally. With this development, there is no such thing as
+ ‘sold-out’ anymore if you know where to look and are willing to pay the price 
+ (Cross, 2018)\cite{globalnews2023}. With a market of such size, 
+ the potential of introducing innovative technologies for (re)selling tickets are huge.
+  Moreover, we have experience with reselling and buying tickets on the (un)official 
+  aftermarkets in the music and live events industry. Therefore, this industry will 
+  be discussed. Specifically, the application of the Blockchain Approach for 
+  eliminating unfair and fraudulent resale, will be investigated. First, 
+  the market patterns and challenges of this industry will be addressed. 
+  Then, the main entry barriers of this innovation will be outlined. 
+  Accordingly, an entry strategy and entry channels will be proposed.
+
+
+
+
+
+\section{Market patterns and industry challenges}
+
+
+The music industry has a complicated payment approach, there are many stakeholders  
+involved (artists, record labels, event organizers, and other representatives) and 
+transparency is very limited. This means that artists receive payments with a massive 
+delay and suspicions and tensions among the other representatives often arise. 
+Blockchain technology is an innovation that aims to provide a solution to this 
+problem. Although the technology was developed to facilitate transactions involving Bitcoin, it can now be applied to all types of transactions. In particular, it allows for disintermediation, therefore, resulting in more efficient and direct transactions. Blockchain guarantees reliable verification of music and fairly allocates responsibilities and fees (Doeland, 2016)\cite{doeland2023}. 
+
+There are a lot of companies that use blockchain to encrypt music tickets to put an 
+end to secondary markets. For example, GUTS is already selling encrypted tickets and 
+Surround is looking into this as well, among others. Both aim to prevent ticket fraud, 
+scalping, and a lack of transparency in ticket pricing as well as closing the value 
+gap between the creative side of the industry and the platforms selling tickets 
+(Frackiewicz, 2023\cite{frackiewicz2023} \& PwC, 2019\cite{pwc2023}). 
+GUTS has already implemented blockchain technology into their sales activities meaning 
+they already have a technological framework to facilitate this. Surround  is currently 
+still looking into this and is more so focussed on creating an open-source platform 
+to allow secure transfer assets, specifically looking at copyright sensitivity. 
+Both companies are examples showing that there are different product versions on 
+the niche market in the current phase, implying that the technology is in the 
+adaptation phase. However, it has to be mentioned that it is not a fully developed 
+niche market, with multiple companies still acquiring the knowledge necessary for applying blockchain to the encryption of tickets.  In the next chapter, entry barriers preventing the possibility for large-scale diffusion will be aligned with entry strategies facilitating successful development during the adaptation phase.
+
+
+
+
+\section{Market entry strategy to overcome barriers}
+
+To come up with a suitable strategy we first need to identify the key missing factors that would lead to large-scale diffusion of the Blockchain ticketing system and the reasons for these factors which will lead us to the right strategy.
+Firstly, although Blockchain is an existing technology,
+ which in recent years has become popular, it has been vastly associated with the cryptocurrency exchange. 
+Thus, the knowledge about its potential application in concert ticket selling could be lacking from a customer's standpoint. 
+The technology can bring many benefits but the switching costs could be high as it would most likely require the existing business models to be redefined. New entrants need to make sure that their customers (artists, event organizers, and ticket-selling platforms) are aware of the benefits of the new technology, namely security, transparency, and elimination of ticket reselling. In addition, integrating a Blockchain system is a costly and complex procedure that could lead to unexpected expenditures and problems. Finally, using Blockchain entails that the end customers would have to manage private keys, which might be difficult for some of them leading to a reduction of the current (end-)customer base. Because the technology and its full potential are difficult to grasp, the product needs clear functionality. This is established by introducing a simpler version than the technology’s potential allows. Exclusively encrypting tickets for better security and prevention of fraudulent resale is a great start. Although the technology can contribute not only to safety but to a completely new way of paying artists and/or intermediaries as well, this exhaustive application would not benefit the knowledge application. 
+
+Another barrier to the ticketing system would be the contradiction of using Blockchain to encrypt the tickets. On one hand, the technology is used to prevent fraud and (semi) criminal activities, on the other hand, Blockchain-based currency is used on black markets for activities like fraud (because of transactions being anonymous and somewhat untraceable (Spagnoletti et al., 2021)\cite{spagnoletti2021online}). An example of this is the FTX scam, where Blockchain-based cryptocurrency portfolios disappeared in thin air after an elaborate scam (Hetler, 2023)\cite{techtarget2023}. Ethical considerations are at play when building your safe ticketing platform with technology that is used for the contrary. This consideration affects the socio-cultural acceptance of customers. Of course, this acceptance can grow over time, but for full-scale implementation of Blockchain, it is better to prove its usefulness starting with a smaller, more manageable application. Therefore, the redesign niche strategy also works on this acceptance and takes away the social restraint over time. 
+
+One of the main barriers for Blockchain technology to diffuse on a large scale is the absence of clear guidelines, legal frameworks, or established precedents governing its use within the music industry. For example, when data protection is considered, the music industry needs to obey the laws of the EU which gives the right to individuals to delete their data. This, however, conflicts with Blockchain technology which is designed to prevent retroactive alterations to its ledger. By implementing the particular niche strategy, an application of Blockchain technology will be explored where the institutional legislations are more favorable. Redesign is almost inevitable in this case. Therefore, target clients in line with this strategy would be locally trusted ticketing companies with a great market share in their area. As global companies have to follow the rules in multiple countries with different regulations, it is difficult to implement the ‘one-size-fits-all’ Blockchain encryption in their operations. 
+
+
+
+
+
+
+% This is \colorbox{red}{red background text} and this is \colorbox{green}{green background text}.
+
+
+
+
+
+
+
+
+% % bibliography
+\bibliographystyle{ieeetr}
+\bibliography{bibl}
+
+\end{document}

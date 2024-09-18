@@ -1,0 +1,152 @@
+% \special{dvipdfmx:config z 0}
+\documentclass[UTF8,a4paper,AutoFakeBold,AutoFakeSlant]{article}
+\usepackage[a4paper,left=2.8cm,right=2.6cm,top=3.2cm,bottom=3.5cm]{geometry}
+\usepackage{ctex}
+% \usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\usepackage[mathscr]{eucal}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{capt-of} 
+\usepackage{hyperref} 
+\usepackage{abstract}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{amsfonts} 
+\usepackage{CJK,CJKnumb}
+\usepackage{float}
+% \usepackage{gbt7714}
+\usepackage{framed}
+\usepackage{multirow}
+\usepackage{animate}
+\usepackage[framemethod=tikz]{mdframed}
+
+\newcommand{\tnewroman}{\fontspec{Times New Roman}}
+\newcommand{\song}{\CJKfamily{song}}    % 宋体   (Windows自带simsun.ttf)
+\newcommand{\fs}{\CJKfamily{fs}}        % 仿宋体 (Windows自带simfs.ttf)
+\newcommand{\kai}{\CJKfamily{kai}}      % 楷体   (Windows自带simkai.ttf)
+\newcommand{\hei}{\CJKfamily{hei}}      % 黑体   (Windows自带simhei.ttf)
+\newcommand{\li}{\CJKfamily{li}}        % 隶书   (Windows自带simli.ttf) 
+\newcommand{\ssong}{\CJKfamily{STSong}}
+% \newfontfamily{\heiti}{SimHei}
+
+\xeCJKsetup{SlantFactor = 0.3}
+% \xeCJKsetup{SlantFactor = -0.7}
+\setCJKmainfont[BoldFont=SimHei, SlantedFont=KaiTi]{SimSun}
+
+
+
+\usepackage{xcolor}  	%高亮使用的颜色
+\definecolor{commentcolor}{RGB}{85,139,78}
+\definecolor{stringcolor}{RGB}{206,145,108}
+\definecolor{keywordcolor}{RGB}{34,34,250}
+\definecolor{backcolor}{RGB}{220,220,220}
+
+\usepackage{accsupp}	
+\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+\renewcommand{\abstractname}{}    % clear the title
+\renewcommand{\absnamepos}{empty}
+%去除摘要两边缩进
+\makeatletter
+\renewenvironment{abstract}{%
+    \if@twocolumn
+    \subsection*{\abstractname}%
+    \else
+    \small
+    \begin{center}%
+        {\bfseries \abstractname\vspace{-.5em}\vspace{\z@}}%
+    \end{center}%
+    \fi}
+    {}
+\makeatother
+
+% 设置页眉
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{\textit{Research Proposal Inter- and Intra-Organizational Decision-Making - Group 21}}
+\lfoot{}
+\cfoot{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+
+
+
+
+\title{\textbf{\textsf{{\textsf{Research Proposal Inter and Intra Organisational Decision Making - Group 21}}}}} 
+\author{\tnewroman Marie-Anne de Gier, M. Miftahul Fahmi, Tom Vermaat, Yuxiao Ma}
+\date{}
+
+% 去掉红框
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+
+\renewcommand{\refname}{References}
+
+\begin{document}
+
+% 缩短标题与页面上边距的距离
+\setlength{\abovedisplayskip}{1pt}
+
+\maketitle
+
+
+\begin{abstract}
+\noindent \textit{\textbf{Research Question:} How do interest gaps between stakeholders influence the decision-making process in designing AI-enabled coastal flood mitigation in the Netherlands?}
+\end{abstract}
+
+\vspace{1em}
+
+The Netherlands has quite a long history in battling coastal flood. Major events like the North Sea flood (1953) led to the development of the Delta Works defence system \cite{husby2013}. However, the threat of flooding will mostly increase due to climate change \cite{nicholls2007}. Recently, the use of artificial intelligence (AI) has come as an enabler to improve coastal flood prediction and mitigation efforts \cite{saravi2019}.
+
+Despite the potential benefits, the decision-making process surrounding the implementation of the AI can be characterized as a wicked problem, because of the multi-faceted nature of the problem. Firstly, there is no single definitive solution to mitigating coastal flooding. The added use of AI gives this problem another dimension. But perhaps more importantly, the conflicting stakeholder interests cause a high degree of complexity influencing both the solution making process and the possible solutions itself.  These characteristics of the problem stated above cause it to be a wicked problem, thus suited for our research question. 
+
+The decision-making process for the AI-enabled coastal flood mitigation involves several phases:
+\begin{enumerate}
+    \item \textbf{Data collection}: Research data is gathered from databases NSO (the Netherlands Space Agency) and the Ministry of Infrastructure and Water Management \cite{philip2020, strijker2023, haasnoot2020}. Conflicts may arise around data accessibility, quality, privacy, and compatibility.
+    \item \textbf{Data analysis}: Experts from institutions and private companies use AI algorithms to predict potential hazard scenarios \cite{matias2024, jain2023, bearne2023, vanbeukering2022}. Conflicts may emerge regarding the choice of algorithm (model), accuracy, and the result interpretation.
+    \item \textbf{Consultation phase}: The output (predictions) will be reviewed by stakeholders, such as municipal authorities and affected communities \cite{bosoni2023, punt2023}. Conflicting interests may arise during this phase, especially because of different political objectives (e.g., environmental vs. economic). Research by Tallberg et al. (2024) \cite{tallberg2024} has shown that business interests may clash with protection of rights, safety, and public interests in the context of regulatory approaches for implementing AI.
+    \item \textbf{Resource allocation}: Based on the flood risk analysis, the governments will allocate resources for evacuation efforts \cite{stuurgroep2018}. This involves coordination and negotiation with other ministries, such as the Ministry of Interior and Kingdom Relations and the Ministry of Economic Affairs and Climate Policy. Conflicts may emerge because the resources distribution and prioritization of different regions.
+    \item \textbf{Finally, Implementation}: If the AI models indicate a high risk of severe coastal flooding, this further leads to issuing evacuation orders through local authorities \cite{terpstra2020}. Challenges can arise in communicating the evacuation plans, coordination, and addressing public scepticism.
+\end{enumerate}
+
+
+In our paper, we will focus on the stakeholder consultation and resource allocation (3rd and 4th) steps. These two negotiation moments are the most relevant for answering the RQ. Stakeholder consultation is important because, as stakeholders have different interests and priorities, there is a high likelihood of interest gaps arising at this stage. For example, environmental organisations may prioritise ecological protection, while local authorities and communities may be more concerned with economical impacts and evacuation logistics. Similarly, in the resource allocation step, conflicts of interest may arise as different regions compete for limited resources based on their perceived level of risk and political influence. These conflicting interests could significantly influence the decision-making process.
+
+We plan to list all the relevant stakeholders, define the interest, and map the gap between the interests to understand the potential conflicts. The main reference mainly includes “Participatory Framework” \cite{lee2019}, “Actors Perspectives” \cite{lai2020}, “Democratized AI” \cite{montes2018}, “AI Governance” \cite{truby2020}, “AI Ethics” \cite{ryan2020}, and “AI in Flood Decision” \cite{samadi2024}. To our best knowledge, there are small number of papers about the socio-technical challenge in using AI as a novel tool in coastal flood mitigation.
+
+
+% appendix
+\newpage
+\section*{Appendix}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/flowchart.png}
+    \caption{Flowchart of the decision-making process for AI-enabled coastal flood mitigation in the Netherlands}
+    \label{fig:flowchart}
+\end{figure}
+
+
+
+
+
+
+
+% \bibliographystyle{gbt7714-numerical}
+% % \bibliographystyle{7714-author-year}
+\bibliographystyle{ieeetr}
+\bibliography{bibl}
+
+
+\end{document}

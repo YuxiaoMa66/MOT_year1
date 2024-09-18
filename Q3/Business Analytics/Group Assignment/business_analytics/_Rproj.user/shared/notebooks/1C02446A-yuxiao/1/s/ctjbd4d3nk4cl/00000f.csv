@@ -1,0 +1,4 @@
+"0","# regular boxplot function"
+"0","pbox <- function(df, col) {"
+"0","  boxplot(df[,col], main = paste(""Boxplot of"", col), ylab = col)"
+"0","}"

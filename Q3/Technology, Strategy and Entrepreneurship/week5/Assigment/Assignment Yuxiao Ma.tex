@@ -1,0 +1,104 @@
+% \special{dvipdfmx:config z 0}
+\documentclass[UTF8,a4paper,AutoFakeBold,AutoFakeSlant]{article}
+\usepackage[a4paper,left=2.8cm,right=2.6cm,top=3.7cm,bottom=3.5cm]{geometry}
+\usepackage{ctex}
+% \usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\usepackage[mathscr]{eucal}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{capt-of} 
+\usepackage{hyperref} 
+\usepackage{abstract}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{amsfonts} 
+\usepackage{CJK,CJKnumb}
+\usepackage{float}
+% \usepackage{gbt7714}
+\usepackage{framed}
+\usepackage{multirow}
+\usepackage{animate}
+\usepackage[framemethod=tikz]{mdframed}
+
+\newcommand{\tnewroman}{\fontspec{Times New Roman}}
+\newcommand{\song}{\CJKfamily{song}}    % 宋体   (Windows自带simsun.ttf)
+\newcommand{\fs}{\CJKfamily{fs}}        % 仿宋体 (Windows自带simfs.ttf)
+\newcommand{\kai}{\CJKfamily{kai}}      % 楷体   (Windows自带simkai.ttf)
+\newcommand{\hei}{\CJKfamily{hei}}      % 黑体   (Windows自带simhei.ttf)
+\newcommand{\li}{\CJKfamily{li}}        % 隶书   (Windows自带simli.ttf) 
+\newcommand{\ssong}{\CJKfamily{STSong}}
+% \newfontfamily{\heiti}{SimHei}
+
+\xeCJKsetup{SlantFactor = 0.3}
+% \xeCJKsetup{SlantFactor = -0.7}
+\setCJKmainfont[BoldFont=SimHei, SlantedFont=KaiTi]{SimSun}
+
+
+
+\usepackage{xcolor}  	%高亮使用的颜色
+\definecolor{commentcolor}{RGB}{85,139,78}
+\definecolor{stringcolor}{RGB}{206,145,108}
+\definecolor{keywordcolor}{RGB}{34,34,250}
+\definecolor{backcolor}{RGB}{220,220,220}
+
+\usepackage{accsupp}	
+\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+
+
+
+
+
+\title{\textbf{\textsf{{\textsf{Assignment: Teaching case}}}}} 
+\author{\tnewroman Yuxiao Ma}
+\date{}
+
+% 去掉红框
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+
+\begin{document}
+
+
+
+\maketitle
+
+
+\section{Differences between Lean and Agile}
+
+Lean focuses on maximizing efficiency by establishing clear scope and managing uncertainty about the time and effort required to achieve goals. It emphasizes learning and iteration. Agile handles uncertainty by being flexible about project scope while paying close attention to customer needs and the time and cost of delivery. In organizations developing new products, Lean will guide the initial discovery and definition of how efficiently to build what is built, while Agile will adapt to changing needs during product development.
+
+
+\section{Customer Development Approach by Steve Blank}
+
+This approach includes identifying product options by matching team strengths to market needs, selecting target markets, interviewing key decision makers, and evaluating product ideas against team capabilities and market needs. It is a structured process designed to efficiently discover viable product concepts.
+
+
+\section{Agile Planning in the Second Phase}
+
+Agile is applied in the second phase to rapidly develop a minimum viable product (MVP) based on clear, prioritized customer and business needs established during the lean phase. This allows flexibility and rapid adaptation to feedback.
+
+\section{Lean/Agile Hybrid Model}
+
+This hybrid approach combines the best of both approaches. It allows for continuous release planning and adjustments based on customer feedback, while also ensuring efficient and rapid development of new product features. The model helps manage projects and the changing needs of the market.
+
+
+\section{Reflection on Lean/Agile Principles in Personal Experience}
+
+During my undergraduate course in Human Computer Interaction, my group improved the design of a vending machine to make it more accessible to people with disabilities. The project involved researching user requirements, prototyping and testing to enhance usability. Our approach is aligned with agile principles and we iteratively develop the design based on feedback from users with disabilities, demonstrating flexibility and a strong focus on user needs. This experience shows how agile methods can significantly benefit product design by ensuring that the final solution is both inclusive and responsive to user feedback.
+
+
+% \bibliographystyle{gbt7714-numerical}
+% % \bibliographystyle{7714-author-year}
+% \bibliographystyle{ieeetr}
+% \bibliography{bibl}
+
+\end{document}

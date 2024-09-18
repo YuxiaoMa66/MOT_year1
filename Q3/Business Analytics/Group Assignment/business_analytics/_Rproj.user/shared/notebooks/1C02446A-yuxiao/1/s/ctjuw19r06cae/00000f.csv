@@ -1,0 +1,6 @@
+"0","# copy the dataframe in case we need to use the original dataframe"
+"0","dta2 <- dta"
+"0",""
+"0","# create a new dataframe with the selected variables"
+"0","dta2 <- dta2[,c(IV1, IV2, IV3, DV)]"
+"0","head(dta2)"

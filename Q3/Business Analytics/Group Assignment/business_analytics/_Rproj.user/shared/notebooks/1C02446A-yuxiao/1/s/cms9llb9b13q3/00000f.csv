@@ -1,0 +1,3 @@
+"0","# plot the importance of the variables, using the 3 different algorithms"
+"0","par(mfrow = c(3,1))"
+"0","barplot(imp_info_gain, main = ""Importance of the Variables (Information Gain)"", col = ""lightblue"")"

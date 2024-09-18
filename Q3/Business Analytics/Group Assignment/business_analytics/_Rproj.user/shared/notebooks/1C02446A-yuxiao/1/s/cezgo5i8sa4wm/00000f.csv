@@ -1,0 +1,8 @@
+"0","# regualr boxplot function"
+"0","pbox <- function(df, col) {"
+"0","  ggplot(df$col, aes(x = 1, y = df$col)) + "
+"0","    geom_boxplot() +"
+"0","    labs(title = paste(col), x = """", y = col) +"
+"0","    theme_minimal() +"
+"0","    theme(legend.position = ""none"")"
+"0","}"

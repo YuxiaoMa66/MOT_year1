@@ -1,0 +1,3 @@
+"0","# remove the gender variable"
+"0","IV2 <- c(""Customer_type_dummy"",""Type_of_travel_dummy"",""Class_business_dummy"",""Class_economy_dummy"")"
+"0",""
